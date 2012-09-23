@@ -1,0 +1,39 @@
+; Demonstrates 8-way scrolling with 4x4 blocks, static score panel and sprite multiplexing
+!to "TestACME.prg", cbm
+!sl "TestACME.map"
+!svl "TestACME.lbl"
+!cpu 6510
+!ct pet
+
+WoobleImm = $05
+WoobleAddr = $06
+WoobleImm2 = $07
+
+* = $0400
+	lda #WoobleImm
+	lda WoobleAddr
+WoobleAddrPC lda WoobleAddrPC
+	lda #WoobleImm
+	rts
+
+;Thing = $50
+;
+;BASICSTART = $0801
+;
+;; This starts at $0801 so that doing a LOAD"*",8 will still work with the default $0801 BASIC start address.
+;*= BASICSTART
+;!byte $0b,$08,$01,$00,$9e		; Line 1 SYS2061
+;!convtab pet
+;!tx "2061"						; Address for sys start in text
+;!byte $00,$00,$00
+;
+;VIC2BorderColour				= $d020
+;VIC2ScreenColour				= $d021
+;
+;BASICEntry = $80d
+;
+;* = BASICEntry
+;	inc VIC2BorderColour
+;Flooble
+;	inc VIC2ScreenColour
+;	rts

@@ -1,0 +1,22 @@
+!to "Test.prg", cbm
+!sal	; Causes the label saving routines to also dump out local labels
+!sl "Test.map"	; Save all labels
+!svl "Test.lbl"	; Save referenced labels in VICE format
+!cpu 6510
+!ct pet
+
+
+*=$400
+GlobalLabel
+	lda #0
+	sta $400
+	rts
+.localLabel
+	lda GlobalLabel
+	lda .localLabel
+	rts
+!zn {
+.reallyLocal
+	lda .reallyLocal
+	rts
+}
