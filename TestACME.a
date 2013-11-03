@@ -1,4 +1,3 @@
-; Demonstrates 8-way scrolling with 4x4 blocks, static score panel and sprite multiplexing
 !to "TestACME.prg", cbm
 !sl "TestACME.map"
 !svl "TestACME.lbl"

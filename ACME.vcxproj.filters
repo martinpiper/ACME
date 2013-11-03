@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{f5448874-abee-4868-925b-b236ffd0b69a}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{fa075761-74a5-4d9e-8554-a1457cdf32a5}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{119918e4-c3d8-4810-a10f-89c022ad83c2}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Resource Files\Docs etc">
+      <UniqueIdentifier>{5fa7c09f-539a-4b88-97d5-219b2f7a67f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Txt">
+      <UniqueIdentifier>{8eb5f4dc-673b-4301-a6bf-6f0e8cfcd860}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\_dos.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\_std.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\acme.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\alu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\basics.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cliargs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cpu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dynabuf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\encoding.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\flow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\global.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\input.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\label.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\macro.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mnemo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\output.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\platform.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\section.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\_riscos.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\_amiga.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\_dos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\_riscos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\_std.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\_win32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\acme.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\alu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\basics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cliargs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dynabuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\encoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\flow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\label.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\macro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mnemo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\platform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\section.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="docs\65816.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\AddrModes.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\AllPOs.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Changes.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Errors.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Example.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="ACME_Lib\6502\Help.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="ACME_Lib\65816\Help.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="ACME_Lib\Own\Help.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Help.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Illegals.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Lib.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\QuickRef.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Source.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="docs\Upgrade.txt">
+      <Filter>Resource Files\Docs etc</Filter>
+    </Text>
+    <Text Include="ReadMe.txt">
+      <Filter>Txt</Filter>
+    </Text>
+    <Text Include="Done.txt">
+      <Filter>Txt</Filter>
+    </Text>
+    <Text Include="TODO.txt">
+      <Filter>Txt</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="examples\me\const.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="docs\COPYING">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\me\core.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\me\cursor.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\ddrv.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\ddrv128.exp">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\ddrv64.exp">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\me\file.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\macedit.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\macedit.exp">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\me\macros.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\me\out.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ACME_Lib\6502\std.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="ACME_Lib\65816\std.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\me\tables.bin">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="examples\me\vars.a">
+      <Filter>Resource Files\Docs etc</Filter>
+    </CustomBuild>
+    <CustomBuild Include="CleanProject.bat">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="CleanProjectFully.bat">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="CleanProjectFullyWithAttrib.bat">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="DoBackup.bat">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Test.a">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md">
+      <Filter>Txt</Filter>
+    </None>
+    <None Include="TestACME.a">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="trigono.a">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include=".gitignore">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

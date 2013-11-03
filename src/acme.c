@@ -16,11 +16,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#define RELEASE		"0.94"		// update before release (FIXME)
-#define CODENAME	"Arlanda"	// update before release
-#define CHANGE_DATE	"12 Apr"	// update before release
-#define CHANGE_YEAR	"2010"		// update before release
-#define HOME_PAGE	"http://www.wellytop.com/C64.html"
+#define RELEASE		"0.95"		// update before release (FIXME)
+#define CODENAME	"Badger"	// update before release
+#define CHANGE_DATE	"03 Nov"	// update before release
+#define CHANGE_YEAR	"2013"		// update before release
+#define HOME_PAGE	"http://www.wellytop.com/C64.html\nhttps://github.com/martinpiper/ACME/"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -328,7 +328,7 @@ static const char* long_option(const char* string) {
 		format_msvc = TRUE;
 	else if(strcmp(string, OPTION_LIB) == 0)
 	{
-		gLibraryIncludes[gNumLibraryIncludes++] = strdup(cliargs_get_string("library include"));
+		gLibraryIncludes[gNumLibraryIncludes++] = _strdup(cliargs_get_string("library include"));
 	}
 	PLATFORM_LONGOPTION_CODE
 	else if(strcmp(string, OPTION_VERSION) == 0)

@@ -1,0 +1,12 @@
+ACME TODO file.
+
+VICE C64 remote debugging
+Using VICE x64.exe -remotemonitor
+Then telnet localhost 6510
+It's possible to break into the execution by sending a character. For example to get new "m 0000" memory while it's running code. Or to break execution for step with 'z'.
+
+Anyway, it would be possible to update ACME to output a full debug map for each memory location with source file and line number.
+It would also be possible to accurately save out what labels and bytes for what memory are where.
+Including zone information would allow local labels to be displayed first within the zone scope.
+
+Then use the remote debugger to display nice binary disassembly and source code mixed in.

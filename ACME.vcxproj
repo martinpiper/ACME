@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <SccProjectName>Perforce Project</SccProjectName>
+    <SccLocalPath>.</SccLocalPath>
+    <ProjectGuid>{7FDD8776-71E1-40F1-82FB-7F67434A41BE}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110_xp</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110_xp</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\Release\</OutDir>
+    <IntDir>.\Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <Optimization>Disabled</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <MinimalRebuild>true</MinimalRebuild>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
+      <BrowseInformation>true</BrowseInformation>
+      <PrecompiledHeaderOutputFile>.\Debug\ACME.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+    </ClCompile>
+    <Midl>
+      <TypeLibraryName>.\Debug\ACME.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0809</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug\ACME.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>.\Debug\ACME.exe</OutputFile>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>MaxSpeed</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\Release\ACME.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\Release\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
+    </ClCompile>
+    <Midl>
+      <TypeLibraryName>.\Release\ACME.tlb</TypeLibraryName>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0809</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release\ACME.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>.\Release\ACME.exe</OutputFile>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\_dos.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\_riscos.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\_std.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\acme.c" />
+    <ClCompile Include="src\alu.c" />
+    <ClCompile Include="src\basics.c" />
+    <ClCompile Include="src\cliargs.c" />
+    <ClCompile Include="src\cpu.c" />
+    <ClCompile Include="src\dynabuf.c" />
+    <ClCompile Include="src\encoding.c" />
+    <ClCompile Include="src\flow.c" />
+    <ClCompile Include="src\global.c" />
+    <ClCompile Include="src\input.c" />
+    <ClCompile Include="src\label.c" />
+    <ClCompile Include="src\macro.c" />
+    <ClCompile Include="src\mnemo.c" />
+    <ClCompile Include="src\output.c" />
+    <ClCompile Include="src\platform.c" />
+    <ClCompile Include="src\section.c" />
+    <ClCompile Include="src\tree.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\_amiga.h" />
+    <ClInclude Include="src\_dos.h" />
+    <ClInclude Include="src\_riscos.h" />
+    <ClInclude Include="src\_std.h" />
+    <ClInclude Include="src\_win32.h" />
+    <ClInclude Include="src\acme.h" />
+    <ClInclude Include="src\alu.h" />
+    <ClInclude Include="src\basics.h" />
+    <ClInclude Include="src\cliargs.h" />
+    <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\cpu.h" />
+    <ClInclude Include="src\dynabuf.h" />
+    <ClInclude Include="src\encoding.h" />
+    <ClInclude Include="src\flow.h" />
+    <ClInclude Include="src\global.h" />
+    <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\label.h" />
+    <ClInclude Include="src\macro.h" />
+    <ClInclude Include="src\mnemo.h" />
+    <ClInclude Include="src\output.h" />
+    <ClInclude Include="src\platform.h" />
+    <ClInclude Include="src\section.h" />
+    <ClInclude Include="src\tree.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="docs\65816.txt" />
+    <Text Include="docs\AddrModes.txt" />
+    <Text Include="docs\AllPOs.txt" />
+    <Text Include="docs\Changes.txt" />
+    <Text Include="docs\Errors.txt" />
+    <Text Include="docs\Example.txt" />
+    <Text Include="ACME_Lib\6502\Help.txt" />
+    <Text Include="ACME_Lib\65816\Help.txt" />
+    <Text Include="ACME_Lib\Own\Help.txt" />
+    <Text Include="docs\Help.txt" />
+    <Text Include="docs\Illegals.txt" />
+    <Text Include="docs\Lib.txt" />
+    <Text Include="docs\QuickRef.txt" />
+    <Text Include="docs\Source.txt" />
+    <Text Include="docs\Upgrade.txt" />
+    <Text Include="Done.txt" />
+    <Text Include="ReadMe.txt" />
+    <Text Include="TODO.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="examples\me\const.a" />
+    <CustomBuild Include="docs\COPYING" />
+    <CustomBuild Include="examples\me\core.a" />
+    <CustomBuild Include="examples\me\cursor.a" />
+    <CustomBuild Include="examples\ddrv.a" />
+    <CustomBuild Include="examples\ddrv128.exp" />
+    <CustomBuild Include="examples\ddrv64.exp" />
+    <CustomBuild Include="examples\me\file.a" />
+    <CustomBuild Include="examples\macedit.a" />
+    <CustomBuild Include="examples\macedit.exp" />
+    <CustomBuild Include="examples\me\macros.a" />
+    <CustomBuild Include="examples\me\out.a" />
+    <CustomBuild Include="ACME_Lib\6502\std.a" />
+    <CustomBuild Include="ACME_Lib\65816\std.a" />
+    <CustomBuild Include="examples\me\tables.bin" />
+    <CustomBuild Include="examples\me\vars.a" />
+    <CustomBuild Include="CleanProject.bat" />
+    <CustomBuild Include="CleanProjectFully.bat" />
+    <CustomBuild Include="CleanProjectFullyWithAttrib.bat" />
+    <CustomBuild Include="DoBackup.bat" />
+    <CustomBuild Include="Test.a" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include="README.md" />
+    <None Include="TestACME.a" />
+    <None Include="trigono.a" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

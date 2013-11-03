@@ -20,3 +20,11 @@ GlobalLabel
 	lda .reallyLocal
 	rts
 }
+
+!zn
+.anotherLocal
+	lda .anotherLocal
+
+!zn
+.anotherLocal2
+	lda .anotherLocal2
