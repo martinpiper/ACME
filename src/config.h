@@ -51,7 +51,9 @@ typedef struct result_int_t	result_int_t;	// always int, never float
 #endif
 // Boolean values
 #ifndef FALSE
+#ifndef __cplusplus
 typedef int	bool;
+#endif
 #define FALSE	0
 #define TRUE	1
 #endif

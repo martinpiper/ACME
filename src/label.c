@@ -253,12 +253,32 @@ static enum eos_t PO_svl(void) {
 	return(ENSURE_EOS);
 }
 
+static enum eos_t PO_pdb(void) {
+	// only process this pseudo opcode in the first pass
+	if(pass_count)
+		return(SKIP_REMAINDER);
+	// if label dump file already chosen, complain and exit
+	if(PDB_filename) {
+		Throw_warning("PDB file already chosen.");
+		return(SKIP_REMAINDER);
+	}
+	// read filename to global dynamic buffer
+	// if no file name given, exit (complaining will have been done)
+	if(Input_read_filename(FALSE))
+		return(SKIP_REMAINDER);
+	// get malloc'd copy of filename
+	PDB_filename = DynaBuf_get_copy(GlobalDynaBuf);
+	// ensure there's no garbage at end of line
+	return(ENSURE_EOS);
+}
+
 // predefined stuff
 static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("set",	PO_set),
 	PREDEFNODE("sal",	PO_sal),	// MPi: Added
 	PREDEFNODE("sl",	PO_sl),
-	PREDEFLAST("svl",	PO_svl)		// MPi: Added
+	PREDEFNODE("svl",	PO_svl),	// MPi: Added
+	PREDEFLAST("pdb",	PO_pdb)		// MPi: Added
 	//    ^^^^ this marks the last element
 };
 

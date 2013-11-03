@@ -69,6 +69,7 @@ static node_t	file_formats[]	= {
 
 // Fill output buffer with given byte value
 static void fill_completely(char value) {
+	PDBInit();
 	memset(output_buffer, value, OUTBUFFERSIZE);
 }
 
@@ -121,6 +122,7 @@ static void set_mem_ptr(signed long index) {
 static void real_output(intval_t byte) {
 	if(write_idx > segment_max)
 		border_crossed(write_idx);
+	PDBAddFileLineToAddr( write_idx , Input_now->original_filename , Input_now->line_number );
 	*write_ptr++ = byte & 0xff;
 	write_idx++;
 	CPU_2add++;

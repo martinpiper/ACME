@@ -2,9 +2,13 @@
 !sal	; Causes the label saving routines to also dump out local labels
 !sl "Test.map"	; Save all labels
 !svl "Test.lbl"	; Save referenced labels in VICE format
+!pdb "Test.pdb"	; Save PDB format data
+!source "ACME_Lib/6502/std.a"
 !cpu 6510
 !ct pet
 
+
+!initmem $77
 
 *=$400
 GlobalLabel
@@ -24,7 +28,17 @@ GlobalLabel
 !zn
 .anotherLocal
 	lda .anotherLocal
+	+inc16 .anotherLocal
 
 !zn
 .anotherLocal2
 	lda .anotherLocal2
+
+!by $12
+
+
+*=*+13
+
+
+!by $32
+

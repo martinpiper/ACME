@@ -8,11 +8,13 @@
 #define acme_H
 
 #include "config.h"
+#include <stdio.h>
 
 
 // Variables
 extern const char*	labeldump_filename;
 extern const char*	vicelabeldump_filename;
+extern const char*	PDB_filename;
 extern const char*	output_filename;
 extern int	labeldump_allSections;
 // maximum recursion depth for macro calls and "!source"
@@ -29,5 +31,8 @@ extern int gNumLibraryIncludes;
 // Tidy up before exiting by saving label dump
 extern int	ACME_finalize(int exit_code);
 
+extern void PDBInit( void );
+extern void PDBAddFileLineToAddr( const int address , const char *filename , const int lineNumber );
+extern void PDBSave( FILE *fp );
 
 #endif

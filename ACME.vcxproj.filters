@@ -81,6 +81,9 @@
     <ClCompile Include="src\_riscos.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\PDB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\_amiga.h">

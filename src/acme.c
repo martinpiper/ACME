@@ -75,6 +75,7 @@ static signed long	fill_value		= MEMINIT_USE_DEFAULT;
 static struct cpu_t	*default_cpu		= NULL;
 const char*	labeldump_filename	= NULL;
 const char*	vicelabeldump_filename	= NULL;
+const char*	PDB_filename	= NULL;
 const char*	output_filename		= NULL;
 int	labeldump_allSections	= 0;
 // maximum recursion depth for macro calls and "!source"
@@ -160,6 +161,18 @@ int ACME_finalize(int exit_code) {
 			fprintf(stderr,
 				"Error: Cannot open label dump file \"%s\".\n",
 				vicelabeldump_filename);
+			exit_code = EXIT_FAILURE;
+		}
+	}
+
+	if(PDB_filename) {
+		fd = fopen(PDB_filename, FILE_WRITETEXT);
+		if(fd) {
+			PDBSave(fd);
+		} else {
+			fprintf(stderr,
+				"Error: Cannot open PDB file \"%s\".\n",
+				PDB_filename);
 			exit_code = EXIT_FAILURE;
 		}
 	}
