@@ -10,3 +10,11 @@ It would also be possible to accurately save out what labels and bytes for what 
 Including zone information would allow local labels to be displayed first within the zone scope.
 
 Then use the remote debugger to display nice binary disassembly and source code mixed in.
+
+Implementation notes:
+*Functions like "real_output" can be used to provide extensive debug information.
+For example when "*write_ptr++" is used.
+*Look for Parse_and_close_file, tends to be used for source input files.
+Look at Input_new_file it has Input_now->line_number and Input_now->original_filename already setup
+
+*Implement the file write for PDB_filename in ACME_finalize after it does vicelabeldump_filename
