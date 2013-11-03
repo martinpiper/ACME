@@ -21,10 +21,9 @@ Look at Input_new_file it has Input_now->line_number and Input_now->original_fil
 	In PDBSave()
 
 *Output format:
-FILES:<dec num>
+FILES:<dec num for the number of files used>
 <index0>:<filename>
 ...
-<indexn>:<filenamen>
-ADDRS:<dec num>
-$<hex num>:<dec index into FILES> <dec line number>
+ADDRS:<dec num of the addresses used>
+$<hex num address>:<dec index into FILES> <dec line number>
 ...
