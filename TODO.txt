@@ -18,3 +18,13 @@ For example when "*write_ptr++" is used.
 Look at Input_new_file it has Input_now->line_number and Input_now->original_filename already setup
 
 *Implement the file write for PDB_filename in ACME_finalize after it does vicelabeldump_filename
+	In PDBSave()
+
+*Output format:
+FILES:<dec num>
+<index0>:<filename>
+...
+<indexn>:<filenamen>
+ADDRS:<dec num>
+$<hex num>:<dec index into FILES> <dec line number>
+...
