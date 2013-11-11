@@ -196,3 +196,31 @@ void Tree_dump_forest(node_ra_t** forest, int id_number, void (*fn)(node_ra_t*, 
 		forest++;
 	}
 }
+
+
+// Call given function for each object of matching type in the given tree.
+// Calls itself recursively.
+int count_tree(node_ra_t* node, int id_number, int inCount) {
+
+	if(node->id_number == id_number)
+		inCount++;
+	if(node->greater_than)
+		count_tree(node->greater_than, id_number, inCount);
+	if(node->less_than_or_equal)
+		count_tree(node->less_than_or_equal, id_number, inCount);
+
+	return inCount;
+}
+
+// Calls Tree_dump_tree for each non-zero entry of the given tree table.
+int Tree_count_forest(node_ra_t** forest, int id_number) {
+	int	i;
+	int count = 0;
+	for(i = 255; i >= 0; i--) {
+		if(*forest)
+			count = count_tree(*forest, id_number, count);
+		forest++;
+	}
+
+	return count;
+}

@@ -45,5 +45,11 @@ extern void	Label_dump_all_vice(FILE* fd);
 // so it references the *next* anonymous forward label definition.
 extern label_t*	Label_fix_forward_name(void);
 
+extern int gLabelCount;
+extern void CountLabelForPDB(node_ra_t* node, FILE* fd);
+
+extern void DumpLabelForPDB(node_ra_t* node, FILE* fd);
+
+extern int gTheZone;
 
 #endif

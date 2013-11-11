@@ -66,6 +66,4 @@ extern "C" void PDBSave( FILE *fp )
 
 		st++;
 	}
-
-	fclose( fp );
 }

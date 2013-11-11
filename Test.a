@@ -8,12 +8,21 @@
 !ct pet
 
 
+!macro MFOO {
+	lda #0
+	sta $500
+}
+
 !initmem $77
 
 *=$400
 GlobalLabel
 	lda #0
 	sta $400
+	+MFOO
+	+MFOO
+	+MFOO
+	+MFOO
 	rts
 .localLabel
 	lda GlobalLabel

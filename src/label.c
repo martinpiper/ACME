@@ -63,6 +63,43 @@ static void dump_one_label(node_ra_t* node, FILE* fd) {
 	fprintf(fd, "\n");
 }
 
+int gLabelCount = 0;
+
+void CountLabelForPDB(node_ra_t* node, FILE* fd)
+{
+	label_t*	label	= node->body;
+	if ( ! ( (label->result.flags & MVALUE_DEFINED) && !(label->result.flags & MVALUE_IS_FP) ) )
+	{
+		return;
+	}
+	gLabelCount++;
+}
+
+int gTheZone = 0;
+
+void DumpLabelForPDB(node_ra_t* node, FILE* fd)
+{
+	label_t*	label	= node->body;
+	if ( ! ( (label->result.flags & MVALUE_DEFINED) && !(label->result.flags & MVALUE_IS_FP) ) )
+	{
+		return;
+	}
+
+	fprintf( fd , "$%x:%d:%s" , label->result.val.intval , gTheZone , node->id_string );
+
+	if ( label->usage )
+	{
+		fprintf(fd," USED");
+	}
+
+	if ( label->result.flags & MVALUE_IS_ADDRESS )
+	{
+		fprintf(fd," ADDR");
+	}
+
+	fprintf(fd,"\n");
+}
+
 static void dump_one_label_vice(node_ra_t* node, FILE* fd)
 {
 //al C:09ae .nmi1

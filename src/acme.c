@@ -42,7 +42,7 @@
 #include "output.h"
 #include "platform.h"
 #include "section.h"
-
+#include "tree.h"
 
 // Constants
 static const char	FILE_WRITETEXT[]	= "w";
@@ -168,7 +168,26 @@ int ACME_finalize(int exit_code) {
 	if(PDB_filename) {
 		fd = fopen(PDB_filename, FILE_WRITETEXT);
 		if(fd) {
+			zone_t i;
 			PDBSave(fd);
+
+			for (i=0;i<=zone_max;i++)
+			{
+				// Dump unused labels
+				Tree_dump_forest(Label_forest, i, CountLabelForPDB, fd);
+			}
+			
+			fprintf(fd,"LABELS:%d\n" , gLabelCount);
+
+			// The order of dumped labels is important because VICE will prefer later defined labels
+			for (i=0;i<=zone_max;i++)
+			{
+				gTheZone = i;
+				Tree_dump_forest(Label_forest, i, DumpLabelForPDB, fd);
+			}
+
+			fclose( fd );
+
 		} else {
 			fprintf(stderr,
 				"Error: Cannot open PDB file \"%s\".\n",

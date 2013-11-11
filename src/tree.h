@@ -56,5 +56,6 @@ extern bool	Tree_hard_scan(node_ra_t**, node_ra_t**, int, bool);
 // Calls given function for each node of each tree of given forest.
 extern void	Tree_dump_forest(node_ra_t**, int, void (*)(node_ra_t*, FILE*), FILE*);
 
+extern int Tree_count_forest(node_ra_t** forest, int id_number);
 
 #endif

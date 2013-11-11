@@ -5,25 +5,3 @@ Using VICE x64.exe -remotemonitor
 Then telnet localhost 6510
 It's possible to break into the execution by sending a character. For example to get new "m 0000" memory while it's running code. Or to break execution for step with 'z'.
 
-Anyway, it would be possible to update ACME to output a full debug map for each memory location with source file and line number.
-It would also be possible to accurately save out what labels and bytes for what memory are where.
-Including zone information would allow local labels to be displayed first within the zone scope.
-
-Then use the remote debugger to display nice binary disassembly and source code mixed in.
-
-Implementation notes:
-*Functions like "real_output" can be used to provide extensive debug information.
-For example when "*write_ptr++" is used.
-*Look for Parse_and_close_file, tends to be used for source input files.
-Look at Input_new_file it has Input_now->line_number and Input_now->original_filename already setup
-
-*Implement the file write for PDB_filename in ACME_finalize after it does vicelabeldump_filename
-	In PDBSave()
-
-*Output format:
-FILES:<dec num for the number of files used>
-<index0>:<filename>
-...
-ADDRS:<dec num of the addresses used>
-$<hex num address>:<dec index into FILES> <dec line number>
-...
