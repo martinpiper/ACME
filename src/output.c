@@ -18,6 +18,7 @@
 #include "output.h"
 #include "platform.h"
 #include "tree.h"
+#include "section.h"
 
 
 // Structure for linked list of segment data
@@ -122,7 +123,7 @@ static void set_mem_ptr(signed long index) {
 static void real_output(intval_t byte) {
 	if(write_idx > segment_max)
 		border_crossed(write_idx);
-	PDBAddFileLineToAddr( write_idx , Input_now->original_filename , Input_now->line_number );
+	PDBAddFileLineToAddr( write_idx , Input_now->original_filename , Input_now->line_number , Section_now->zone );
 	*write_ptr++ = byte & 0xff;
 	write_idx++;
 	CPU_2add++;

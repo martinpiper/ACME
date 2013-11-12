@@ -15,6 +15,8 @@
 
 !initmem $77
 
+localLabel = 1234
+
 *=$400
 GlobalLabel
 	lda #0
@@ -31,6 +33,7 @@ GlobalLabel
 !zn {
 .reallyLocal
 	lda .reallyLocal
+	+MFOO
 	rts
 }
 

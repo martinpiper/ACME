@@ -21,8 +21,14 @@ FILES:<dec num for the number of files used>
 <index0>:<filename>
 ...
 ADDRS:<dec num of the addresses used>
-$<hex num address>:<dec index into FILES> <dec line number>
+$<hex num address>:<dec zone>:<dec index into FILES>:<dec line number>
 ...
 LABELS:<dec num of the labels>
-$<hex num>:<dec zone>:<text label> <USED> <ADDR>
+$<hex num>:<dec zone>:<text label>:<1/0 = USED>:<1/0 = ADDR>
 ...
+
+
+
+Rebuilt the project from scratch to avoid problems with the conversion from the DSW/DSP
+
+Address needs zone list when it changes

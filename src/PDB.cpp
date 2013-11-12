@@ -15,6 +15,7 @@ struct DebugInfo
 	}
 	std::string mFilename;
 	int mLineNumber;
+	int mZone;
 };
 
 std::map<int , DebugInfo> sAddrMap;
@@ -24,11 +25,12 @@ extern void PDBInit( void )
 	sAddrMap.clear();
 }
 
-extern "C" void PDBAddFileLineToAddr( const int address , const char *filename , const int lineNumber )
+extern "C" void PDBAddFileLineToAddr( const int address , const char *filename , const int lineNumber , const int zone )
 {
 	DebugInfo &debug = sAddrMap[ address ];
 	debug.mFilename = filename;
 	debug.mLineNumber = lineNumber;
+	debug.mZone = zone;
 }
 
 extern "C" void PDBSave( FILE *fp )
@@ -62,7 +64,7 @@ extern "C" void PDBSave( FILE *fp )
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		fprintf( fp , "$%x:%d %d\n" , st->first , filenameIndex[ debug.mFilename ] , debug.mLineNumber );
+		fprintf( fp , "$%x:%d:%d:%d\n" , st->first , debug.mZone , filenameIndex[ debug.mFilename ] , debug.mLineNumber );
 
 		st++;
 	}

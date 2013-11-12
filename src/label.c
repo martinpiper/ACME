@@ -89,12 +89,20 @@ void DumpLabelForPDB(node_ra_t* node, FILE* fd)
 
 	if ( label->usage )
 	{
-		fprintf(fd," USED");
+		fprintf(fd,":1");
+	}
+	else
+	{
+		fprintf(fd,":0");
 	}
 
 	if ( label->result.flags & MVALUE_IS_ADDRESS )
 	{
-		fprintf(fd," ADDR");
+		fprintf(fd,":1");
+	}
+	else
+	{
+		fprintf(fd,":0");
 	}
 
 	fprintf(fd,"\n");
