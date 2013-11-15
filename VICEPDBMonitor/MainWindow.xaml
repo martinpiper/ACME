@@ -3,6 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="VICE PDB Monitor" Height="423.684" Width="660.526" ResizeMode="CanResizeWithGrip">
     <Grid x:Name="monitorText" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
-        <TextBox x:Name="textBox" Margin="10" TextWrapping="Wrap" Text="TextBox" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+        <TextBox x:Name="textBox" Margin="10" TextWrapping="Wrap" Text="TextBox" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas"/>
     </Grid>
 </Window>

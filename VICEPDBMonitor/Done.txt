@@ -1,0 +1,6 @@
+﻿It seems as though VICE does something weird and truncates commands to the shortest recent command length regardless of return being received.
+For example if "m 0 100\n" is sent then the next command "m 100 1000\n" will not be processed correctly.
+The workaround is to append lots of spaces after the command but before the "\n".
+
+
+Added polling register and memory dump.

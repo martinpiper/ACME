@@ -1,0 +1,9 @@
+﻿TODO File for VICE PDB Monitor
+
+Need some kind of command queue and command result mechanism along with specific parsers for each command type.
+For example: reg, memory, io
+From this it's possible to display lots of useful source level debugging.
+The command "z" can be used to single step.
+The command "break" can be used to set a btreak point.
+	Return: BREAK: <dec num breakpoint index>
+"del <dec num break point breakpoint index>"

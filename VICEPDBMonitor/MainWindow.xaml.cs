@@ -46,8 +46,12 @@ namespace VICEPDBMonitor
         }
 
         Socket sock;
+        bool sentReg = false;
+        bool gotReg = false;
         bool sentMem = false;
         bool sentExit = false;
+        string gotText = "";
+        string gotTextWork = "";
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
@@ -56,13 +60,22 @@ namespace VICEPDBMonitor
             {
                 return;
             }
-            if (!sentMem)
+            if (!sentReg)
             {
-                sentMem = true;
-                byte[] msg = Encoding.ASCII.GetBytes("m 0 ffff\n");
+                gotText = "";
+                gotTextWork = "";
+                sentReg = true;
+                // NOTE: Adding spaces for monitor bug workaround
+                byte[] msg = Encoding.ASCII.GetBytes("r                                         \n");
                 int ret = sock.Send(msg);
             }
-//            textBox.Text += "Hello\n";
+            if (!sentMem && gotReg)
+            {
+                sentMem = true;
+                // NOTE: Adding spaces for monitor bug workaround
+                byte[] msg = Encoding.ASCII.GetBytes("m 0000 ffff                               \n");
+                int ret = sock.Send(msg);
+            }
 
             byte[] bytes = new byte[500000];
             try
@@ -70,18 +83,39 @@ namespace VICEPDBMonitor
                 int got = sock.Receive(bytes);
                 if (got > 0)
                 {
-                    textBox.Text += Encoding.ASCII.GetString(bytes, 0, got);
+                    gotText += Encoding.ASCII.GetString(bytes, 0, got);
                 }
             }
             catch (System.Exception ex)
             {
-                int foundPos = textBox.Text.IndexOf("(C:$0000)");
-                if (sentMem && !sentExit && (foundPos > 0) && (foundPos > (textBox.Text.Length - 20)))
+                if (gotText.Length > 10)
                 {
-                    textBox.Text += "Sent EXIT\n";
-                    sentExit = true;
-                    byte[] msg = Encoding.ASCII.GetBytes("x\n");
-                    int ret = sock.Send(msg);
+                    // Look for the second line starting with this, which signifies the command was done.
+                    int foundPos = gotText.IndexOf("(C:$", 8);
+                    if ((foundPos > 0) && (foundPos > (gotText.Length - 20)))
+                    {
+                        if (sentReg && !gotReg)
+                        {
+                            gotTextWork = gotText.Substring(10 , foundPos-10);
+                            gotReg = true;
+                            gotText = gotText.Substring(foundPos);
+                        }
+                        if (sentMem)
+                        {
+                            gotTextWork += gotText.Substring(10 , foundPos-10);
+
+                            textBox.Text = gotTextWork;
+                            sentExit = true;
+                            byte[] msg = Encoding.ASCII.GetBytes("x                                         \n");
+                            int ret = sock.Send(msg);
+                            gotText = "";
+                            gotTextWork = "";
+                            sentReg = false;
+                            gotReg = false;
+                            sentMem = false;
+                            sentExit = false;
+                        }
+                    }
                 }
             }
         }
