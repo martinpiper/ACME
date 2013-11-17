@@ -4,3 +4,6 @@ The workaround is to append lots of spaces after the command but before the "\n"
 
 
 Added polling register and memory dump.
+
+
+Reading the PDB into various internal data structures.

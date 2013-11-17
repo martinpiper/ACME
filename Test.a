@@ -18,33 +18,44 @@
 localLabel = 1234
 
 *=$400
+main
 GlobalLabel
+	sei
 	lda #0
 	sta $400
 	+MFOO
 	+MFOO
 	+MFOO
 	+MFOO
+.loop
+	jsr .localLabel
+	jsr Foo2
+	inc $d020
+	jmp .loop
 	rts
 .localLabel
 	lda GlobalLabel
 	lda .localLabel
 	rts
 !zn {
+Foo2
 .reallyLocal
 	lda .reallyLocal
 	+MFOO
+	jsr Foo3
 	rts
 }
 
 !zn
 .anotherLocal
+Foo3
 	lda .anotherLocal
-	+inc16 .anotherLocal
+	+inc16 $700
 
 !zn
 .anotherLocal2
 	lda .anotherLocal2
+	rts
 
 !by $12
 
@@ -54,3 +65,7 @@ GlobalLabel
 
 !by $32
 
+!zn
+UnusedCode
+	inc $d021
+	rts
