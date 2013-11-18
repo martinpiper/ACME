@@ -125,7 +125,7 @@ namespace VICEPDBMonitor
 							addrInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
 							addrInfo.mZone = int.Parse(tokens[1]);
 							addrInfo.mFile = int.Parse(tokens[2]);
-							addrInfo.mLine = int.Parse(tokens[3]);
+							addrInfo.mLine = int.Parse(tokens[3]) - 1;	// Files lines are 1 based in the debug file
 							addrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
 						}
 					}
@@ -212,6 +212,13 @@ namespace VICEPDBMonitor
 		string gotText = "";
 		string gotTextWork = "";
 
+		int mPC = 0;
+		int mRegA = 0;
+		int mRegX = 0;
+		int mRegY = 0;
+		int mSP = 0;
+		int mNV_BDIZC = 0;
+
 		private void dispatcherTimer_Tick(object sender, EventArgs e)
 		{
 			sock.Poll(0, SelectMode.SelectRead);
@@ -258,12 +265,56 @@ namespace VICEPDBMonitor
 						if (sentReg && !gotReg)
 						{
 							gotTextWork = gotText.Substring(foundFirstPos, foundPos - foundFirstPos);
+							//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
+							//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
+							string parse = gotTextWork.Substring(gotTextWork.IndexOf(".;"));
+							string[] parse2 = parse.Split(' ');
+							mPC = int.Parse(parse2[0].Substring(2) , NumberStyles.HexNumber);
+							mRegA = int.Parse(parse2[1] , NumberStyles.HexNumber);
+							mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
+							mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
+							mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
+//							mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+
 							gotReg = true;
 							gotText = gotText.Substring(foundPos);
 						}
 						if (sentMem)
 						{
-							gotTextWork += gotText.Substring(foundFirstPos, foundPos - foundFirstPos);
+							try
+							{
+								AddrInfo addrInfo = addrInfoByAddr[mPC];
+								gotTextWork += "File:" + sourceFileNames[addrInfo.mFile] + "\n";
+								gotTextWork += "Line:" + (addrInfo.mLine+1) + "\n";
+								int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
+								if (theLine < 0)
+								{
+									theLine = 0;
+								}
+								int toDisplay = 20;
+								while (toDisplay-- > 0)
+								{
+									if (theLine == addrInfo.mLine)
+									{
+										gotTextWork += "=>";
+									}
+									else
+									{
+										gotTextWork += "  ";
+									}
+									gotTextWork += sourceFiles[addrInfo.mFile][theLine++];
+									gotTextWork += "\n";
+								}
+							}
+							catch (System.Exception ex2)
+							{
+								// No source info, so just dump memory
+								gotTextWork += gotText.Substring(foundFirstPos, foundPos - foundFirstPos);
+								//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+								//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+								//...
+								//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+							}
 
 							textBox.Text = gotTextWork;
 							sentExit = true;
@@ -276,8 +327,16 @@ namespace VICEPDBMonitor
 							sentMem = false;
 							sentExit = false;
 						}
-					}
+					}	
 				}
+			}
+		}
+
+		private void commandBox_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				string command = commandBox.Text;
 			}
 		}
 	}

@@ -11,3 +11,8 @@ The command "z" can be used to single step.
 The command "break" can be used to set a btreak point.
 	Return: BREAK: <dec num breakpoint index>
 "del <dec num break point breakpoint index>"
+
+
+
+Need something that maps file index and line number pair back to address.
+The same file and line number could map to multiple addresses.
