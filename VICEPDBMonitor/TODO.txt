@@ -16,3 +16,17 @@ The command "break" can be used to set a btreak point.
 
 Need something that maps file index and line number pair back to address.
 The same file and line number could map to multiple addresses.
+Need previous and next addresses setup for each AddrInfo
+
+
+
+Dump hex bytes and opcode disassembly for lines mixed in with source code.
+Using the previous address info it would be possible to go backwards a number of steps from the current PC.
+Then ask VICE to disassemble from that previous address to the PC, then PC to next addresses
+The disassembly at PC is important to be able to get the current PC disassembled properly even if the previous code is self modified to rubbish.
+Then merge the appropriate source file lines into the disassembly based on the addresses shown in the disassembly.
+
+
+
+Label display.
+Locals for the current zone, then the other zones back to the global zone 0.
