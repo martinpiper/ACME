@@ -11,6 +11,8 @@ The command "z" can be used to single step.
 The command "break" can be used to set a btreak point.
 	Return: BREAK: <dec num breakpoint index>
 "del <dec num break point breakpoint index>"
+"io" will show all the IO chips status. USeful.
+
 
 
 
@@ -30,3 +32,8 @@ Then merge the appropriate source file lines into the disassembly based on the a
 
 Label display.
 Locals for the current zone, then the other zones back to the global zone 0.
+
+
+
+Possible to show the memory changed since the last step/break/run.
+Possible to show the label values changed based on this memory diff.
