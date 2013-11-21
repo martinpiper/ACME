@@ -12,7 +12,7 @@ The command "break" can be used to set a btreak point.
 	Return: BREAK: <dec num breakpoint index>
 "del <dec num break point breakpoint index>"
 "io" will show all the IO chips status. USeful.
-
+*Or move the actual updates and logic to a separate thread and make the command fetch blocking, which would be easier to code for.
 
 
 
@@ -27,6 +27,7 @@ Using the previous address info it would be possible to go backwards a number of
 Then ask VICE to disassemble from that previous address to the PC, then PC to next addresses
 The disassembly at PC is important to be able to get the current PC disassembled properly even if the previous code is self modified to rubbish.
 Then merge the appropriate source file lines into the disassembly based on the addresses shown in the disassembly.
+*Can use startPrev and endNext ranges.
 
 
 

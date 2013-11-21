@@ -63,10 +63,12 @@ namespace VICEPDBMonitor
 	
 	public class AddrInfo
 	{
-		public int mAddr;
-		public int mZone;
-		public int mFile;
-		public int mLine;
+		public int mAddr = -1;
+		public int mPrevAddr = -1;
+		public int mNextAddr = -1;
+		public int mZone = -1;
+		public int mFile = -1;
+		public int mLine = -1;
 	}
 
 	public class LabelInfo
@@ -97,6 +99,7 @@ namespace VICEPDBMonitor
 
 			string[] commandLineArgs = Environment.GetCommandLineArgs();
 			string line;
+			int prevAddr = -1;
 
 			// Read the file and display it line by line.
 			using (System.IO.StreamReader file = new System.IO.StreamReader(commandLineArgs[1]))
@@ -123,10 +126,16 @@ namespace VICEPDBMonitor
 							string[] tokens = line.Split(':');
 							AddrInfo addrInfo = new AddrInfo();
 							addrInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
+							addrInfo.mPrevAddr = prevAddr;
 							addrInfo.mZone = int.Parse(tokens[1]);
 							addrInfo.mFile = int.Parse(tokens[2]);
 							addrInfo.mLine = int.Parse(tokens[3]) - 1;	// Files lines are 1 based in the debug file
 							addrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
+							if (prevAddr >= 0)
+							{
+								addrInfoByAddr[prevAddr].mNextAddr = addrInfo.mAddr;
+							}
+							prevAddr = addrInfo.mAddr;
 						}
 					}
 					else if (line.IndexOf("LABELS:") == 0)
@@ -284,6 +293,31 @@ namespace VICEPDBMonitor
 							try
 							{
 								AddrInfo addrInfo = addrInfoByAddr[mPC];
+								int range = 20;
+								int startPrev = mPC;
+								// Step backwards trying to find a good starting point to disassemble
+								while (range-- > 0)
+								{
+									AddrInfo addrInfo2 = addrInfoByAddr[startPrev];
+									if (addrInfo2.mPrevAddr < 0)
+									{
+										break;
+									}
+									startPrev = addrInfo2.mPrevAddr;
+								}
+								range = 20;
+								// Step forwards trying to find a good ending point to disassemble
+								int endNext = mPC;
+								while (range-- > 0)
+								{
+									AddrInfo addrInfo2 = addrInfoByAddr[endNext];
+									if (addrInfo2.mNextAddr < 0)
+									{
+										break;
+									}
+									endNext = addrInfo2.mNextAddr;
+								}
+
 								gotTextWork += "File:" + sourceFileNames[addrInfo.mFile] + "\n";
 								gotTextWork += "Line:" + (addrInfo.mLine+1) + "\n";
 								int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
