@@ -197,9 +197,10 @@ namespace VICEPDBMonitor
 				}
 			}
 
-			mCommands.Add("r");
-			mCommands.Add("m 0000 ffff");
-			mCommands.Add("x");
+//			mCommands.Add("r");
+//			mCommands.Add("m 0000 ffff");
+//			mCommands.Add("x");
+			mCommands.Add("!s");
 
 			NoArgDelegate fetcher = new NoArgDelegate(this.BackgroundThread);
 			fetcher.BeginInvoke(null, null);
@@ -309,15 +310,12 @@ namespace VICEPDBMonitor
 				{
 					lastCommand = mCommands[0];
 					mCommands.RemoveAt(0);
-					SendCommand(lastCommand);
-					string theReply = "";
-					if (lastCommand.IndexOf("x") != 0)
+
+					if (lastCommand.IndexOf("!s") == 0)
 					{
-						theReply = GetReply();
-					}
-					// Process the reply
-					if (lastCommand.IndexOf("r") == 0)
-					{
+						SendCommand("r");
+						string theReply = GetReply();
+
 						//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
 						//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
 						string parse = theReply.Substring(theReply.IndexOf(".;"));
@@ -358,6 +356,25 @@ namespace VICEPDBMonitor
 								endNext = addrInfo2.mNextAddr;
 							}
 
+							string command = "d " + startPrev.ToString("X") + " " + mPC.ToString("X");
+							SendCommand(command);
+							string disassemblyBefore = GetReply();
+							command = "d " + mPC.ToString("X") + " " + endNext.ToString("X");
+							SendCommand(command);
+							string disassemblyAfter = GetReply();
+
+							gotText += disassemblyBefore;
+							gotText += ">>>\n";
+							gotText += disassemblyAfter;
+							// Get something like:
+							/*
+								.C:0427  AD 00 04    LDA $0400
+								.C:042a  AD 27 04    LDA $0427
+								...
+								.C:0439  60          RTS
+								.C:043a  AD 3A 04    LDA $043A
+							*/
+
 							gotText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
 							gotText += "Line:" + (addrInfo.mLine + 1) + "\n";
 							int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
@@ -382,6 +399,8 @@ namespace VICEPDBMonitor
 						}
 						catch (System.Exception)
 						{
+							SendCommand("m 0000 ffff");
+							theReply = GetReply();
 							// No source info, so just dump memory
 							gotText += theReply;
 							//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
@@ -392,8 +411,16 @@ namespace VICEPDBMonitor
 					}
 					else
 					{
-						gotText += theReply;
+						// Any other commands get here
+						SendCommand(lastCommand);
+						string theReply = "";
+						if (lastCommand.IndexOf("x") != 0)
+						{
+							theReply = GetReply();
+							gotText += theReply;
+						}
 					}
+					
 					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), gotText);
 				}
 				else
