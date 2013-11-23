@@ -13,3 +13,6 @@ Done simple source file display when the address matches a known location, other
 
 
 Added a background thread that doesn't block the GUI.
+
+Rearranged the command and receive routines so they block when needed.
+*Or move the actual updates and logic to a separate thread and make the command fetch blocking, which would be easier to code for.

@@ -213,63 +213,50 @@ namespace VICEPDBMonitor
 		int mNV_BDIZC = 0;
 		List<string> mCommands = new List<string>();
 
+		Socket mSocket;
+		String mGotTextWorking = "";
+
 		private void UpdateUserInterface(String text)
 		{
 			mTextBox.Text = text;
 		}
 
-		private void BackgroundThread()
+		private void SendCommand(string command)
 		{
-			Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-			String gotText = "";
-			String gotTextWorking = "";
-			socket.Blocking = false;
-			try
+			if (command.Length > 0)
 			{
-				socket.Connect("localhost", 6510);
-			}
-			catch (System.Exception /*ex*/)
-			{
-			}
-
-			bool pendingCommand = false;
-			string lastCommand = "";
-
-			while (socket.Connected)
-			{
-				if (!pendingCommand && (mCommands.Count > 0))
+				// Add padding to avoid the VICE monitor command truncation bug
+				command += "                                                                           \n";
+				byte[] msg = Encoding.ASCII.GetBytes(command);
+				int sent = 0;
+				while (sent < msg.Length)
 				{
-					lastCommand = mCommands[0];
-					mCommands.RemoveAt(0);
-					// Add padding to avoid the VICE monitor command truncation bug
-					lastCommand += "                                                                           \n";
-					byte[] msg = Encoding.ASCII.GetBytes(lastCommand);
-					int sent = 0;
-					while (sent < msg.Length)
+					int ret = mSocket.Send(msg, sent, msg.Length - sent, SocketFlags.None);
+					if (ret > 0)
 					{
-						int ret = socket.Send(msg, sent , msg.Length - sent, SocketFlags.None);
-						if (ret > 0)
-						{
-							sent += ret;
-						}
-						else
-						{
-							Thread.Sleep(10);
-						}
+						sent += ret;
 					}
-					// If it's not "x" then pend for the reply
-					if (lastCommand.IndexOf("x") != 0)
+					else
 					{
-						pendingCommand = true;
+						Thread.Sleep(10);
 					}
 				}
+			}
+		}
+
+		private string GetReply()
+		{
+			string theReply = "";
+
+			while (mSocket.Connected)
+			{
 				byte[] bytes = new byte[500000];
 				try
 				{
-					int got = socket.Receive(bytes);
+					int got = mSocket.Receive(bytes);
 					if (got > 0)
 					{
-						gotTextWorking += Encoding.ASCII.GetString(bytes, 0, got);
+						mGotTextWorking += Encoding.ASCII.GetString(bytes, 0, got);
 					}
 				}
 				catch (System.Exception ex)
@@ -278,105 +265,148 @@ namespace VICEPDBMonitor
 					Thread.Sleep(100);
 				}
 
-				int foundFirstPos = gotTextWorking.IndexOf("(C:$");
-				if (foundFirstPos >= 0 && gotTextWorking.Length > 16)
+				int foundFirstPos = mGotTextWorking.IndexOf("(C:$");
+				if (foundFirstPos >= 0 && mGotTextWorking.Length > 16)
 				{
-					int foundSecondPos = gotTextWorking.IndexOf("(C:$", foundFirstPos + 10 + 4);
+					int foundSecondPos = mGotTextWorking.IndexOf("(C:$", foundFirstPos + 10 + 4);
 					if (foundSecondPos > foundFirstPos)
 					{
-						int foundThirdPos = gotTextWorking.IndexOf(") ", foundSecondPos + 4);
+						int foundThirdPos = mGotTextWorking.IndexOf(") ", foundSecondPos + 4);
 						if (foundThirdPos > foundSecondPos)
 						{
 							foundFirstPos += 10;	// End of the first "(C:$"
-							string theReply = gotTextWorking.Substring(foundFirstPos , foundSecondPos - foundFirstPos);
+							theReply = mGotTextWorking.Substring(foundFirstPos, foundSecondPos - foundFirstPos);
 							// Start the next command buffer with valid text
-							gotTextWorking = gotTextWorking.Substring(foundSecondPos);
-
-							// Process the reply
-							if (lastCommand.IndexOf("r") == 0)
-							{
-								//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
-								//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
-								string parse = theReply.Substring(theReply.IndexOf(".;"));
-								string[] parse2 = parse.Split(' ');
-								mPC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
-								mRegA = int.Parse(parse2[1], NumberStyles.HexNumber);
-								mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
-								mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
-								mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
-//								mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
-								gotText = theReply;
-
-								try
-								{
-									AddrInfo addrInfo = mAddrInfoByAddr[mPC];
-									int range = 20;
-									int startPrev = mPC;
-									// Step backwards trying to find a good starting point to disassemble
-									while (range-- > 0)
-									{
-										AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
-										if (addrInfo2.mPrevAddr < 0)
-										{
-											break;
-										}
-										startPrev = addrInfo2.mPrevAddr;
-									}
-									range = 20;
-									// Step forwards trying to find a good ending point to disassemble
-									int endNext = mPC;
-									while (range-- > 0)
-									{
-										AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
-										if (addrInfo2.mNextAddr < 0)
-										{
-											break;
-										}
-										endNext = addrInfo2.mNextAddr;
-									}
-
-									gotText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
-									gotText += "Line:" + (addrInfo.mLine + 1) + "\n";
-									int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
-									if (theLine < 0)
-									{
-										theLine = 0;
-									}
-									int toDisplay = 20;
-									while (toDisplay-- > 0)
-									{
-										if (theLine == addrInfo.mLine)
-										{
-											gotText += "=>";
-										}
-										else
-										{
-											gotText += "  ";
-										}
-										gotText += mSourceFiles[addrInfo.mFile][theLine++];
-										gotText += "\n";
-									}
-								}
-								catch (System.Exception )
-								{
-									// No source info, so just dump memory
-									gotText += theReply;
-									//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
-									//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
-									//...
-									//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
-								}							
-							}
-							else
-							{
-								gotText += theReply;
-							}
-							pendingCommand = false;
-							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), gotText);
+							mGotTextWorking = mGotTextWorking.Substring(foundSecondPos);
+							return theReply;
 						}
 					}
 				}
+			}			
+			
+			return "";
+		}
 
+		private void BackgroundThread()
+		{
+			mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); 
+			String gotText = "";
+			
+			mSocket.Blocking = false;
+			try
+			{
+				mSocket.Connect("localhost", 6510);
+			}
+			catch (System.Exception /*ex*/)
+			{
+			}
+
+			string lastCommand = "";
+
+			while (mSocket.Connected)
+			{
+				if (mCommands.Count > 0)
+				{
+					lastCommand = mCommands[0];
+					mCommands.RemoveAt(0);
+					SendCommand(lastCommand);
+					string theReply = "";
+					if (lastCommand.IndexOf("x") != 0)
+					{
+						theReply = GetReply();
+					}
+					// Process the reply
+					if (lastCommand.IndexOf("r") == 0)
+					{
+						//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
+						//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
+						string parse = theReply.Substring(theReply.IndexOf(".;"));
+						string[] parse2 = parse.Split(' ');
+						mPC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
+						mRegA = int.Parse(parse2[1], NumberStyles.HexNumber);
+						mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
+						mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
+						mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
+						//								mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+						gotText = theReply;
+
+						try
+						{
+							AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+							int range = 20;
+							int startPrev = mPC;
+							// Step backwards trying to find a good starting point to disassemble
+							while (range-- > 0)
+							{
+								AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+								if (addrInfo2.mPrevAddr < 0)
+								{
+									break;
+								}
+								startPrev = addrInfo2.mPrevAddr;
+							}
+							range = 20;
+							// Step forwards trying to find a good ending point to disassemble
+							int endNext = mPC;
+							while (range-- > 0)
+							{
+								AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
+								if (addrInfo2.mNextAddr < 0)
+								{
+									break;
+								}
+								endNext = addrInfo2.mNextAddr;
+							}
+
+							gotText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
+							gotText += "Line:" + (addrInfo.mLine + 1) + "\n";
+							int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
+							if (theLine < 0)
+							{
+								theLine = 0;
+							}
+							int toDisplay = 20;
+							while (toDisplay-- > 0)
+							{
+								if (theLine == addrInfo.mLine)
+								{
+									gotText += "=>";
+								}
+								else
+								{
+									gotText += "  ";
+								}
+								gotText += mSourceFiles[addrInfo.mFile][theLine++];
+								gotText += "\n";
+							}
+						}
+						catch (System.Exception)
+						{
+							// No source info, so just dump memory
+							gotText += theReply;
+							//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+							//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+							//...
+							//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+						}
+					}
+					else
+					{
+						gotText += theReply;
+					}
+					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), gotText);
+				}
+				else
+				{
+					Thread.Sleep(100);
+					if (mSocket.Available > 0)
+					{
+						// This happens if a break/watch point is hit, then a reply is received without any command being sent
+						string theReply = GetReply();
+						gotText += theReply;
+						this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), gotText);
+					}
+				}
 			}
 
 			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Not connected");
