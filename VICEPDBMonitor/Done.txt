@@ -10,3 +10,6 @@ Reading the PDB into various internal data structures.
 
 
 Done simple source file display when the address matches a known location, otherwise the memory is hex dumped.
+
+
+Added a background thread that doesn't block the GUI.

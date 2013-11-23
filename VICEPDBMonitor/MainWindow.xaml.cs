@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Net.Sockets;
 using System.Globalization;
+using System.Threading;
 
 namespace VICEPDBMonitor
 {
@@ -85,13 +86,16 @@ namespace VICEPDBMonitor
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		List<string> sourceFileNames = new List<string>();
-		List<string> sourceFileNamesFound = new List<string>();
-		List<List<string>> sourceFiles = new List<List<string>>();
-		Dictionary<int, AddrInfo> addrInfoByAddr = new Dictionary<int, AddrInfo>();
-		MultiMap<int, LabelInfo> labelInfoByAddr = new MultiMap<int, LabelInfo>();
-		MultiMap<int, LabelInfo> labelInfoByZone = new MultiMap<int, LabelInfo>();
-		MultiMap<string, LabelInfo> labelInfoByLabel = new MultiMap<string, LabelInfo>();
+		List<string> mSourceFileNames = new List<string>();
+		List<string> mSourceFileNamesFound = new List<string>();
+		List<List<string>> mSourceFiles = new List<List<string>>();
+		Dictionary<int, AddrInfo> mAddrInfoByAddr = new Dictionary<int, AddrInfo>();
+		MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
+		MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
+		MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
+
+		private delegate void NoArgDelegate();
+		private delegate void OneArgDelegate(String arg);
 
 		public MainWindow()
 		{
@@ -109,12 +113,12 @@ namespace VICEPDBMonitor
 					if (line.IndexOf("FILES:") == 0)
 					{
 						int lines = int.Parse(line.Substring(6));
-						sourceFileNames.Capacity = lines;
+						mSourceFileNames.Capacity = lines;
 						while (lines-- > 0)
 						{
 							line = file.ReadLine();
 							string[] tokens = line.Split(':');
-							sourceFileNames.Add(tokens[1]);
+							mSourceFileNames.Add(tokens[1]);
 						}
 					}
 					else if (line.IndexOf("ADDRS:") == 0)
@@ -130,10 +134,10 @@ namespace VICEPDBMonitor
 							addrInfo.mZone = int.Parse(tokens[1]);
 							addrInfo.mFile = int.Parse(tokens[2]);
 							addrInfo.mLine = int.Parse(tokens[3]) - 1;	// Files lines are 1 based in the debug file
-							addrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
+							mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
 							if (prevAddr >= 0)
 							{
-								addrInfoByAddr[prevAddr].mNextAddr = addrInfo.mAddr;
+								mAddrInfoByAddr[prevAddr].mNextAddr = addrInfo.mAddr;
 							}
 							prevAddr = addrInfo.mAddr;
 						}
@@ -151,9 +155,9 @@ namespace VICEPDBMonitor
 							labelInfo.mLabel = tokens[2];
 							labelInfo.mUsed = int.Parse(tokens[3]) == 1;
 							labelInfo.mMemory = int.Parse(tokens[4]) == 1;
-							labelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
-							labelInfoByZone.Add(labelInfo.mZone, labelInfo);
-							labelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
+							mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
+							mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
+							mLabelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
 						}
 					}
 				}
@@ -161,7 +165,7 @@ namespace VICEPDBMonitor
 				file.Close();
 			}
 
-			foreach (string name in sourceFileNames)
+			foreach (string name in mSourceFileNames)
 			{
 				try
 				{
@@ -183,43 +187,23 @@ namespace VICEPDBMonitor
 						}
 						file.Close();
 					}
-					sourceFiles.Add(aFile);
-					sourceFileNamesFound.Add(newPath);
+					mSourceFiles.Add(aFile);
+					mSourceFileNamesFound.Add(newPath);
 				}
 				catch (System.Exception ex)
 				{
-					sourceFiles.Add(new List<string>());
-					sourceFileNamesFound.Add("");
+					mSourceFiles.Add(new List<string>());
+					mSourceFileNamesFound.Add("");
 				}
 			}
 
-			System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-			dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-			dispatcherTimer.Interval = new TimeSpan(0 , 0 , 0 , 0 , 100);
-			dispatcherTimer.Start();
+			mCommands.Add("r");
+			mCommands.Add("m 0000 ffff");
+			mCommands.Add("x");
 
-			// Remember to use: "C:\Downloads\WinVICE-2.4-x64\WinVICE-2.4-x64\x64.exe" -remotemonitor
-			// Connect to port 6510
-
-			sock = new Socket(AddressFamily.InterNetwork , SocketType.Stream , ProtocolType.Tcp);
-			sock.Blocking = false;
-			try
-			{
-				sock.Connect("localhost", 6510);
-			}
-			catch (System.Exception ex)
-			{
-				
-			}
+			NoArgDelegate fetcher = new NoArgDelegate(this.BackgroundThread);
+			fetcher.BeginInvoke(null, null);
 		}
-
-		Socket sock;
-		bool sentReg = false;
-		bool gotReg = false;
-		bool sentMem = false;
-		bool sentExit = false;
-		string gotText = "";
-		string gotTextWork = "";
 
 		int mPC = 0;
 		int mRegA = 0;
@@ -227,150 +211,184 @@ namespace VICEPDBMonitor
 		int mRegY = 0;
 		int mSP = 0;
 		int mNV_BDIZC = 0;
+		List<string> mCommands = new List<string>();
 
-		private void dispatcherTimer_Tick(object sender, EventArgs e)
+		private void UpdateUserInterface(String text)
 		{
-			sock.Poll(0, SelectMode.SelectRead);
-			if (!sock.Connected)
-			{
-				return;
-			}
-			if (!sentReg)
-			{
-				gotText = "";
-				gotTextWork = "";
-				sentReg = true;
-				// NOTE: Adding spaces for monitor bug workaround
-				byte[] msg = Encoding.ASCII.GetBytes("r										 \n");
-				int ret = sock.Send(msg);
-			}
-			if (!sentMem && gotReg)
-			{
-				sentMem = true;
-				// NOTE: Adding spaces for monitor bug workaround
-				byte[] msg = Encoding.ASCII.GetBytes("m 0000 ffff							   \n");
-				int ret = sock.Send(msg);
-			}
+			mTextBox.Text = text;
+		}
 
-			byte[] bytes = new byte[500000];
+		private void BackgroundThread()
+		{
+			Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			String gotText = "";
+			String gotTextWorking = "";
+			socket.Blocking = false;
 			try
 			{
-				int got = sock.Receive(bytes);
-				if (got > 0)
-				{
-					gotText += Encoding.ASCII.GetString(bytes, 0, got);
-				}
+				socket.Connect("localhost", 6510);
 			}
-			catch (System.Exception ex)
+			catch (System.Exception /*ex*/)
 			{
-				if (gotText.Length > 16)
-				{
-					// Look for the second line starting with this, which signifies the command was done.
-					int foundFirstPos = gotText.IndexOf("(C:$");
-					int foundPos = gotText.IndexOf("(C:$", 12);
-					if ((foundFirstPos >= 0) && (foundPos > 0) && (foundPos > (gotText.Length - 20)))
-					{
-						foundFirstPos += 10;	// End of the first "(C:$"
-						if (sentReg && !gotReg)
-						{
-							gotTextWork = gotText.Substring(foundFirstPos, foundPos - foundFirstPos);
-							//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
-							//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
-							string parse = gotTextWork.Substring(gotTextWork.IndexOf(".;"));
-							string[] parse2 = parse.Split(' ');
-							mPC = int.Parse(parse2[0].Substring(2) , NumberStyles.HexNumber);
-							mRegA = int.Parse(parse2[1] , NumberStyles.HexNumber);
-							mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
-							mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
-							mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
-//							mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
-
-							gotReg = true;
-							gotText = gotText.Substring(foundPos);
-						}
-						if (sentMem)
-						{
-							try
-							{
-								AddrInfo addrInfo = addrInfoByAddr[mPC];
-								int range = 20;
-								int startPrev = mPC;
-								// Step backwards trying to find a good starting point to disassemble
-								while (range-- > 0)
-								{
-									AddrInfo addrInfo2 = addrInfoByAddr[startPrev];
-									if (addrInfo2.mPrevAddr < 0)
-									{
-										break;
-									}
-									startPrev = addrInfo2.mPrevAddr;
-								}
-								range = 20;
-								// Step forwards trying to find a good ending point to disassemble
-								int endNext = mPC;
-								while (range-- > 0)
-								{
-									AddrInfo addrInfo2 = addrInfoByAddr[endNext];
-									if (addrInfo2.mNextAddr < 0)
-									{
-										break;
-									}
-									endNext = addrInfo2.mNextAddr;
-								}
-
-								gotTextWork += "File:" + sourceFileNames[addrInfo.mFile] + "\n";
-								gotTextWork += "Line:" + (addrInfo.mLine+1) + "\n";
-								int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
-								if (theLine < 0)
-								{
-									theLine = 0;
-								}
-								int toDisplay = 20;
-								while (toDisplay-- > 0)
-								{
-									if (theLine == addrInfo.mLine)
-									{
-										gotTextWork += "=>";
-									}
-									else
-									{
-										gotTextWork += "  ";
-									}
-									gotTextWork += sourceFiles[addrInfo.mFile][theLine++];
-									gotTextWork += "\n";
-								}
-							}
-							catch (System.Exception ex2)
-							{
-								// No source info, so just dump memory
-								gotTextWork += gotText.Substring(foundFirstPos, foundPos - foundFirstPos);
-								//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
-								//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
-								//...
-								//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
-							}
-
-							textBox.Text = gotTextWork;
-							sentExit = true;
-							byte[] msg = Encoding.ASCII.GetBytes("x										 \n");
-							int ret = sock.Send(msg);
-							gotText = "";
-							gotTextWork = "";
-							sentReg = false;
-							gotReg = false;
-							sentMem = false;
-							sentExit = false;
-						}
-					}	
-				}
 			}
+
+			bool pendingCommand = false;
+			string lastCommand = "";
+
+			while (socket.Connected)
+			{
+				if (!pendingCommand && (mCommands.Count > 0))
+				{
+					lastCommand = mCommands[0];
+					mCommands.RemoveAt(0);
+					// Add padding to avoid the VICE monitor command truncation bug
+					lastCommand += "                                                                           \n";
+					byte[] msg = Encoding.ASCII.GetBytes(lastCommand);
+					int sent = 0;
+					while (sent < msg.Length)
+					{
+						int ret = socket.Send(msg, sent , msg.Length - sent, SocketFlags.None);
+						if (ret > 0)
+						{
+							sent += ret;
+						}
+						else
+						{
+							Thread.Sleep(10);
+						}
+					}
+					// If it's not "x" then pend for the reply
+					if (lastCommand.IndexOf("x") != 0)
+					{
+						pendingCommand = true;
+					}
+				}
+				byte[] bytes = new byte[500000];
+				try
+				{
+					int got = socket.Receive(bytes);
+					if (got > 0)
+					{
+						gotTextWorking += Encoding.ASCII.GetString(bytes, 0, got);
+					}
+				}
+				catch (System.Exception ex)
+				{
+//					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
+					Thread.Sleep(100);
+				}
+
+				int foundFirstPos = gotTextWorking.IndexOf("(C:$");
+				if (foundFirstPos >= 0 && gotTextWorking.Length > 16)
+				{
+					int foundSecondPos = gotTextWorking.IndexOf("(C:$", foundFirstPos + 10 + 4);
+					if (foundSecondPos > foundFirstPos)
+					{
+						int foundThirdPos = gotTextWorking.IndexOf(") ", foundSecondPos + 4);
+						if (foundThirdPos > foundSecondPos)
+						{
+							foundFirstPos += 10;	// End of the first "(C:$"
+							string theReply = gotTextWorking.Substring(foundFirstPos , foundSecondPos - foundFirstPos);
+							// Start the next command buffer with valid text
+							gotTextWorking = gotTextWorking.Substring(foundSecondPos);
+
+							// Process the reply
+							if (lastCommand.IndexOf("r") == 0)
+							{
+								//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
+								//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
+								string parse = theReply.Substring(theReply.IndexOf(".;"));
+								string[] parse2 = parse.Split(' ');
+								mPC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
+								mRegA = int.Parse(parse2[1], NumberStyles.HexNumber);
+								mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
+								mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
+								mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
+//								mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+								gotText = theReply;
+
+								try
+								{
+									AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+									int range = 20;
+									int startPrev = mPC;
+									// Step backwards trying to find a good starting point to disassemble
+									while (range-- > 0)
+									{
+										AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+										if (addrInfo2.mPrevAddr < 0)
+										{
+											break;
+										}
+										startPrev = addrInfo2.mPrevAddr;
+									}
+									range = 20;
+									// Step forwards trying to find a good ending point to disassemble
+									int endNext = mPC;
+									while (range-- > 0)
+									{
+										AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
+										if (addrInfo2.mNextAddr < 0)
+										{
+											break;
+										}
+										endNext = addrInfo2.mNextAddr;
+									}
+
+									gotText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
+									gotText += "Line:" + (addrInfo.mLine + 1) + "\n";
+									int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
+									if (theLine < 0)
+									{
+										theLine = 0;
+									}
+									int toDisplay = 20;
+									while (toDisplay-- > 0)
+									{
+										if (theLine == addrInfo.mLine)
+										{
+											gotText += "=>";
+										}
+										else
+										{
+											gotText += "  ";
+										}
+										gotText += mSourceFiles[addrInfo.mFile][theLine++];
+										gotText += "\n";
+									}
+								}
+								catch (System.Exception )
+								{
+									// No source info, so just dump memory
+									gotText += theReply;
+									//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+									//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+									//...
+									//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+								}							
+							}
+							else
+							{
+								gotText += theReply;
+							}
+							pendingCommand = false;
+							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), gotText);
+						}
+					}
+				}
+
+			}
+
+			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Not connected");
 		}
 
 		private void commandBox_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
 			{
-				string command = commandBox.Text;
+				string command = mCommandBox.Text;
+				mCommands.Add(command);
+				mCommandBox.Clear();
 			}
 		}
 	}
