@@ -16,3 +16,14 @@ Added a background thread that doesn't block the GUI.
 
 Rearranged the command and receive routines so they block when needed.
 *Or move the actual updates and logic to a separate thread and make the command fetch blocking, which would be easier to code for.
+
+
+Added command !s and !sm
+Command !s will dump registers and plain source files using the current PC.
+Command !sm  will dump registers and mixed source files and disassembly using the current PC.
+	Dump hex bytes and opcode disassembly for lines mixed in with source code.
+	Using the previous address info it would be possible to go backwards a number of steps from the current PC.
+	Then ask VICE to disassemble from that previous address to the PC, then PC to next addresses
+	The disassembly at PC is important to be able to get the current PC disassembled properly even if the previous code is self modified to rubbish.
+	Then merge the appropriate source file lines into the disassembly based on the addresses shown in the disassembly.
+	*Can use startPrev and endNext ranges.

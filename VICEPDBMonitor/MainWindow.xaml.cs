@@ -201,6 +201,7 @@ namespace VICEPDBMonitor
 //			mCommands.Add("m 0000 ffff");
 //			mCommands.Add("x");
 			mCommands.Add("!s");
+//			mCommands.Add("!sm");
 
 			NoArgDelegate fetcher = new NoArgDelegate(this.BackgroundThread);
 			fetcher.BeginInvoke(null, null);
@@ -288,6 +289,20 @@ namespace VICEPDBMonitor
 			return "";
 		}
 
+		private void ParseRegisters(string theReply)
+		{
+			//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
+			//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
+			string parse = theReply.Substring(theReply.IndexOf(".;"));
+			string[] parse2 = parse.Split(' ');
+			mPC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
+			mRegA = int.Parse(parse2[1], NumberStyles.HexNumber);
+			mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
+			mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
+			mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
+			//								mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+		}
+
 		private void BackgroundThread()
 		{
 			mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); 
@@ -311,26 +326,22 @@ namespace VICEPDBMonitor
 					lastCommand = mCommands[0];
 					mCommands.RemoveAt(0);
 
-					if (lastCommand.IndexOf("!s") == 0)
+					if (lastCommand.IndexOf("!sm") == 0)
 					{
 						SendCommand("r");
 						string theReply = GetReply();
 
-						//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
-						//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
-						string parse = theReply.Substring(theReply.IndexOf(".;"));
-						string[] parse2 = parse.Split(' ');
-						mPC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
-						mRegA = int.Parse(parse2[1], NumberStyles.HexNumber);
-						mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
-						mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
-						mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
-						//								mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+						ParseRegisters(theReply);
+
 						gotText = theReply;
 
 						try
 						{
-							AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+							List<int> lastDisplayedLine = new List<int>();
+					        mSourceFileNames.ForEach(delegate(String name)
+							{
+								lastDisplayedLine.Add(0);
+							});
 							int range = 20;
 							int startPrev = mPC;
 							// Step backwards trying to find a good starting point to disassemble
@@ -363,9 +374,11 @@ namespace VICEPDBMonitor
 							SendCommand(command);
 							string disassemblyAfter = GetReply();
 
-							gotText += disassemblyBefore;
-							gotText += ">>>\n";
-							gotText += disassemblyAfter;
+							string lastSourceDisplayed = "";
+
+//							gotText += disassemblyBefore;
+//							gotText += ">>>\n";
+//							gotText += disassemblyAfter;
 							// Get something like:
 							/*
 								.C:0427  AD 00 04    LDA $0400
@@ -374,6 +387,102 @@ namespace VICEPDBMonitor
 								.C:0439  60          RTS
 								.C:043a  AD 3A 04    LDA $043A
 							*/
+							string[] split = disassemblyBefore.Split('\n');
+							bool doingBefore = true;
+							int index = 0;
+							while (index < split.Length)
+							{
+								string line = split[index++];
+								if (line.Length < 7)
+								{
+									continue;
+								}
+								string tAddr = line.Substring(3);
+								tAddr = tAddr.Substring(0 , 4);
+								int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+								if (doingBefore && theAddr >= mPC)
+								{
+									split = disassemblyAfter.Split('\n');
+									index = 0;
+									doingBefore = false;
+									continue;
+								}
+
+								try
+								{
+									AddrInfo addrInfo = mAddrInfoByAddr[theAddr];
+									if (lastSourceDisplayed != mSourceFileNames[addrInfo.mFile])
+									{
+										lastSourceDisplayed = mSourceFileNames[addrInfo.mFile];
+										gotText += "--- " + lastSourceDisplayed + " ---\n";
+									}
+									if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
+									{
+										lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine - 5;
+										if (lastDisplayedLine[addrInfo.mFile] < 0)
+										{
+											lastDisplayedLine[addrInfo.mFile] = 0;
+										}
+									}
+									if (lastDisplayedLine[addrInfo.mFile] > addrInfo.mLine)
+									{
+										lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine;
+									}
+									int i;
+									for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
+									{
+										gotText += string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i] + "\n";
+									}
+									lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine+1;
+								}
+								catch (System.Exception)
+								{
+									
+								}
+
+								if (theAddr == mPC)
+								{
+									gotText += ">>>> ";
+								}
+								gotText += line + "\n";
+							}
+						}
+						catch (System.Exception)
+						{
+							SendCommand("m 0000 ffff");
+							theReply = GetReply();
+							// No source info, so just dump memory
+							gotText += theReply;
+							//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+							//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+							//...
+							//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+						}
+					}
+					else if (lastCommand.IndexOf("!s") == 0)
+					{
+						SendCommand("r");
+						string theReply = GetReply();
+
+						ParseRegisters(theReply);
+
+						gotText = theReply;
+
+						try
+						{
+							AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+							int range = 20;
+							int startPrev = mPC;
+							// Step backwards trying to find a good starting point to disassemble
+							while (range-- > 0)
+							{
+								AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+								if (addrInfo2.mPrevAddr < 0)
+								{
+									break;
+								}
+								startPrev = addrInfo2.mPrevAddr;
+							}
 
 							gotText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
 							gotText += "Line:" + (addrInfo.mLine + 1) + "\n";
