@@ -200,8 +200,10 @@ namespace VICEPDBMonitor
 //			mCommands.Add("r");
 //			mCommands.Add("m 0000 ffff");
 //			mCommands.Add("x");
-			mCommands.Add("!s");
+//			mCommands.Add("!s");
 //			mCommands.Add("!sm");
+
+			HandleCodeView();
 
 			NoArgDelegate fetcher = new NoArgDelegate(this.BackgroundThread);
 			fetcher.BeginInvoke(null, null);
@@ -218,9 +220,13 @@ namespace VICEPDBMonitor
 		Socket mSocket;
 		String mGotTextWorking = "";
 
-		private void UpdateUserInterface(String text)
+		private void UpdateSourceView(String text)
 		{
 			mTextBox.Text = text;
+		}
+		private void UpdateLabelView(String text)
+		{
+			mLabelsBox.Text = text;
 		}
 
 		private void SendCommand(string command)
@@ -301,6 +307,42 @@ namespace VICEPDBMonitor
 			mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
 			mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
 			//								mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+
+			string labels = "";
+			try
+			{
+				List<string> allLabels = new List<string>();
+				int theZone = mAddrInfoByAddr[mPC].mZone;
+				while (theZone >= 0)
+				{
+					List<LabelInfo> theLabels = mLabelInfoByZone[theZone];
+
+					foreach (LabelInfo aLabel in theLabels)
+					{
+						string labelText = "";
+						if (theZone != 0)
+						{
+							labelText = ".";
+						}
+						labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X");
+						allLabels.Add(labelText);
+					}
+					// MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
+					theZone--;
+				}
+				allLabels.Sort();
+
+				foreach (string line in allLabels)
+				{
+					labels += line + "\n";
+				}
+			}
+			catch (System.Exception ex)
+			{
+				
+			}
+			
+			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateLabelView), labels);
 		}
 
 		private void BackgroundThread()
@@ -342,7 +384,8 @@ namespace VICEPDBMonitor
 							{
 								lastDisplayedLine.Add(0);
 							});
-							int range = 20;
+							// MPi: TODO: Tweak the 10 range based on the display height?
+							int range = 10;
 							int startPrev = mPC;
 							// Step backwards trying to find a good starting point to disassemble
 							while (range-- > 0)
@@ -354,7 +397,8 @@ namespace VICEPDBMonitor
 								}
 								startPrev = addrInfo2.mPrevAddr;
 							}
-							range = 20;
+							// MPi: TODO: Tweak the 10 range based on the display height?
+							range = 10;
 							// Step forwards trying to find a good ending point to disassemble
 							int endNext = mPC;
 							while (range-- > 0)
@@ -471,6 +515,7 @@ namespace VICEPDBMonitor
 						try
 						{
 							AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+							// MPi: TODO: Tweak the 20 range based on the display height?
 							int range = 20;
 							int startPrev = mPC;
 							// Step backwards trying to find a good starting point to disassemble
@@ -491,7 +536,8 @@ namespace VICEPDBMonitor
 							{
 								theLine = 0;
 							}
-							int toDisplay = 20;
+							// MPi: TODO: Tweak the 20 toDisplay based on the display height?
+							int toDisplay = 30;
 							while (toDisplay-- > 0)
 							{
 								if (theLine == addrInfo.mLine)
@@ -530,7 +576,7 @@ namespace VICEPDBMonitor
 						}
 					}
 					
-					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), gotText);
+					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), gotText);
 				}
 				else
 				{
@@ -540,12 +586,12 @@ namespace VICEPDBMonitor
 						// This happens if a break/watch point is hit, then a reply is received without any command being sent
 						string theReply = GetReply();
 						gotText += theReply;
-						this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), gotText);
+						this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), gotText);
 					}
 				}
 			}
 
-			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Not connected");
+			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), "Not connected");
 		}
 
 		private void commandBox_KeyDown(object sender, KeyEventArgs e)
@@ -557,6 +603,47 @@ namespace VICEPDBMonitor
 				mCommandBox.Clear();
 			}
 		}
-	}
 
+		// The first command should be to "step" to pause the CPU. Unless there is a breakpoint triggered then this can be disabled.
+		bool mNeverStepped = true;
+
+		private void HandleCodeView()
+		{
+			if (mNeverStepped == true)
+			{
+				mNeverStepped = false;
+				mCommands.Add("z");
+			}
+			if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == true )
+			{
+				mCommands.Add("!sm");
+			}
+			else if (mDoSource.IsChecked == true && !mDoDisassembly.IsChecked == true)
+			{
+				mCommands.Add("!s");
+			}
+		}
+
+		private void Button_Click(object sender, RoutedEventArgs e)
+		{
+			HandleCodeView();
+		}
+
+		private void Button_Click_1(object sender, RoutedEventArgs e)
+		{
+			mCommands.Add("z");
+			HandleCodeView();
+		}
+
+		private void mDoSource_Click(object sender, RoutedEventArgs e)
+		{
+			HandleCodeView();
+		}
+
+		private void mDoDisassembly_Click(object sender, RoutedEventArgs e)
+		{
+			HandleCodeView();
+		}
+
+	}
 }

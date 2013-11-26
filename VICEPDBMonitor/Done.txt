@@ -27,3 +27,8 @@ Command !sm  will dump registers and mixed source files and disassembly using th
 	The disassembly at PC is important to be able to get the current PC disassembled properly even if the previous code is self modified to rubbish.
 	Then merge the appropriate source file lines into the disassembly based on the addresses shown in the disassembly.
 	*Can use startPrev and endNext ranges.
+
+
+
+Label display.
+Locals for the current zone, then the other zones back to the global zone 0.

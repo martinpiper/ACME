@@ -1,8 +1,23 @@
 ﻿TODO File for VICE PDB Monitor
 
+Register view above the source view.
+
+
+
+// MPi: TODO: Tweak the 20 range based on the display height?
+// MPi: TODO: Tweak the - 10 based on the display height?
+// MPi: TODO: Tweak the 20 toDisplay based on the display height?
+// MPi: TODO: Tweak the 10 range based on the display height?
+
+
+
+Maybe the x command can clear the window text, ready for any breakpoint being hit.
+
+
+
 ACME should output any include paths used in the PDB.
 ACME Should output previous zone for each zone, that way the hierarchy of zones can be used for label display.
-
+//MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
 
 
 Need some kind of command queue and command result mechanism along with specific parsers for each command type.
@@ -19,11 +34,6 @@ The command "break" can be used to set a btreak point.
 Need something that maps file index and line number pair back to address.
 The same file and line number could map to multiple addresses.
 Need previous and next addresses setup for each AddrInfo
-
-
-
-Label display.
-Locals for the current zone, then the other zones back to the global zone 0.
 
 
 
