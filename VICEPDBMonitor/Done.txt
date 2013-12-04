@@ -32,3 +32,9 @@ Command !sm  will dump registers and mixed source files and disassembly using th
 
 Label display.
 Locals for the current zone, then the other zones back to the global zone 0.
+
+
+Used labels check box.
+
+
+Register view above the source view.

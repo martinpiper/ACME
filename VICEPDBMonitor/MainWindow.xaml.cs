@@ -86,6 +86,7 @@ namespace VICEPDBMonitor
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		bool mUsedLabels = false;
 		List<string> mSourceFileNames = new List<string>();
 		List<string> mSourceFileNamesFound = new List<string>();
 		List<List<string>> mSourceFiles = new List<List<string>>();
@@ -228,6 +229,10 @@ namespace VICEPDBMonitor
 		{
 			mLabelsBox.Text = text;
 		}
+		private void UpdateRegsView(String text)
+		{
+			mRegsBox.Text = text;
+		}
 
 		private void SendCommand(string command)
 		{
@@ -306,7 +311,9 @@ namespace VICEPDBMonitor
 			mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
 			mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
 			mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
-			//								mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+//			mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+
+			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
 
 			string labels = "";
 			try
@@ -319,16 +326,27 @@ namespace VICEPDBMonitor
 
 					foreach (LabelInfo aLabel in theLabels)
 					{
-						string labelText = "";
-						if (theZone != 0)
+						if ((mUsedLabels == false) || ((mUsedLabels == true) && (aLabel.mUsed == true)))
 						{
-							labelText = ".";
+							string labelText = "";
+							if (theZone != 0)
+							{
+								labelText = ".";
+							}
+
+							labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X");
+							allLabels.Add(labelText);
 						}
-						labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X");
-						allLabels.Add(labelText);
 					}
 					// MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
-					theZone--;
+					if (theZone > 0)
+					{
+						theZone = 0;	// For now just display the global zone
+					}
+					else
+					{
+						break;
+					}
 				}
 				allLabels.Sort();
 
@@ -375,7 +393,7 @@ namespace VICEPDBMonitor
 
 						ParseRegisters(theReply);
 
-						gotText = theReply;
+						gotText = "";
 
 						try
 						{
@@ -510,7 +528,7 @@ namespace VICEPDBMonitor
 
 						ParseRegisters(theReply);
 
-						gotText = theReply;
+						gotText = "";
 
 						try
 						{
@@ -609,6 +627,7 @@ namespace VICEPDBMonitor
 
 		private void HandleCodeView()
 		{
+			mUsedLabels = (mCheckUsedLabels.IsChecked == true);
 			if (mNeverStepped == true)
 			{
 				mNeverStepped = false;
@@ -641,6 +660,11 @@ namespace VICEPDBMonitor
 		}
 
 		private void mDoDisassembly_Click(object sender, RoutedEventArgs e)
+		{
+			HandleCodeView();
+		}
+
+		private void mCheckUsedLabels_Click(object sender, RoutedEventArgs e)
 		{
 			HandleCodeView();
 		}

@@ -1,9 +1,5 @@
 ﻿TODO File for VICE PDB Monitor
 
-Register view above the source view.
-
-
-
 // MPi: TODO: Tweak the 20 range based on the display height?
 // MPi: TODO: Tweak the - 10 based on the display height?
 // MPi: TODO: Tweak the 20 toDisplay based on the display height?
