@@ -38,3 +38,6 @@ Used labels check box.
 
 
 Register view above the source view.
+
+
+Added extra disassembly only view.

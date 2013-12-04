@@ -1,5 +1,9 @@
 ﻿TODO File for VICE PDB Monitor
 
+The current line should be scrolled to the middle of the source/disassembly view.
+
+
+
 // MPi: TODO: Tweak the 20 range based on the display height?
 // MPi: TODO: Tweak the - 10 based on the display height?
 // MPi: TODO: Tweak the 20 toDisplay based on the display height?

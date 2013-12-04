@@ -582,6 +582,95 @@ namespace VICEPDBMonitor
 							//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
 						}
 					}
+					else if (lastCommand.IndexOf("!cls") == 0)
+					{
+						gotText = "";
+					}
+					else if (lastCommand.IndexOf("!d") == 0)
+					{
+						SendCommand("r");
+						string theReply = GetReply();
+
+						ParseRegisters(theReply);
+
+						gotText = "";
+
+						try
+						{
+							// MPi: TODO: Tweak the 20 range based on the display height?
+							int range = 20;
+							int startPrev = mPC;
+							// Step backwards trying to find a good starting point to disassemble
+							while (range-- > 0)
+							{
+								AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+								if (addrInfo2.mPrevAddr < 0)
+								{
+									break;
+								}
+								startPrev = addrInfo2.mPrevAddr;
+							}
+							// MPi: TODO: Tweak the 20 range based on the display height?
+							range = 20;
+							// Step forwards trying to find a good ending point to disassemble
+							int endNext = mPC;
+							while (range-- > 0)
+							{
+								AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
+								if (addrInfo2.mNextAddr < 0)
+								{
+									break;
+								}
+								endNext = addrInfo2.mNextAddr;
+							}
+
+							string command = "d " + startPrev.ToString("X") + " " + mPC.ToString("X");
+							SendCommand(command);
+							string disassemblyBefore = GetReply();
+							command = "d " + mPC.ToString("X") + " " + endNext.ToString("X");
+							SendCommand(command);
+							string disassemblyAfter = GetReply();
+
+							string[] split = disassemblyBefore.Split('\n');
+							bool doingBefore = true;
+							int index = 0;
+							while (index < split.Length)
+							{
+								string line = split[index++];
+								if (line.Length < 7)
+								{
+									continue;
+								}
+								string tAddr = line.Substring(3);
+								tAddr = tAddr.Substring(0, 4);
+								int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+								if (doingBefore && theAddr >= mPC)
+								{
+									split = disassemblyAfter.Split('\n');
+									index = 0;
+									doingBefore = false;
+									continue;
+								}
+
+								if (theAddr == mPC)
+								{
+									gotText += ">>>> ";
+								}
+								gotText += line + "\n";
+							}
+						}
+						catch (System.Exception)
+						{
+							SendCommand("m 0000 ffff");
+							theReply = GetReply();
+							// No source info, so just dump memory
+							gotText += theReply;
+							//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+							//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+							//...
+							//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+						}
+					}
 					else
 					{
 						// Any other commands get here
@@ -637,9 +726,17 @@ namespace VICEPDBMonitor
 			{
 				mCommands.Add("!sm");
 			}
-			else if (mDoSource.IsChecked == true && !mDoDisassembly.IsChecked == true)
+			else if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == false)
 			{
 				mCommands.Add("!s");
+			}
+			else if (mDoSource.IsChecked == false && mDoDisassembly.IsChecked == true)
+			{
+				mCommands.Add("!d");
+			}
+			else if (mDoSource.IsChecked == false && mDoDisassembly.IsChecked == false)
+			{
+				mCommands.Add("!cls");
 			}
 		}
 
