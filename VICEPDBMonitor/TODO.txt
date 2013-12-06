@@ -1,5 +1,7 @@
 ﻿TODO File for VICE PDB Monitor
 
+mSourceIncludes is initialised with suitable data, but not used during filename searches yet...
+
 The current line should be scrolled to the middle of the source/disassembly view.
 
 
@@ -15,16 +17,14 @@ Maybe the x command can clear the window text, ready for any breakpoint being hi
 
 
 
-ACME should output any include paths used in the PDB.
 ACME Should output previous zone for each zone, that way the hierarchy of zones can be used for label display.
 //MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
 
 
-Need some kind of command queue and command result mechanism along with specific parsers for each command type.
 For example: reg, memory, io
 From this it's possible to display lots of useful source level debugging.
 The command "z" can be used to single step.
-The command "break" can be used to set a btreak point.
+The command "break" can be used to set a break point.
 	Return: BREAK: <dec num breakpoint index>
 "del <dec num break point breakpoint index>"
 "io" will show all the IO chips status. Useful.

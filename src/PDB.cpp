@@ -51,6 +51,13 @@ extern "C" void PDBSave( FILE *fp )
 		st++;
 	}
 
+	fprintf( fp , "INCLUDES:%d\n" , (int) gNumLibraryIncludes );
+	int i;
+	for ( i = 0 ; i < gNumLibraryIncludes ; i++ )
+	{
+		fprintf( fp , "%s\n" , gLibraryIncludes );
+	}
+
 	fprintf( fp , "FILES:%d\n" , (int) filenameIndex.size() );
 	std::map< std::string , int >::iterator st2 = filenameIndex.end();
 	while ( st2 != filenameIndex.begin() )

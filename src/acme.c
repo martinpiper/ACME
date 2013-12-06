@@ -325,8 +325,8 @@ static void set_mem_contents(void) {
 	exit(EXIT_FAILURE);
 }
 
-// A maximum of 246 extra library includes
-char *gLibraryIncludes[16];
+// A maximum of 256 extra library includes
+char *gLibraryIncludes[256];
 int gNumLibraryIncludes = 0;
 
 // handle long options (like "--example"). Return unknown string.

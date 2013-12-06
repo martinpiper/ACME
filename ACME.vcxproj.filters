@@ -19,6 +19,9 @@
     <Filter Include="Asm">
       <UniqueIdentifier>{8ea6bb68-2fca-4d59-a493-606d50af5706}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{1b085d35-012b-41cb-bde9-21dbdb12704c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\_amiga.h">
@@ -170,6 +173,9 @@
     <None Include=".gitignore">
       <Filter>Txt</Filter>
     </None>
+    <None Include="docs\COPYING">
+      <Filter>Docs</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Done.txt">
@@ -183,6 +189,42 @@
     </Text>
     <Text Include="TODO.txt">
       <Filter>Txt</Filter>
+    </Text>
+    <Text Include="docs\65816.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\AddrModes.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\AllPOs.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Changes.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Errors.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Example.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Help.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Illegals.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Lib.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\QuickRef.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Source.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="docs\Upgrade.txt">
+      <Filter>Docs</Filter>
     </Text>
   </ItemGroup>
 </Project>

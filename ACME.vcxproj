@@ -127,6 +127,7 @@
     <None Include="CleanProjectFully.bat" />
     <None Include="CleanProjectFullyWithAttrib.bat" />
     <None Include="DoBackup.bat" />
+    <None Include="docs\COPYING" />
     <None Include="README.md" />
     <None Include="src\Makefile" />
     <None Include="src\Makefile.dos" />
@@ -136,6 +137,18 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ACME_Lib\6502\Help.txt" />
+    <Text Include="docs\65816.txt" />
+    <Text Include="docs\AddrModes.txt" />
+    <Text Include="docs\AllPOs.txt" />
+    <Text Include="docs\Changes.txt" />
+    <Text Include="docs\Errors.txt" />
+    <Text Include="docs\Example.txt" />
+    <Text Include="docs\Help.txt" />
+    <Text Include="docs\Illegals.txt" />
+    <Text Include="docs\Lib.txt" />
+    <Text Include="docs\QuickRef.txt" />
+    <Text Include="docs\Source.txt" />
+    <Text Include="docs\Upgrade.txt" />
     <Text Include="Done.txt" />
     <Text Include="ReadMe.txt" />
     <Text Include="TODO.txt" />

@@ -22,7 +22,7 @@ extern signed long	macro_recursions_left;
 extern signed long	source_recursions_left;
 extern zone_t		zone_max;
 
-extern char *gLibraryIncludes[16];
+extern char *gLibraryIncludes[256];
 extern int gNumLibraryIncludes;
 
 

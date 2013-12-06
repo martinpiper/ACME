@@ -41,3 +41,11 @@ Register view above the source view.
 
 
 Added extra disassembly only view.
+
+
+Need some kind of command queue and command result mechanism along with specific parsers for each command type.
+
+
+
+ACME should output any include paths used in the PDB.
+Parse and use the "INCLUDES:0<cr>files..." section of the file.

@@ -11,6 +11,12 @@ This text only contains descriptions of changes independent of the
 platform used. There should be another help file in this archive
 outlining the platform specific changes.
 
+----------------------------------------------------------------------
+Section:   New in release 0.95
+----------------------------------------------------------------------
+
+Added !pdb "filename.pdb"
+Save program debug information file. Useful for source level debugging.
 
 ----------------------------------------------------------------------
 Section:   New in release 0.94

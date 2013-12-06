@@ -87,7 +87,9 @@ namespace VICEPDBMonitor
 	public partial class MainWindow : Window
 	{
 		bool mUsedLabels = false;
-		List<string> mSourceFileNames = new List<string>();
+		List<string> mSourceIncludes = new List<string>();
+		string[] mSourceFileNames;
+		int mSourceFileNamesLength = 0;
 		List<string> mSourceFileNamesFound = new List<string>();
 		List<List<string>> mSourceFiles = new List<List<string>>();
 		Dictionary<int, AddrInfo> mAddrInfoByAddr = new Dictionary<int, AddrInfo>();
@@ -111,15 +113,26 @@ namespace VICEPDBMonitor
 			{
 				while ((line = file.ReadLine()) != null)
 				{
-					if (line.IndexOf("FILES:") == 0)
+					if (line.IndexOf("INCLUDES:") == 0)
+					{
+						int lines = int.Parse(line.Substring(9));
+						mSourceIncludes.Capacity = lines;
+						while (lines-- > 0)
+						{
+							line = file.ReadLine();
+							mSourceIncludes.Add(line);
+						}
+					}
+					else if (line.IndexOf("FILES:") == 0)
 					{
 						int lines = int.Parse(line.Substring(6));
-						mSourceFileNames.Capacity = lines;
+						mSourceFileNames = new string[lines];
+						mSourceFileNamesLength = lines;
 						while (lines-- > 0)
 						{
 							line = file.ReadLine();
 							string[] tokens = line.Split(':');
-							mSourceFileNames.Add(tokens[1]);
+							mSourceFileNames[ int.Parse(tokens[0]) ] = tokens[1];
 						}
 					}
 					else if (line.IndexOf("ADDRS:") == 0)
@@ -397,11 +410,12 @@ namespace VICEPDBMonitor
 
 						try
 						{
-							List<int> lastDisplayedLine = new List<int>();
-					        mSourceFileNames.ForEach(delegate(String name)
+							int[] lastDisplayedLine = new int[mSourceFileNamesLength];
+							int i;
+							for (i = 0; i < mSourceFileNamesLength; i++)
 							{
-								lastDisplayedLine.Add(0);
-							});
+								lastDisplayedLine[i] = 0;
+							}
 							// MPi: TODO: Tweak the 10 range based on the display height?
 							int range = 10;
 							int startPrev = mPC;
@@ -490,7 +504,6 @@ namespace VICEPDBMonitor
 									{
 										lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine;
 									}
-									int i;
 									for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
 									{
 										gotText += string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i] + "\n";
