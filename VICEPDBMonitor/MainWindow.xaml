@@ -4,17 +4,16 @@
         Title="VICE PDB Monitor" Height="423.684" Width="692.526" ResizeMode="CanResizeWithGrip">
     <Grid x:Name="monitorText" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="549*"/>
-            <ColumnDefinition Width="136*"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="mTextBox" Margin="10,48,39,37" Text="Waiting to connect..." IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False"/>
-        <TextBox x:Name="mCommandBox" Margin="10,0,10,10" TextWrapping="Wrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" FontFamily="Consolas" KeyDown="commandBox_KeyDown" Height="22" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-        <TextBox x:Name="mLabelsBox" Margin="0,10,10,102" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Right" Width="160" Grid.ColumnSpan="2"/>
-        <Button Content="Break" HorizontalAlignment="Right" Margin="0,0,95,37" VerticalAlignment="Bottom" Width="75" Click="Button_Click" Grid.ColumnSpan="2"/>
-        <CheckBox x:Name="mDoSource" Content="Source" HorizontalAlignment="Right" Margin="0,0,114,82" IsChecked="True" Click="mDoSource_Click" Height="15" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-        <CheckBox x:Name="mDoDisassembly" Content="Disassembly" Margin="0,0,85,62" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-        <Button Content="Step" HorizontalAlignment="Right" Margin="0,0,10,37" VerticalAlignment="Bottom" Width="75" Click="Button_Click_1" Grid.Column="1"/>
-        <CheckBox x:Name="mCheckUsedLabels" Content="Used labels" Margin="0,0,10,82" VerticalAlignment="Bottom" Click="mCheckUsedLabels_Click" HorizontalAlignment="Right" Width="80" IsChecked="True" Grid.Column="1"/>
-        <TextBox x:Name="mRegsBox" Margin="10,10,39,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Consolas"/>
+        <TextBox x:Name="mTextBox" Margin="10,48,175,37" Text="Waiting to connect..." IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False"/>
+        <TextBox x:Name="mCommandBox" Margin="10,0,10,10" TextWrapping="Wrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" FontFamily="Consolas" KeyDown="commandBox_KeyDown" Height="22" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="mLabelsBox" Margin="0,10,10,102" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Right" Width="160"/>
+        <Button Content="Break" HorizontalAlignment="Right" Margin="0,0,95,37" VerticalAlignment="Bottom" Width="75" Click="Button_Click" Height="20"/>
+        <CheckBox x:Name="mDoSource" Content="Source" HorizontalAlignment="Right" Margin="0,0,114,82" IsChecked="True" Click="mDoSource_Click" Height="15" VerticalAlignment="Bottom" Width="56"/>
+        <CheckBox x:Name="mDoDisassembly" Content="Disassembly" Margin="0,0,85,62" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom"/>
+        <Button Content="Step" HorizontalAlignment="Right" Margin="0,0,10,37" VerticalAlignment="Bottom" Width="75" Click="Button_Click_1" Height="20"/>
+        <CheckBox x:Name="mCheckUsedLabels" Content="Used labels" Margin="0,0,10,82" VerticalAlignment="Bottom" Click="mCheckUsedLabels_Click" HorizontalAlignment="Right" Width="80" IsChecked="True" Height="15"/>
+        <TextBox x:Name="mRegsBox" Margin="10,10,175,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Consolas"/>
     </Grid>
 </Window>
