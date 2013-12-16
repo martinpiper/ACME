@@ -1,5 +1,10 @@
 ﻿TODO File for VICE PDB Monitor
 
+If the connection to VICE is lost then retry the connection until it succeeds.
+Add a bit of UI to show when the connection is lost or connected.
+
+
+
 Make it possible to read more than one PDB file at the same time.
 
 
