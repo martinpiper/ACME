@@ -49,3 +49,12 @@ Need some kind of command queue and command result mechanism along with specific
 
 ACME should output any include paths used in the PDB.
 Parse and use the "INCLUDES:0<cr>files..." section of the file.
+
+
+
+If the connection to VICE is lost then retry the connection until it succeeds.
+Add a bit of UI to show when the connection is lost or connected.
+
+
+
+Improved the mixed source disassembly display code to avoid multiple lines that are the same being displayed.
