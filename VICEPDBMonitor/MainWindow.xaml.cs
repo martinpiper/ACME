@@ -39,6 +39,14 @@ namespace VICEPDBMonitor
 			}
 		}
 
+		public int Count
+		{
+			get
+			{
+				return mDictionary.Count;
+			}
+		}
+
 		public IEnumerable<K> Keys
 		{
 			get
@@ -88,7 +96,7 @@ namespace VICEPDBMonitor
 	{
 		bool mUsedLabels = false;
 		List<string> mSourceIncludes = new List<string>();
-		string[] mSourceFileNames;
+		string[] mSourceFileNames = null;
 		int mSourceFileNamesLength = 0;
 		List<string> mSourceFileNamesFound = new List<string>();
 		List<List<string>> mSourceFiles = new List<List<string>>();
@@ -104,112 +112,158 @@ namespace VICEPDBMonitor
 		{
 			InitializeComponent();
 
-			string[] commandLineArgs = Environment.GetCommandLineArgs();
 			string line;
-			int prevAddr = -1;
+			string[] commandLineArgs = Environment.GetCommandLineArgs();
 
-			// Read the file and display it line by line.
-			using (System.IO.StreamReader file = new System.IO.StreamReader(commandLineArgs[1]))
+			int i;
+			for (i = 1; i < commandLineArgs.Length; i++)
 			{
-				while ((line = file.ReadLine()) != null)
+				int prevAddr = -1;
+				int localFileIndex = 0;
+
+				// Read the file and parse it line by line.
+				using (System.IO.StreamReader file = new System.IO.StreamReader(commandLineArgs[i]))
 				{
-					if (line.IndexOf("INCLUDES:") == 0)
+					while ((line = file.ReadLine()) != null)
 					{
-						int lines = int.Parse(line.Substring(9));
-						mSourceIncludes.Capacity = lines;
-						while (lines-- > 0)
+						if (line.IndexOf("INCLUDES:") == 0)
 						{
-							line = file.ReadLine();
-							mSourceIncludes.Add(line);
-						}
-					}
-					else if (line.IndexOf("FILES:") == 0)
-					{
-						int lines = int.Parse(line.Substring(6));
-						mSourceFileNames = new string[lines];
-						mSourceFileNamesLength = lines;
-						while (lines-- > 0)
-						{
-							line = file.ReadLine();
-							string[] tokens = line.Split(':');
-							mSourceFileNames[ int.Parse(tokens[0]) ] = tokens[1];
-						}
-					}
-					else if (line.IndexOf("ADDRS:") == 0)
-					{
-						int lines = int.Parse(line.Substring(6));
-						while (lines-- > 0)
-						{
-							line = file.ReadLine();
-							string[] tokens = line.Split(':');
-							AddrInfo addrInfo = new AddrInfo();
-							addrInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
-							addrInfo.mPrevAddr = prevAddr;
-							addrInfo.mZone = int.Parse(tokens[1]);
-							addrInfo.mFile = int.Parse(tokens[2]);
-							addrInfo.mLine = int.Parse(tokens[3]) - 1;	// Files lines are 1 based in the debug file
-							mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
-							if (prevAddr >= 0)
+							int lines = int.Parse(line.Substring(9));
+							mSourceIncludes.Clear();
+							while (lines-- > 0)
 							{
-								mAddrInfoByAddr[prevAddr].mNextAddr = addrInfo.mAddr;
+								line = file.ReadLine();
+								mSourceIncludes.Add(line);
 							}
-							prevAddr = addrInfo.mAddr;
 						}
-					}
-					else if (line.IndexOf("LABELS:") == 0)
-					{
-						int lines = int.Parse(line.Substring(7));
-						while (lines-- > 0)
+						else if (line.IndexOf("FILES:") == 0)
 						{
-							line = file.ReadLine();
-							string[] tokens = line.Split(':');
-							LabelInfo labelInfo = new LabelInfo();
-							labelInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
-							labelInfo.mZone = int.Parse(tokens[1]);
-							labelInfo.mLabel = tokens[2];
-							labelInfo.mUsed = int.Parse(tokens[3]) == 1;
-							labelInfo.mMemory = int.Parse(tokens[4]) == 1;
-							mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
-							mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
-							mLabelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
+							localFileIndex = mSourceFileNamesLength;
+							int lines = int.Parse(line.Substring(6));
+							mSourceFileNamesLength += lines;
+							if (mSourceFileNames != null)
+							{
+								// Copy old into new
+								string[] tempNames = new string[mSourceFileNamesLength];
+								int j;
+								for (j = 0; j < localFileIndex; j++)
+								{
+									tempNames[j] = mSourceFileNames[j];
+								}
+								mSourceFileNames = tempNames;
+							}
+							else
+							{
+								mSourceFileNames = new string[mSourceFileNamesLength];
+							}
+							while (lines-- > 0)
+							{
+								line = file.ReadLine();
+								string[] tokens = line.Split(':');
+								mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
+							}
+						}
+						else if (line.IndexOf("ADDRS:") == 0)
+						{
+							int lines = int.Parse(line.Substring(6));
+							int baseZone = 0;
+							if (mLabelInfoByZone.Count > 0)
+							{
+								baseZone = mLabelInfoByZone.Keys.Max();
+							}
+							while (lines-- > 0)
+							{
+								line = file.ReadLine();
+								string[] tokens = line.Split(':');
+								AddrInfo addrInfo = new AddrInfo();
+								addrInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
+								addrInfo.mPrevAddr = prevAddr;
+								addrInfo.mZone = int.Parse(tokens[1]);
+								if (addrInfo.mZone > 0)
+								{
+									addrInfo.mZone += baseZone;
+								}
+								addrInfo.mFile = localFileIndex + int.Parse(tokens[2]);
+								addrInfo.mLine = int.Parse(tokens[3]) - 1;	// Files lines are 1 based in the debug file
+								mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
+								if (prevAddr >= 0)
+								{
+									mAddrInfoByAddr[prevAddr].mNextAddr = addrInfo.mAddr;
+								}
+								prevAddr = addrInfo.mAddr;
+							}
+						}
+						else if (line.IndexOf("LABELS:") == 0)
+						{
+							int lines = int.Parse(line.Substring(7));
+							int baseZone = 0;
+							if (mLabelInfoByZone.Count > 0)
+							{
+								baseZone = mLabelInfoByZone.Keys.Max() + 1;
+							}
+							while (lines-- > 0)
+							{
+								line = file.ReadLine();
+								string[] tokens = line.Split(':');
+								LabelInfo labelInfo = new LabelInfo();
+								labelInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
+								labelInfo.mZone = int.Parse(tokens[1]);
+								if (labelInfo.mZone > 0)
+								{
+									labelInfo.mZone += baseZone;	// Helps to distinguish zones for multiple PDB files
+								}
+								labelInfo.mLabel = tokens[2];
+								labelInfo.mUsed = int.Parse(tokens[3]) == 1;
+								labelInfo.mMemory = int.Parse(tokens[4]) == 1;
+								mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
+								mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
+								mLabelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
+							}
 						}
 					}
+
+					file.Close();
 				}
 
-				file.Close();
-			}
-
-			foreach (string name in mSourceFileNames)
-			{
-				try
+				int l;
+				// Only process new names this iteration
+				// MPi: TODO: Use mSourceIncludes
+				for (l = localFileIndex; l < mSourceFileNamesLength; l++ )
 				{
-					List<string> aFile = new List<string>();
-					string newPath = name;
-					if (!System.IO.File.Exists(newPath))
+					string name = mSourceFileNames[l];
+					try
 					{
-						newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[1]), name);
+						List<string> aFile = new List<string>();
+						string newPath = name;
 						if (!System.IO.File.Exists(newPath))
 						{
-							newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[1]), System.IO.Path.GetFileName(name));
+							newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), name);
+							if (!System.IO.File.Exists(newPath))
+							{
+								newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), System.IO.Path.GetFileName(name));
+							}
 						}
-					}
-					using (System.IO.StreamReader file = new System.IO.StreamReader(newPath))
-					{
-						while ((line = file.ReadLine()) != null)
+						using (System.IO.StreamReader file = new System.IO.StreamReader(newPath))
 						{
-							aFile.Add(line);
+							while ((line = file.ReadLine()) != null)
+							{
+								aFile.Add(line);
+							}
+							file.Close();
 						}
-						file.Close();
+						mSourceFiles.Add(aFile);
+						mSourceFileNamesFound.Add(newPath);
 					}
-					mSourceFiles.Add(aFile);
-					mSourceFileNamesFound.Add(newPath);
+					catch (System.Exception ex)
+					{
+						mSourceFiles.Add(new List<string>());
+						mSourceFileNamesFound.Add("");
+					}
 				}
-				catch (System.Exception ex)
-				{
-					mSourceFiles.Add(new List<string>());
-					mSourceFileNamesFound.Add("");
-				}
+			
 			}
+
+
 
 //			mCommands.Add("r");
 //			mCommands.Add("m 0000 ffff");

@@ -58,3 +58,7 @@ Add a bit of UI to show when the connection is lost or connected.
 
 
 Improved the mixed source disassembly display code to avoid multiple lines that are the same being displayed.
+
+
+
+Make it possible to read more than one PDB file at the same time.
