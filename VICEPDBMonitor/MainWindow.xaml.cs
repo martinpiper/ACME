@@ -100,7 +100,7 @@ namespace VICEPDBMonitor
 		int mSourceFileNamesLength = 0;
 		List<string> mSourceFileNamesFound = new List<string>();
 		List<List<string>> mSourceFiles = new List<List<string>>();
-		Dictionary<int, AddrInfo> mAddrInfoByAddr = new Dictionary<int, AddrInfo>();
+		SortedDictionary<int, AddrInfo> mAddrInfoByAddr = new SortedDictionary<int, AddrInfo>();
 		MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
 		MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
 		MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
@@ -177,7 +177,6 @@ namespace VICEPDBMonitor
 								string[] tokens = line.Split(':');
 								AddrInfo addrInfo = new AddrInfo();
 								addrInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
-								addrInfo.mPrevAddr = prevAddr;
 								addrInfo.mZone = int.Parse(tokens[1]);
 								if (addrInfo.mZone > 0)
 								{
@@ -185,12 +184,8 @@ namespace VICEPDBMonitor
 								}
 								addrInfo.mFile = localFileIndex + int.Parse(tokens[2]);
 								addrInfo.mLine = int.Parse(tokens[3]) - 1;	// Files lines are 1 based in the debug file
-								mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
-								if (prevAddr >= 0)
-								{
-									mAddrInfoByAddr[prevAddr].mNextAddr = addrInfo.mAddr;
-								}
-								prevAddr = addrInfo.mAddr;
+//								mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
+								mAddrInfoByAddr[addrInfo.mAddr] = addrInfo;
 							}
 						}
 						else if (line.IndexOf("LABELS:") == 0)
@@ -263,6 +258,18 @@ namespace VICEPDBMonitor
 			
 			}
 
+			int thePrevAddr = -1;
+			foreach (KeyValuePair<int, AddrInfo> pair in mAddrInfoByAddr)
+			{
+				pair.Value.mPrevAddr = thePrevAddr;
+				thePrevAddr = pair.Value.mAddr;
+			}
+			thePrevAddr = -1;
+			foreach (KeyValuePair<int, AddrInfo> pair in mAddrInfoByAddr.Reverse())
+			{
+				pair.Value.mNextAddr = thePrevAddr;
+				thePrevAddr = pair.Value.mAddr;
+			}
 
 
 //			mCommands.Add("r");

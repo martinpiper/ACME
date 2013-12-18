@@ -62,3 +62,7 @@ Improved the mixed source disassembly display code to avoid multiple lines that 
 
 
 Make it possible to read more than one PDB file at the same time.
+
+
+
+Link up mNextAddr/mPrevAddr when all PDB files are read.
