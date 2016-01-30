@@ -32,3 +32,6 @@ $<hex num>:<dec zone>:<text label>:<1/0 = USED>:<1/0 = ADDR>
 Rebuilt the project from scratch to avoid problems with the conversion from the DSW/DSP
 
 Address needs zone list when it changes
+
+
+Improved PO: "!binary" now has "interleave" parameter.

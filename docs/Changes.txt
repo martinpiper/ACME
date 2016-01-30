@@ -12,6 +12,12 @@ platform used. There should be another help file in this archive
 outlining the platform specific changes.
 
 ----------------------------------------------------------------------
+Section:   New in release 0.96
+----------------------------------------------------------------------
+
+Improved PO: "!binary" now has "interleave" parameter.
+
+----------------------------------------------------------------------
 Section:   New in release 0.95
 ----------------------------------------------------------------------
 

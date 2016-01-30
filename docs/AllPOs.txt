@@ -221,7 +221,7 @@ Examples:	!source <6502/std.a>	; Read library file
 		!src "Macros.a"		; Read file from current dir
 
 
-Call:		!binary FILENAME [, [SIZE] [, [SKIP]]]
+Call:		!binary FILENAME [, [SIZE] [, [SKIP] , [INTERLEAVE]]]
 Purpose:	Insert binary file directly into output file.
 Parameters:	FILENAME: A file name given in "..." quoting (load
 		from current directory) or in <...> quoting (load from
@@ -237,6 +237,10 @@ Parameters:	FILENAME: A file name given in "..." quoting (load
 		the file from file offset SKIP. So C64 coders wanting
 		to include C64 files without their load addresses
 		should use a SKIP value of 2.
+		INTERLEAVE: When reading the file data will apply this
+		addition to the file pointer instead, skips bytes while
+		reading data. 2 will skip every other byte, for example.
+		This detaults to 1 so it reads every byte
 Aliases:	"!bin"
 Examples:	!binary <Own/menudata.b>	; insert library file
 		!bin "asc2pet.b", 256, 2	; insert 256 bytes

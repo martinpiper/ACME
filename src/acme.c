@@ -16,10 +16,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#define RELEASE		"0.95"		// update before release (FIXME)
-#define CODENAME	"Badger"	// update before release
-#define CHANGE_DATE	"03 Nov"	// update before release
-#define CHANGE_YEAR	"2013"		// update before release
+#define RELEASE		"0.96"		// update before release (FIXME)
+#define CODENAME	"Cormorant"	// update before release
+#define CHANGE_DATE	"30 Jan"	// update before release
+#define CHANGE_YEAR	"2016"		// update before release
 #define HOME_PAGE	"http://www.wellytop.com/C64.html\nhttps://github.com/martinpiper/ACME/"
 
 #include <stdio.h>

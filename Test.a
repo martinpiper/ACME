@@ -69,3 +69,5 @@ Foo3
 UnusedCode
 	inc $d021
 	rts
+
+!bin ".gitIgnore",,,4

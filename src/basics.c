@@ -64,7 +64,9 @@ static enum eos_t PO_binary(void) {
 	FILE*		fd;
 	int		byte;
 	intval_t	size	= -1,	// means "not given" => "until EOF"
-			skip	= 0;
+			skip	= 0,
+			interleave = 1;
+	int skipByte;
 
 	// if file name is missing, don't bother continuing
 	if(Input_read_filename(TRUE))
@@ -81,8 +83,20 @@ static enum eos_t PO_binary(void) {
 		&& (size <0))
 			Throw_serious_error("Negative size argument.");
 		if(Input_accept_comma())
+		{
 			ALU_optional_defined_int(&skip);// read skip
+
+			if(Input_accept_comma())
+			{
+				ALU_optional_defined_int(&interleave);// read interleave
+				if (interleave <= 1)
+				{
+					Throw_serious_error("Negative size argument.");
+				}
+			}
+		}
 	}
+	skipByte = interleave;
 	// check whether including is a waste of time
 	if((size >= 0) && (pass_undefined_count || pass_real_errors))
 		Output_fake(size);	// really including is useless anyway
@@ -95,8 +109,13 @@ static enum eos_t PO_binary(void) {
 			byte = getc(fd);
 			if(byte == EOF)
 				break;
-			Output_byte(byte);
-			size--;
+			skipByte++;
+			if (skipByte >= interleave)
+			{
+				Output_byte(byte);
+				size--;
+				skipByte = 0;
+			}
 		}
 		// if more should have been read, warn and add padding
 		if(size > 0) {
