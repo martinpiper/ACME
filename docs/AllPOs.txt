@@ -240,7 +240,7 @@ Parameters:	FILENAME: A file name given in "..." quoting (load
 		INTERLEAVE: When reading the file data will apply this
 		addition to the file pointer instead, skips bytes while
 		reading data. 2 will skip every other byte, for example.
-		This detaults to 1 so it reads every byte
+		This defaults to 1 so it reads every byte
 Aliases:	"!bin"
 Examples:	!binary <Own/menudata.b>	; insert library file
 		!bin "asc2pet.b", 256, 2	; insert 256 bytes
