@@ -35,3 +35,12 @@ Address needs zone list when it changes
 
 
 Improved PO: "!binary" now has "interleave" parameter.
+
+
+
+* Added VICEPDBMonitor
+VICE C64 remote debugging
+Using VICE x64.exe -remotemonitor
+Then telnet localhost 6510
+It's possible to break into the execution by sending a character. For example to get new "m 0000" memory while it's running code. Or to break execution for step with 'z'.
+

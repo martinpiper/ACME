@@ -1,8 +1,54 @@
 ACME TODO file.
 
+* Add assembler zone documentation
+	!entry	- Document entry status/register/memory locations
+	!return	- Document returned status/register/memory locations
+	!trashed	- Document trashed status/register/memory locations. Like !return but makes the unknown/trashed state explicit.
+	When any of the above are used then also track all status/register/memory usage for the zone
 
-VICE C64 remote debugging
-Using VICE x64.exe -remotemonitor
-Then telnet localhost 6510
-It's possible to break into the execution by sending a character. For example to get new "m 0000" memory while it's running code. Or to break execution for step with 'z'.
+	
 
+
+* Use the assembler zone documentation and static analysis to warn when conflicting status/register/memory locations are used in code.
+	If the calling zone uses status/register/memory that the called zone does then output a warning.
+	For example:
+	!zn {
+	!return A
+		foo
+			lda #0
+>>Warning doThing trashes A>>	jsr doThing
+			rts
+	}
+	!zn {
+	!entry
+	!return
+	doThing
+		lda #0
+		rts
+	
+
+
+* Optimising assembly with zone using !optimise
+	Use the assembler zone documentation and static analysis to automatically pick optimisations for a zone
+	For example:
+	!zn {
+	!optimise speed
+	!entry Y
+	!return X
+	!trash Y
+	foo
+		iny
+		iny
+		iny
+		iny
+		tya
+		tax
+		rts
+	}
+	Would optimise to:
+	foo
+		tya
+		clc
+		adc #4
+		tax
+		rts
