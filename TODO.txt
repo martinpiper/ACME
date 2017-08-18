@@ -1,5 +1,9 @@
 ACME TODO file.
 
+* Dead strip code in zones where labels (their memory addresses) are not referenced at all by anything outside that zone.
+
+
+
 * Add assembler zone documentation
 	!entry	- Document entry status/register/memory locations
 	!return	- Document returned status/register/memory locations
