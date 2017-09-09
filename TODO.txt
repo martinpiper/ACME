@@ -1,3 +1,8 @@
+// $(ProjectDir)
+// -v9 Test.a
+// C:\work\C64\Scroller
+// -v3 --msvc ScrollEntry.a
+
 ACME TODO file.
 
 * Dead strip code in zones where labels (their memory addresses) are not referenced at all by anything outside that zone.

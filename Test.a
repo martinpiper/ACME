@@ -71,3 +71,8 @@ UnusedCode
 	rts
 
 !bin ".gitIgnore",,,4
+
+foo = 1
+!ifndef foo {
+!error "foo not defined!"
+}

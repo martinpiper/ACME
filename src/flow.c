@@ -284,8 +284,7 @@ static enum eos_t PO_if(void) {// Now GotByte = illegal char
 	return(ENSURE_EOS);
 }
 
-// Conditional assembly ("!ifdef"). Has to be re-entrant.
-static enum eos_t PO_ifdef(void) {// Now GotByte = illegal char
+static enum eos_t PO_ifdef_toggle(bool toggle) {// Now GotByte = illegal char
 	node_ra_t*	node;
 	label_t*	label;
 	zone_t		zone;
@@ -302,6 +301,10 @@ static enum eos_t PO_ifdef(void) {// Now GotByte = illegal char
 		if(label->result.flags & MVALUE_DEFINED)
 			defined = TRUE;
 	}
+	if (toggle)
+	{
+		defined = !defined;
+	}
 	SKIPSPACE();
 	if(GotByte == CHAR_SOB)
 		parse_block_else_block(defined);
@@ -311,6 +314,14 @@ static enum eos_t PO_ifdef(void) {// Now GotByte = illegal char
 		return(SKIP_REMAINDER);
 	}
 	return(ENSURE_EOS);
+}
+
+// Conditional assembly ("!ifdef"). Has to be re-entrant.
+static enum eos_t PO_ifdef(void) {// Now GotByte = illegal char
+	return PO_ifdef_toggle(FALSE);
+}
+static enum eos_t PO_ifndef(void) {// Now GotByte = illegal char
+	return PO_ifdef_toggle(TRUE);
 }
 
 // Macro definition ("!macro").
@@ -385,6 +396,7 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("for",	PO_for),
 	PREDEFNODE("if",	PO_if),
 	PREDEFNODE("ifdef",	PO_ifdef),
+	PREDEFNODE("ifndef",	PO_ifndef),
 	PREDEFNODE("macro",	PO_macro),
 	PREDEFNODE("source",	PO_source),
 	PREDEFLAST("src",	PO_source),
