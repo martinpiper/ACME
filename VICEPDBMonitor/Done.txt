@@ -66,3 +66,7 @@ Make it possible to read more than one PDB file at the same time.
 
 
 Link up mNextAddr/mPrevAddr when all PDB files are read.
+
+
+
+Mixed disassembly and source mode now has better formatting where the information is all on one line where possible.

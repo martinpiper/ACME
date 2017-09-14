@@ -506,7 +506,7 @@ namespace VICEPDBMonitor
 										startPrev = addrInfo2.mPrevAddr;
 									}
 									// MPi: TODO: Tweak the 10 range based on the display height?
-									range = 10;
+									range = 20;
 									// Step forwards trying to find a good ending point to disassemble
 									int endNext = mPC;
 									while (range-- > 0)
@@ -544,6 +544,7 @@ namespace VICEPDBMonitor
 									string[] split = disassemblyBefore.Split('\n');
 									bool doingBefore = true;
 									int index = 0;
+									String lastSourceLine = "";
 									while (index < split.Length)
 									{
 										string line = split[index++];
@@ -584,12 +585,19 @@ namespace VICEPDBMonitor
 											}
 											for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
 											{
+												if (lastSourceLine.Length > 0)
+												{
+//													gotText += "     " + "                                  " + lastSourceLine + "\n";
+													gotText += "     " + lastSourceLine + "\n";
+													lastSourceLine = "";
+												}
+
 												if ((lastSourceIndexDisplayed == addrInfo.mFile) && (lastSourceLineDisplayed == i))
 												{
 													// Stop displaying the same source and line multiple times in a row
 													continue;
 												}
-												gotText += string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i] + "\n";
+												lastSourceLine = string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i];
 												lastSourceIndexDisplayed = addrInfo.mFile;
 												lastSourceLineDisplayed = i;
 											}
@@ -604,7 +612,20 @@ namespace VICEPDBMonitor
 										{
 											gotText += ">>>> ";
 										}
-										gotText += line + "\n";
+										else
+										{
+											gotText += "     ";
+										}
+										if (lastSourceLine.Length > 0)
+										{
+											line = line.PadRight(34, ' ');
+											gotText += line + lastSourceLine + "\n";
+											lastSourceLine = "";
+										}
+										else
+										{
+											gotText += line + "\n";
+										}
 									}
 								}
 								catch (System.Exception)
