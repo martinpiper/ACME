@@ -70,3 +70,7 @@ Link up mNextAddr/mPrevAddr when all PDB files are read.
 
 
 Mixed disassembly and source mode now has better formatting where the information is all on one line where possible.
+
+
+
+Mixed asm and source mode, all on one line?
