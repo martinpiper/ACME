@@ -883,12 +883,17 @@ namespace VICEPDBMonitor
 			}
 		}
 
-		private void Button_Click(object sender, RoutedEventArgs e)
+		private void Button_Click_Break(object sender, RoutedEventArgs e)
 		{
 			HandleCodeView();
 		}
 
-		private void Button_Click_1(object sender, RoutedEventArgs e)
+		private void Button_Click_Go(object sender, RoutedEventArgs e)
+		{
+			mCommands.Add("x");
+		}
+
+		private void Button_Click_StepIn(object sender, RoutedEventArgs e)
 		{
 			mCommands.Add("z");
 			HandleCodeView();
@@ -906,6 +911,18 @@ namespace VICEPDBMonitor
 
 		private void mCheckUsedLabels_Click(object sender, RoutedEventArgs e)
 		{
+			HandleCodeView();
+		}
+
+		private void Button_Click_StepOver(object sender, RoutedEventArgs e)
+		{
+			mCommands.Add("n");
+			HandleCodeView();
+		}
+
+		private void Button_Click_StepOut(object sender, RoutedEventArgs e)
+		{
+			mCommands.Add("ret");
 			HandleCodeView();
 		}
 
