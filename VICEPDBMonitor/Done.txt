@@ -74,3 +74,16 @@ Mixed disassembly and source mode now has better formatting where the informatio
 
 
 Mixed asm and source mode, all on one line?
+
+
+
+* It would be possible to automate the collection of memmapzap and memmapshow information for a configured update frequency and use that to provide sampling profiling information
+	Code/label/memory heat map
+	Or update VICE to maintain this count of access types and report it back, to avoid so much memmapzap/memmapshow access
+		addr: IO ROM RAM
+		0000: -- --- rw-
+		0001: -- --- rw-
+
+
+
+* add more buttons for step over and step out on that one

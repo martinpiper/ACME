@@ -95,6 +95,8 @@ namespace VICEPDBMonitor
 	public partial class MainWindow : Window
 	{
 		bool mUsedLabels = false;
+		bool mAccessUsed = false;
+		bool mExecUsed = false;
 		List<string> mSourceIncludes = new List<string>();
 		string[] mSourceFileNames = null;
 		int mSourceFileNamesLength = 0;
@@ -374,6 +376,54 @@ namespace VICEPDBMonitor
 			return "";
 		}
 
+
+		Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
+		Dictionary<int, int> mExecutedCount = new Dictionary<int, int>();
+
+		private void ParseProfileInformation(string theReply)
+		{
+//			addr: IO ROM RAM
+//			0000: -- --- rw-
+//			0001: -- --- rw-
+			string[] split = theReply.Split('\n');
+			int index = 0;
+			bool gotProfileInfo = false;
+			while (index < split.Length)
+			{
+				string line = split[index++];
+				if (line.Length < 7)
+				{
+					continue;
+				}
+				if (line.IndexOf("addr:") == 0)
+				{
+					gotProfileInfo = true;
+					continue;
+				}
+				if (!gotProfileInfo)
+				{
+					continue;
+				}
+				line = line.ToLower();
+				string tAddr = line.Substring(0, 4);
+				int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+				int count;
+				if (line.IndexOf('x') != -1)
+				{
+					count = 0;
+					mExecutedCount.TryGetValue(theAddr, out count);
+					count++;
+					mExecutedCount[theAddr] = count;
+				}
+
+				count = 0;
+				mAccessedCount.TryGetValue(theAddr, out count);
+				count++;
+				mAccessedCount[theAddr] = count;
+			}
+
+		}
+
 		private void ParseRegisters(string theReply)
 		{
 			//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
@@ -389,6 +439,10 @@ namespace VICEPDBMonitor
 
 			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
 
+		}
+
+		private void UpdateLabels()
+		{
 			string labels = "";
 			try
 			{
@@ -403,6 +457,15 @@ namespace VICEPDBMonitor
 						if ((mUsedLabels == false) || ((mUsedLabels == true) && (aLabel.mUsed == true)))
 						{
 							string labelText = "";
+							int count;
+							if (mExecUsed && mExecutedCount.TryGetValue(aLabel.mAddr, out count))
+							{
+								labelText += "E" + count + ":";
+							}
+							if (mAccessUsed && mAccessedCount.TryGetValue(aLabel.mAddr, out count))
+							{
+								labelText += "A" + count + ":";
+							}
 							if (theZone != 0)
 							{
 								labelText = ".";
@@ -475,12 +538,37 @@ namespace VICEPDBMonitor
 							lastCommand = mCommands[0];
 							mCommands.RemoveAt(0);
 
-							if (lastCommand.IndexOf("!sm") == 0)
+							if (lastCommand.IndexOf("!memmapzap") == 0)
+							{
+								string theReply;
+								mGotTextWorking = "";
+								SendCommand("memmapzap");
+								theReply = GetReply();
+								SendCommand("x");
+							}
+							else if (lastCommand.IndexOf("!memmapshow") == 0)
+							{
+								string theReply;
+								mGotTextWorking = "";
+//								SendCommand("r");
+//								theReply = GetReply();
+								SendCommand("memmapshow");
+								theReply = GetReply();
+
+								ParseProfileInformation(theReply);
+								UpdateLabels();
+
+								SendCommand("memmapzap");
+								theReply = GetReply();
+								SendCommand("x");
+							}
+							else if (lastCommand.IndexOf("!sm") == 0)
 							{
 								SendCommand("r");
 								string theReply = GetReply();
 
 								ParseRegisters(theReply);
+								UpdateLabels();
 
 								gotText = "";
 
@@ -646,6 +734,7 @@ namespace VICEPDBMonitor
 								string theReply = GetReply();
 
 								ParseRegisters(theReply);
+								UpdateLabels();
 
 								gotText = "";
 
@@ -685,6 +774,7 @@ namespace VICEPDBMonitor
 										{
 											gotText += "  ";
 										}
+
 										gotText += mSourceFiles[addrInfo.mFile][theLine++];
 										gotText += "\n";
 									}
@@ -711,6 +801,7 @@ namespace VICEPDBMonitor
 								string theReply = GetReply();
 
 								ParseRegisters(theReply);
+								UpdateLabels();
 
 								gotText = "";
 
@@ -857,13 +948,19 @@ namespace VICEPDBMonitor
 		// The first command should be to "step" to pause the CPU. Unless there is a breakpoint triggered then this can be disabled.
 		bool mNeverStepped = true;
 
-		private void HandleCodeView()
+		private void HandleCheckBoxes()
 		{
 			mUsedLabels = (mCheckUsedLabels.IsChecked == true);
+			mAccessUsed = (mCheckAccessUse.IsChecked == true);
+			mExecUsed = (mCheckExecUse.IsChecked == true);
+		}
+		private void HandleCodeView()
+		{
+			HandleCheckBoxes();
 			if (mNeverStepped == true)
 			{
 				mNeverStepped = false;
-				mCommands.Add("z");
+				mCommands.Add("r");
 			}
 			if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == true )
 			{
@@ -924,6 +1021,30 @@ namespace VICEPDBMonitor
 		{
 			mCommands.Add("ret");
 			HandleCodeView();
+		}
+
+		private void Button_Click_ProfileClear(object sender, RoutedEventArgs e)
+		{
+			mAccessedCount.Clear();
+			mExecutedCount.Clear();
+			mCommands.Add("!memmapzap");
+		}
+
+		private void Button_Click_ProfileAdd(object sender, RoutedEventArgs e)
+		{
+			mCommands.Add("!memmapshow");
+		}
+
+		private void CheckBox_Checked(object sender, RoutedEventArgs e)
+		{
+			HandleCheckBoxes();
+			UpdateLabels();
+		}
+
+		private void CheckBox_Checked_1(object sender, RoutedEventArgs e)
+		{
+			HandleCheckBoxes();
+			UpdateLabels();
 		}
 
 	}
