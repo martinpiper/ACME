@@ -109,6 +109,7 @@ namespace VICEPDBMonitor
 
 		private delegate void NoArgDelegate();
 		private delegate void OneArgDelegate(String arg);
+		private delegate void TwoArgDelegate(String arg , Brush brush);
 
 		public MainWindow()
 		{
@@ -120,7 +121,6 @@ namespace VICEPDBMonitor
 			int i;
 			for (i = 1; i < commandLineArgs.Length; i++)
 			{
-				int prevAddr = -1;
 				int localFileIndex = 0;
 
 				// Read the file and parse it line by line.
@@ -252,7 +252,7 @@ namespace VICEPDBMonitor
 						mSourceFiles.Add(aFile);
 						mSourceFileNamesFound.Add(newPath);
 					}
-					catch (System.Exception ex)
+					catch (System.Exception)
 					{
 						mSourceFiles.Add(new List<string>());
 						mSourceFileNamesFound.Add("");
@@ -298,10 +298,77 @@ namespace VICEPDBMonitor
 		Socket mSocket;
 		String mGotTextWorking = "";
 
-		private void UpdateSourceView(String text)
+		TextPointer GetTextPositionAtOffset(TextPointer position, int characterCount)
 		{
-			mTextBox.Text = text;
+			while (position != null)
+			{
+				if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+				{
+					int count = position.GetTextRunLength(LogicalDirection.Forward);
+					if (characterCount <= count)
+					{
+						return position.GetPositionAtOffset(characterCount);
+					}
+
+					characterCount -= count;
+				}
+
+				TextPointer nextContextPosition = position.GetNextContextPosition(LogicalDirection.Forward);
+				if (nextContextPosition == null)
+					return position;
+
+				position = nextContextPosition;
+			}
+
+			return position;
 		}
+
+		private void SetSourceView(String text)
+		{
+			mTextBox.Document.Blocks.Clear();
+			if (null == text || text.Length == 0)
+			{
+				return;
+			}
+			Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+			r.Background = null;
+
+			mTextBox.AppendText(text);
+
+			// mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
+			TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
+			int offset = searchRange.Text.IndexOf("=>");
+			if (offset < 0)
+			{
+				offset = searchRange.Text.IndexOf(">>>>");
+			}
+			if (offset >= 0)
+			{
+				int lineLength = searchRange.Text.IndexOf("\r", offset);
+				lineLength = lineLength - offset;
+				TextPointer start = GetTextPositionAtOffset(searchRange.Start, offset);
+				TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
+
+				result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
+			}
+		}
+
+		private void AppendTextSourceView(String text, Brush brush)
+		{
+			if (null == text || text.Length == 0)
+			{
+				return;
+			}
+
+			Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+			r.Background = brush;
+
+			mTextBox.AppendText(text);
+
+			r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+			r.Background = null;
+		}
+	
 		private void UpdateLabelView(String text)
 		{
 			mLabelsBox.Text = text;
@@ -439,7 +506,6 @@ namespace VICEPDBMonitor
 //			mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
 
 			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
-
 		}
 
 		private void UpdateLabels()
@@ -795,6 +861,7 @@ namespace VICEPDBMonitor
 							else if (lastCommand.IndexOf("!cls") == 0)
 							{
 								gotText = "";
+								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
 							}
 							else if (lastCommand.IndexOf("!d") == 0)
 							{
@@ -863,12 +930,17 @@ namespace VICEPDBMonitor
 											continue;
 										}
 
+										Brush brush = null;
 										if (theAddr == mPC)
 										{
-											gotText += ">>>> ";
+											line = ">>>> " + line;
+											brush = Brushes.LightBlue;
 										}
-										gotText += line + "\n";
+										line += "\r";
+
+										gotText += line;
 									}
+
 								}
 								catch (System.Exception)
 								{
@@ -885,6 +957,13 @@ namespace VICEPDBMonitor
 							else
 							{
 								// Any other commands get here
+								bool silent = false;
+								if (lastCommand.IndexOf('!') == 0)
+								{
+									lastCommand = lastCommand.Substring(1);
+									silent = true;
+								}
+
 								SendCommand(lastCommand);
 								string theReply = "";
 								if (lastCommand.IndexOf("x") != 0)
@@ -892,9 +971,17 @@ namespace VICEPDBMonitor
 									theReply = GetReply();
 									gotText += theReply;
 								}
+								if (silent)
+								{
+									gotText = "";
+								}
 							}
 
-							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), gotText);
+							if (gotText.Length > 0)
+							{
+								gotText = gotText.Replace("\n", "\r");
+								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
+							}
 						}
 						else
 						{
@@ -904,7 +991,7 @@ namespace VICEPDBMonitor
 								// This happens if a break/watch point is hit, then a reply is received without any command being sent
 								string theReply = GetReply();
 								gotText += theReply;
-								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), gotText);
+								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
 								mCommands.Add("r");
 								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new NoArgDelegate(HandleCodeView));
 							}
@@ -918,7 +1005,7 @@ namespace VICEPDBMonitor
 						{
 							mSocket.Dispose();
 							mSocket = null;
-							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), "Not connected");
+							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), "Not connected");
 						}
 					}
 
@@ -926,7 +1013,7 @@ namespace VICEPDBMonitor
 				}
 				catch (System.Exception /*ex*/)
 				{
-					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), "Exception. Not connected");
+					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), "Exception. Not connected");
 					if (mSocket != null)
 					{
 						mSocket.Dispose();
@@ -948,9 +1035,6 @@ namespace VICEPDBMonitor
 			}
 		}
 
-		// The first command should be to "step" to pause the CPU. Unless there is a breakpoint triggered then this can be disabled.
-		bool mNeverStepped = true;
-
 		private void HandleCheckBoxes()
 		{
 			mUsedLabels = (mCheckUsedLabels.IsChecked == true);
@@ -960,11 +1044,7 @@ namespace VICEPDBMonitor
 		private void HandleCodeView()
 		{
 			HandleCheckBoxes();
-//			if (mNeverStepped == true)
-//			{
-//				mNeverStepped = false;
-				mCommands.Add("r");
-//			}
+			mCommands.Add("!r");
 			if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == true )
 			{
 				mCommands.Add("!sm");
@@ -995,7 +1075,7 @@ namespace VICEPDBMonitor
 
 		private void Button_Click_StepIn(object sender, RoutedEventArgs e)
 		{
-			mCommands.Add("z");
+			mCommands.Add("!z");
 			HandleCodeView();
 		}
 
@@ -1016,13 +1096,13 @@ namespace VICEPDBMonitor
 
 		private void Button_Click_StepOver(object sender, RoutedEventArgs e)
 		{
-			mCommands.Add("n");
+			mCommands.Add("!n");
 			HandleCodeView();
 		}
 
 		private void Button_Click_StepOut(object sender, RoutedEventArgs e)
 		{
-			mCommands.Add("ret");
+			mCommands.Add("!ret");
 			HandleCodeView();
 		}
 

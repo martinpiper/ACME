@@ -19,7 +19,13 @@
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="270" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="mTextBox" Margin="10,48,10,0" Text="Waiting to connect..." IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False"/>
+            <RichTextBox x:Name="mTextBox" Margin="10,48,10,0" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False">
+                <FlowDocument>
+                    <Paragraph>
+                        <Run Language="en-gb" Text="Waiting to connect..."/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
             <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Consolas"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
             <TextBox x:Name="mLabelsBox" Margin="10,10,10,171" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2"/>
