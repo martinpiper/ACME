@@ -1,5 +1,9 @@
 ﻿TODO File for VICE PDB Monitor
 
+* Highlight the current line in the source view - Blue/red background?
+
+
+
 * Breakpoint from clicking a source view line
 	* Indicate lines with break points set in Vice
 
@@ -18,6 +22,15 @@
 
 
 * probably use the memory interface not the TCP interface
+
+
+
+* when it finds a lda (zp,x) or lda (zp),y it looks up contents of ZP and show the @XXXX
+	Same for all hex values from the disassembly, convert to known labels with the best zone
+
+
+
+* also pulling $01 and working out what bank each command is it... number of times I accidentally load from 
 
 
 
