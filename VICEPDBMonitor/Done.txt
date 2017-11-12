@@ -90,3 +90,7 @@ Mixed asm and source mode, all on one line?
 
 
 * Recovering from remote debugger connection issues much better
+
+
+
+* Highlight the current line in the source view - Grey background

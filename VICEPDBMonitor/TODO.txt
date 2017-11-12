@@ -1,9 +1,5 @@
 ﻿TODO File for VICE PDB Monitor
 
-* Highlight the current line in the source view - Blue/red background?
-
-
-
 * Breakpoint from clicking a source view line
 	* Indicate lines with break points set in Vice
 
