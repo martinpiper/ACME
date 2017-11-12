@@ -1,5 +1,14 @@
 ﻿TODO File for VICE PDB Monitor
 
+* Breakpoint from clicking a source view line
+	* Indicate lines with break points set in Vice
+
+
+
+* Remap known labels entered in the edit window to hex values for Vice to use
+
+
+
 * a label search
 
 

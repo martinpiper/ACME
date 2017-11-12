@@ -161,7 +161,8 @@ namespace VICEPDBMonitor
 							while (lines-- > 0)
 							{
 								line = file.ReadLine();
-								string[] tokens = line.Split(':');
+								Char[] separator = { ':' };
+								string[] tokens = line.Split(separator, 2);
 								mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
 							}
 						}
@@ -904,6 +905,8 @@ namespace VICEPDBMonitor
 								string theReply = GetReply();
 								gotText += theReply;
 								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), gotText);
+								mCommands.Add("r");
+								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new NoArgDelegate(HandleCodeView));
 							}
 						}
 					} //< while (mSocket.Connected)
@@ -957,11 +960,11 @@ namespace VICEPDBMonitor
 		private void HandleCodeView()
 		{
 			HandleCheckBoxes();
-			if (mNeverStepped == true)
-			{
-				mNeverStepped = false;
+//			if (mNeverStepped == true)
+//			{
+//				mNeverStepped = false;
 				mCommands.Add("r");
-			}
+//			}
 			if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == true )
 			{
 				mCommands.Add("!sm");
