@@ -325,6 +325,7 @@ namespace VICEPDBMonitor
 
 		private void SetSourceView(String text)
 		{
+			mTextBox.BeginChange();
 			mTextBox.Document.Blocks.Clear();
 			if (null == text || text.Length == 0)
 			{
@@ -351,6 +352,7 @@ namespace VICEPDBMonitor
 
 				result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
 			}
+			mTextBox.EndChange();
 		}
 
 		private void AppendTextSourceView(String text, Brush brush)
