@@ -1,5 +1,9 @@
 ﻿TODO File for VICE PDB Monitor
 
+* Reduce the code scrolling to more of a push/jump scroll?
+
+
+
 * Breakpoint from clicking a source view line
 	* Indicate lines with break points set in Vice
 
