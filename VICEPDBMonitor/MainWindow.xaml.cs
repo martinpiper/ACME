@@ -329,28 +329,35 @@ namespace VICEPDBMonitor
 			mTextBox.Document.Blocks.Clear();
 			if (null == text || text.Length == 0)
 			{
+				mTextBox.EndChange();
 				return;
 			}
-			Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-			r.Background = null;
-
-			mTextBox.AppendText(text);
-
-			// mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
-			TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
-			int offset = searchRange.Text.IndexOf("=>");
-			if (offset < 0)
+			try
 			{
-				offset = searchRange.Text.IndexOf(">>>>");
+				Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+				r.Background = null;
+
+				mTextBox.AppendText(text);
+
+				// mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
+				TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
+				int offset = searchRange.Text.IndexOf("=>");
+				if (offset < 0)
+				{
+					offset = searchRange.Text.IndexOf(">>>>");
+				}
+				if (offset >= 0)
+				{
+					int lineLength = searchRange.Text.IndexOf("\r", offset);
+					lineLength = lineLength - offset;
+					TextPointer start = GetTextPositionAtOffset(searchRange.Start, offset);
+					TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
+
+					result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
+				}
 			}
-			if (offset >= 0)
+			catch (System.Exception)
 			{
-				int lineLength = searchRange.Text.IndexOf("\r", offset);
-				lineLength = lineLength - offset;
-				TextPointer start = GetTextPositionAtOffset(searchRange.Start, offset);
-				TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
-
-				result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
 			}
 			mTextBox.EndChange();
 		}
@@ -965,6 +972,10 @@ namespace VICEPDBMonitor
 									lastCommand = lastCommand.Substring(1);
 									silent = true;
 								}
+								if (!silent)
+								{
+									gotText += "Sending command: " + lastCommand + "\n";
+								}
 
 								SendCommand(lastCommand);
 								string theReply = "";
@@ -1032,6 +1043,81 @@ namespace VICEPDBMonitor
 			if (e.Key == Key.Enter)
 			{
 				string command = mCommandBox.Text;
+
+				// Produce a list of variable names and values relevant to the current PC and its zone
+				List<LabelInfo> allLabels = new List<LabelInfo>();
+
+				try
+				{
+					int theZone = mAddrInfoByAddr[mPC].mZone;
+					while (theZone >= 0)
+					{
+						List<LabelInfo> theLabels = mLabelInfoByZone[theZone];
+						allLabels.AddRange(theLabels);
+
+						// MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
+						if (theZone > 0)
+						{
+							theZone = 0;	// For now just display the global zone
+						}
+						else
+						{
+							break;
+						}
+					}
+					allLabels.Sort((a,b) => b.mLabel.Length.CompareTo(a.mLabel.Length));
+				}
+				catch (System.Exception ex)
+				{
+
+				}
+
+				// Look for labels after each whitespace
+				int pos = 0;
+				while (pos < command.Length)
+				{
+					int testPos = command.IndexOf(' ', pos);
+					if (testPos < 0)
+					{
+						testPos = command.IndexOf('~', pos);
+					}
+					if (testPos < 0)
+					{
+						break;
+					}
+					pos = testPos + 1;
+
+					string remaining = command.Substring(pos);
+					if (remaining[0] == '.')
+					{
+						remaining = remaining.Substring(1);
+					}
+
+					// Note the length order gets the most precise match
+					LabelInfo found = null;
+		
+					foreach (LabelInfo label in allLabels)
+					{
+						if (remaining.StartsWith(label.mLabel))
+						{
+							found = label;
+							break;
+						}
+					}
+
+					// If it's found then reconstruct the command with the label replaced as a hex number
+					if (null != found)
+					{
+						string theHex = "$" + found.mAddr.ToString("X");
+						command = command.Substring(0, pos) + theHex + remaining.Substring(found.mLabel.Length);
+						pos += theHex.Length;
+					}
+					else
+					{
+						pos++;
+					}
+				}
+
 				mCommands.Add(command);
 				mCommandBox.Clear();
 			}
