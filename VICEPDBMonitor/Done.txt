@@ -100,3 +100,9 @@ Mixed asm and source mode, all on one line?
 * Remap known labels entered in the edit window to hex values for Vice to use
 	Use the current, or last known, PC and zone to map backwards through the labels list to find the most likely label
 	Handle missing '.' prefix as well
+
+
+
+* Get a full memory dump from Vice at breakpoint and step
+	Use it to give hints of label values in the label window
+	Use it to give hints of label values in the source

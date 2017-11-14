@@ -94,6 +94,7 @@ namespace VICEPDBMonitor
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		bool mDump = false;
 		bool mUsedLabels = false;
 		bool mAccessUsed = false;
 		bool mExecUsed = false;
@@ -292,7 +293,7 @@ namespace VICEPDBMonitor
 		int mRegX = 0;
 		int mRegY = 0;
 		int mSP = 0;
-		int mNV_BDIZC = 0;
+//		int mNV_BDIZC = 0;
 		List<string> mCommands = new List<string>();
 
 		Socket mSocket;
@@ -323,8 +324,141 @@ namespace VICEPDBMonitor
 			return position;
 		}
 
+		int getSafeC64Memory(int addr)
+		{
+			return (int)mMemoryC64[addr & 0xffff];
+		}
+
+		static int kMicroDumpStringLength = 16;
+		string getMicroDump(int addr)
+		{
+			if (mDump == false)
+			{
+				return "";
+			}
+			string ret;
+			ret = " >(" + getSafeC64Memory(addr).ToString("X2") + " " + getSafeC64Memory(addr+1).ToString("X2") + " " + getSafeC64Memory(addr+2).ToString("X2") + " " + getSafeC64Memory(addr+3).ToString("X2") + ")<";
+			return ret;
+		}
+
+		string EnrichDumpWithMemory(string text)
+		{
+			if (mDump == false)
+			{
+				return text;
+			}
+			int pos = 0;
+			while (pos < text.Length)
+			{
+				try
+				{
+					int pos2 = text.IndexOf("$" , pos);
+					if (pos2 < 1)
+					{
+						break;
+					}
+
+					// Skip #$xx
+					if (text[pos2 - 1] == '#')
+					{
+						pos = pos2 + 3;
+						continue;
+					}
+
+
+					// Enrich ($xx),Y
+					if (text[pos2 + 3] == ')' && text[pos2 + 4] == ',')
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int indirect = mMemoryC64[addr] + (((int)mMemoryC64[addr+1]) << 8);
+						text = text.Insert(pos2 + 5 + 3, getMicroDump(indirect + mRegY));
+
+						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich ($xx,X)
+					if (text[pos2 + 3] == ',' && text[pos2 + 5] == ')')
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int indirect = mMemoryC64[(addr + mRegX) & 0xff] + (((int)mMemoryC64[(addr + mRegX + 1) & 0xff]) << 8);
+						text = text.Insert(pos2 + 5 + 3, getMicroDump(indirect));
+
+						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xxxx,x/y
+					if (text[pos2 + 5] == ',' && (text[pos2 + 5 + 1] == 'X' || text[pos2 + 5 + 1] == 'x' || text[pos2 + 5 + 1] == 'Y' || text[pos2 + 5 + 1] == 'y'))
+					{
+						string tAddr = text.Substring(pos2 + 1, 4);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int offset = mRegX;
+						if (text[pos2 + 5 + 1] == 'Y' || text[pos2 + 5 + 1] == 'y')
+						{
+							offset = mRegY;
+						}
+						text = text.Insert(pos2 + 5 + 3, getMicroDump(addr + offset));
+
+						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xx,
+					if (text[pos2 + 3] == ',' && (text[pos2 + 3 + 1] == 'X' || text[pos2 + 3 + 1] == 'x' || text[pos2 + 3 + 1] == 'Y' || text[pos2 + 3 + 1] == 'y'))
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int offset = mRegX;
+						if (text[pos2 + 3 + 1] == 'Y' || text[pos2 + 3 + 1] == 'y')
+						{
+							offset = mRegY;
+						}
+						text = text.Insert(pos2 + 3 + 3, getMicroDump(addr + offset));
+
+						pos = pos2 + 3 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xxxx
+					int pos3 = text.IndexOfAny(new[] {' ','\n','\r'} , pos2);
+					if (pos3 >= 0 && (pos3 - pos2) == 5)
+					{
+						string tAddr = text.Substring(pos2 + 1, 4);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						text = text.Insert(pos3, getMicroDump(addr));
+
+						pos = pos3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xx
+					if (pos3 >= 0 && (pos3 - pos2) == 3)
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						text = text.Insert(pos3, getMicroDump(addr));
+
+						pos = pos3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					pos = pos2 + 1;
+				}
+				catch (System.Exception)
+				{
+					// Skip whatever was giving problems and try again
+					pos += 4;
+				}
+			}
+			return text;
+		}
+
 		private void SetSourceView(String text)
 		{
+			text = EnrichDumpWithMemory(text);
 			mTextBox.BeginChange();
 			mTextBox.Document.Blocks.Clear();
 			if (null == text || text.Length == 0)
@@ -425,7 +559,7 @@ namespace VICEPDBMonitor
 						mGotTextWorking += Encoding.ASCII.GetString(bytes, 0, got);
 					}
 				}
-				catch (System.Exception ex)
+				catch (System.Exception)
 				{
 //					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
 					Thread.Sleep(100);
@@ -456,6 +590,56 @@ namespace VICEPDBMonitor
 
 		Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
 		Dictionary<int, int> mExecutedCount = new Dictionary<int, int>();
+
+		char[] mMemoryC64 = new char[65536];
+		bool mNeedNewMemoryDump = true;
+
+		private void TestForMemoryDump(bool force = false)
+		{
+			if (mDump == false)
+			{
+				return;
+			}
+			if (force || mNeedNewMemoryDump)
+			{
+				mNeedNewMemoryDump = false;
+				mCommands.Add("!domem");
+			}
+		}
+
+		private void ParseMemory(string theReply)
+		{
+			string[] split = theReply.Split('\n');
+			int index = 0;
+			while (index < split.Length)
+			{
+				string line = split[index++];
+				//>C:0010  4c 39 32 39  4c 69 8b ad  ca dd e4 dd  ca ad 8b 69   L929Li.........i
+				line = line.ToLower();
+				if (!line.StartsWith(">c:"))
+				{
+					continue;
+				}
+
+				try
+				{
+					string tAddr = line.Substring(3, 4);
+					int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+					string remain = line.Substring(9);
+					string[] splits2 = remain.Split(new[]{' '}, StringSplitOptions.RemoveEmptyEntries);
+					int index2 = 0;
+					while (index2 < splits2.Length - 1)
+					{
+						mMemoryC64[theAddr + index2] = (char)int.Parse(splits2[index2], NumberStyles.HexNumber); ;
+						index2++;
+					}
+				}
+				catch (System.Exception)
+				{
+				}
+			}
+
+		}
 
 		private void ParseProfileInformation(string theReply)
 		{
@@ -547,7 +731,7 @@ namespace VICEPDBMonitor
 								labelText = ".";
 							}
 
-							labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X");
+							labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X") + getMicroDump(aLabel.mAddr);
 							allLabels.Add(labelText);
 						}
 					}
@@ -568,7 +752,7 @@ namespace VICEPDBMonitor
 					labels += line + "\n";
 				}
 			}
-			catch (System.Exception ex)
+			catch (System.Exception)
 			{
 				
 			}
@@ -637,6 +821,13 @@ namespace VICEPDBMonitor
 								SendCommand("memmapzap");
 								theReply = GetReply();
 								SendCommand("x");
+							}
+							else if (lastCommand.IndexOf("!domem") == 0)
+							{
+								SendCommand("m 0 ffff");
+								string theReply = GetReply();
+
+								ParseMemory(theReply);
 							}
 							else if (lastCommand.IndexOf("!sm") == 0)
 							{
@@ -1001,11 +1192,11 @@ namespace VICEPDBMonitor
 							Thread.Sleep(100);
 							if (mSocket.Available > 0)
 							{
+								mNeedNewMemoryDump = true;
 								// This happens if a break/watch point is hit, then a reply is received without any command being sent
 								string theReply = GetReply();
 								gotText += theReply;
-								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
-								mCommands.Add("r");
+//								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
 								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new NoArgDelegate(HandleCodeView));
 							}
 						}
@@ -1067,7 +1258,7 @@ namespace VICEPDBMonitor
 					}
 					allLabels.Sort((a,b) => b.mLabel.Length.CompareTo(a.mLabel.Length));
 				}
-				catch (System.Exception ex)
+				catch (System.Exception)
 				{
 
 				}
@@ -1125,6 +1316,7 @@ namespace VICEPDBMonitor
 
 		private void HandleCheckBoxes()
 		{
+			mDump = (mDoDump.IsChecked == true);
 			mUsedLabels = (mCheckUsedLabels.IsChecked == true);
 			mAccessUsed = (mCheckAccessUse.IsChecked == true);
 			mExecUsed = (mCheckExecUse.IsChecked == true);
@@ -1132,6 +1324,7 @@ namespace VICEPDBMonitor
 		private void HandleCodeView()
 		{
 			HandleCheckBoxes();
+			TestForMemoryDump();
 			mCommands.Add("!r");
 			if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == true )
 			{
@@ -1153,16 +1346,19 @@ namespace VICEPDBMonitor
 
 		private void Button_Click_Break(object sender, RoutedEventArgs e)
 		{
+			mNeedNewMemoryDump = true;
 			HandleCodeView();
 		}
 
 		private void Button_Click_Go(object sender, RoutedEventArgs e)
 		{
+			mNeedNewMemoryDump = true;
 			mCommands.Add("x");
 		}
 
 		private void Button_Click_StepIn(object sender, RoutedEventArgs e)
 		{
+			mNeedNewMemoryDump = true;
 			mCommands.Add("!z");
 			HandleCodeView();
 		}
@@ -1184,12 +1380,14 @@ namespace VICEPDBMonitor
 
 		private void Button_Click_StepOver(object sender, RoutedEventArgs e)
 		{
+			mNeedNewMemoryDump = true;
 			mCommands.Add("!n");
 			HandleCodeView();
 		}
 
 		private void Button_Click_StepOut(object sender, RoutedEventArgs e)
 		{
+			mNeedNewMemoryDump = true;
 			mCommands.Add("!ret");
 			HandleCodeView();
 		}
@@ -1213,6 +1411,12 @@ namespace VICEPDBMonitor
 		}
 
 		private void CheckBox_Checked_1(object sender, RoutedEventArgs e)
+		{
+			HandleCheckBoxes();
+			UpdateLabels();
+		}
+
+		private void mDoDump_Checked(object sender, RoutedEventArgs e)
 		{
 			HandleCheckBoxes();
 			UpdateLabels();
