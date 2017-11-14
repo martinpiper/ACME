@@ -1,5 +1,13 @@
 ﻿TODO File for VICE PDB Monitor
 
+* Get a full memory dump from Vice at breakpoint and step
+	Use it to give hints of label values in the label window
+	Use it to give hints of label values in the source
+	Add extra watches view, which is an extra filtered list of variables
+
+
+
+
 * Reduce the code scrolling to more of a push/jump scroll?
 
 
