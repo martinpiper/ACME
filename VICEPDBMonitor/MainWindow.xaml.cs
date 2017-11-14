@@ -528,18 +528,24 @@ namespace VICEPDBMonitor
 				// Add padding to avoid the VICE monitor command truncation bug
 				command += "                                                                           \n";
 				byte[] msg = Encoding.ASCII.GetBytes(command);
-				int sent = 0;
-				while (mSocket.Connected && (sent < msg.Length))
+				ConsumeData();
+				SendBytes(msg);
+			}
+		}
+
+		private void SendBytes(byte[] msg)
+		{
+			int sent = 0;
+			while (mSocket.Connected && (sent < msg.Length))
+			{
+				int ret = mSocket.Send(msg, sent, msg.Length - sent, SocketFlags.None);
+				if (ret > 0)
 				{
-					int ret = mSocket.Send(msg, sent, msg.Length - sent, SocketFlags.None);
-					if (ret > 0)
-					{
-						sent += ret;
-					}
-					else
-					{
-						Thread.Sleep(10);
-					}
+					sent += ret;
+				}
+				else
+				{
+					Thread.Sleep(10);
 				}
 			}
 		}
@@ -591,7 +597,7 @@ namespace VICEPDBMonitor
 		Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
 		Dictionary<int, int> mExecutedCount = new Dictionary<int, int>();
 
-		char[] mMemoryC64 = new char[65536];
+		byte[] mMemoryC64 = new byte[65536];
 		bool mNeedNewMemoryDump = true;
 
 		private void TestForMemoryDump(bool force = false)
@@ -630,7 +636,7 @@ namespace VICEPDBMonitor
 					int index2 = 0;
 					while (index2 < splits2.Length - 1)
 					{
-						mMemoryC64[theAddr + index2] = (char)int.Parse(splits2[index2], NumberStyles.HexNumber); ;
+						mMemoryC64[theAddr + index2] = (byte)int.Parse(splits2[index2], NumberStyles.HexNumber); ;
 						index2++;
 					}
 				}
@@ -795,6 +801,7 @@ namespace VICEPDBMonitor
 						wasConnected = true;
 						if (mCommands.Count > 0)
 						{
+							ConsumeData();
 							lastCommand = mCommands[0];
 							mCommands.RemoveAt(0);
 
@@ -824,10 +831,67 @@ namespace VICEPDBMonitor
 							}
 							else if (lastCommand.IndexOf("!domem") == 0)
 							{
-								SendCommand("m 0 ffff");
-								string theReply = GetReply();
+								// https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l267
+								byte[] sendCommand = new byte[8];
+								sendCommand[0] = 0x2;
+								sendCommand[1] = 0x5;
+								sendCommand[2] = 0x1; // mem dump
+								sendCommand[3] = 0;
+								sendCommand[4] = 0;
+								sendCommand[5] = 255;
+								sendCommand[6] = 255;
+								sendCommand[7] = 0;
 
-								ParseMemory(theReply);
+								SendBytes(sendCommand);
+
+								byte[] replyHeader = new byte[6];
+
+								int actual = 0;
+								while (actual < replyHeader.Length && mSocket.Connected)
+								{
+									try
+									{
+										actual += mSocket.Receive(replyHeader, actual, replyHeader.Length - actual, SocketFlags.None);
+									}
+									catch (System.Exception)
+									{
+										Thread.Sleep(100);
+									}
+
+								}
+
+								if (replyHeader[0] == 0x2)
+								{
+									int responseLength = replyHeader[1] + (replyHeader[2] << 8) + (replyHeader[3] << 16) + (replyHeader[4] << 24);
+
+									if (replyHeader[5] == 0 && responseLength <= mMemoryC64.Length)
+									{
+										byte[] responseBuffer = new Byte[responseLength];
+										actual = 0;
+
+										while (actual < responseBuffer.Length && mSocket.Connected)
+										{
+											try
+											{
+												actual += mSocket.Receive(responseBuffer, actual, responseBuffer.Length - actual, SocketFlags.None);
+											}
+											catch (System.Exception)
+											{
+												Thread.Sleep(100);
+											}
+										}
+
+										if (actual >= mMemoryC64.Length)
+										{
+											for (int i = 0; i < mMemoryC64.Length; i++)
+											{
+												mMemoryC64[i] = responseBuffer[i];
+											}
+										}
+									}
+								}
+
+								byte a = mMemoryC64[0];
 							}
 							else if (lastCommand.IndexOf("!sm") == 0)
 							{
@@ -848,7 +912,7 @@ namespace VICEPDBMonitor
 										lastDisplayedLine[i] = 0;
 									}
 									// MPi: TODO: Tweak the 10 range based on the display height?
-									int range = 10;
+									int range = 15;
 									int startPrev = mPC;
 									// Step backwards trying to find a good starting point to disassemble
 									while (range-- > 0)
@@ -904,6 +968,10 @@ namespace VICEPDBMonitor
 									{
 										string line = split[index++];
 										if (line.Length < 7)
+										{
+											continue;
+										}
+										if (!line.StartsWith(".C:"))
 										{
 											continue;
 										}
@@ -1227,6 +1295,16 @@ namespace VICEPDBMonitor
 				}
 			}
 
+		}
+
+		private void ConsumeData()
+		{
+			// Try to consume anything before sending commands...
+			while (mSocket.Available > 0)
+			{
+				byte[] bytes = new byte[500000];
+				mSocket.Receive(bytes);
+			}
 		}
 
 		private void commandBox_KeyDown(object sender, KeyEventArgs e)

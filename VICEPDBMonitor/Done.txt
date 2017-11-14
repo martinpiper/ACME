@@ -106,3 +106,10 @@ Mixed asm and source mode, all on one line?
 * Get a full memory dump from Vice at breakpoint and step
 	Use it to give hints of label values in the label window
 	Use it to give hints of label values in the source
+
+
+
+* Binary remote monitor commands https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l182
+	* Replace "!domem" with binary dump
+		SendCommand("m 0 ffff");
+		ParseMemory(theReply); gets a lot simpler
