@@ -31,5 +31,6 @@
         <Button Content="Go" HorizontalAlignment="Right" Margin="0,0,104,142" VerticalAlignment="Bottom" Width="75" Click="Button_Click_Go" Height="20"/>
         <Button Content="Profile clear" HorizontalAlignment="Right" Margin="0,0,184,65" VerticalAlignment="Bottom" Width="75" Click="Button_Click_ProfileClear" Height="20"/>
         <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,192,45" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
+        <Button x:Name="viewSprites" Content="Sprites" Margin="0,0,10,140" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewSprites_Click"/>
     </Grid>
 </Window>

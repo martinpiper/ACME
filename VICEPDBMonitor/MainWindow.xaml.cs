@@ -161,8 +161,9 @@ namespace VICEPDBMonitor
 							while (lines-- > 0)
 							{
 								line = file.ReadLine();
-								string[] tokens = line.Split(':');
-								mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
+                                Char[] separator = { ':' };
+                                string[] tokens = line.Split(separator, 2);
+                                mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
 							}
 						}
 						else if (line.IndexOf("ADDRS:") == 0)
@@ -310,7 +311,7 @@ namespace VICEPDBMonitor
 			mRegsBox.Text = text;
 		}
 
-		private void SendCommand(string command)
+		public void SendCommand(string command)
 		{
 			if (command.Length > 0)
 			{
@@ -333,7 +334,7 @@ namespace VICEPDBMonitor
 			}
 		}
 
-		private string GetReply()
+		public string GetReply()
 		{
 			string theReply = "";
 
@@ -376,8 +377,94 @@ namespace VICEPDBMonitor
 			return "";
 		}
 
+        public byte[] sendBinaryMemCommandAndGetData(int start, int end)
+        {
 
-		Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
+            byte[] sendCommand = new byte[8];
+            sendCommand[0] = 0x2;
+            sendCommand[1] = 0x5;
+            sendCommand[2] = 0x1; // mem dump
+            sendCommand[3] = (byte)(start & 255);
+            sendCommand[4] = (byte)((start >> 8) & 255);
+            sendCommand[5] = (byte)(end & 255);
+            sendCommand[6] = (byte)((end >> 8) & 255);
+
+            int sent = 0;
+            while (mSocket.Connected && (sent < sendCommand.Length))
+            {
+                int ret = mSocket.Send(sendCommand, sent, sendCommand.Length - sent, SocketFlags.None);
+                if (ret > 0)
+                {
+                    sent += ret;
+                }
+                else
+                {
+                    Thread.Sleep(10);
+                }
+            }
+
+            Thread.Sleep(10);  //wait for response
+            const int kBufferSize = 64 * 1024;
+            byte[] buffer = new byte[kBufferSize];
+
+            int actual = 0;
+            while (mSocket.Connected && actual < 6)
+            {
+                try
+                {
+                    actual += mSocket.Receive(buffer, actual, kBufferSize - actual, SocketFlags.None);
+                }
+                catch (System.Exception ex)
+                {
+                    //this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
+                    Thread.Sleep(100);
+                }
+            }           
+
+            if (buffer[0] != 0x2)
+            {
+                return new byte[0]; //return an empty array
+            }
+
+            int responseLength = buffer[1] + (buffer[2] << 8) + (buffer[3] << 16) + (buffer[4] << 24);
+
+            if (buffer[5] != 0)
+            {
+                return new byte[0]; //return an empty array
+            }
+
+            if (responseLength > kBufferSize - 5)
+            {
+                return new byte[0]; // to much data
+            }
+
+            byte[] responseBuffer = new byte[responseLength];
+
+            int counter = 0;
+            for (int i = 6; i < actual && i > 0; i++, counter++)
+            {
+                responseBuffer[counter] = buffer[i];
+            }
+
+            while (counter < responseLength)
+            {
+                if (mSocket.Connected)
+                {
+                    int tooRead = mSocket.Available;
+                    while (tooRead > 0)
+                    {
+                        actual += mSocket.Receive(responseBuffer, counter, responseLength - counter, SocketFlags.None);
+
+                        counter += actual;
+                        tooRead -= actual;
+                    }
+                }
+                Thread.Sleep(100);
+            }
+            return responseBuffer;
+        }
+
+        Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
 		Dictionary<int, int> mExecutedCount = new Dictionary<int, int>();
 
 		private void ParseProfileInformation(string theReply)
@@ -1047,5 +1134,11 @@ namespace VICEPDBMonitor
 			UpdateLabels();
 		}
 
-	}
+        private void viewSprites_Click(object sender, RoutedEventArgs e)
+        {
+            SpriteView SV = new SpriteView(this);
+            //set up here
+            SV.Show();
+        }
+    }
 }
