@@ -1140,5 +1140,11 @@ namespace VICEPDBMonitor
             //set up here
             SV.Show();
         }
+
+        private void viewChars_Click(object sender, RoutedEventArgs e)
+        {
+            CharView CV = new CharView(this);
+            CV.Show();
+        }
     }
 }

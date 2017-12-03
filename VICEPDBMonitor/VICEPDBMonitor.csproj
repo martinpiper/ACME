@@ -55,8 +55,15 @@
     </ApplicationDefinition>
     <Compile Include="C128ViewModel.cs" />
     <Compile Include="C64RAM.cs" />
+    <Compile Include="CharView.xaml.cs">
+      <DependentUpon>CharView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SpriteView.xaml.cs" />
     <Compile Include="VICPallete.cs" />
+    <Page Include="CharView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
