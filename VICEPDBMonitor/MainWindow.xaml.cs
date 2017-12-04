@@ -94,6 +94,7 @@ namespace VICEPDBMonitor
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		bool mDump = false;
 		bool mUsedLabels = false;
 		bool mAccessUsed = false;
 		bool mExecUsed = false;
@@ -109,6 +110,7 @@ namespace VICEPDBMonitor
 
 		private delegate void NoArgDelegate();
 		private delegate void OneArgDelegate(String arg);
+		private delegate void TwoArgDelegate(String arg , Brush brush);
 
 		public MainWindow()
 		{
@@ -120,7 +122,6 @@ namespace VICEPDBMonitor
 			int i;
 			for (i = 1; i < commandLineArgs.Length; i++)
 			{
-				int prevAddr = -1;
 				int localFileIndex = 0;
 
 				// Read the file and parse it line by line.
@@ -161,9 +162,15 @@ namespace VICEPDBMonitor
 							while (lines-- > 0)
 							{
 								line = file.ReadLine();
+
                                 Char[] separator = { ':' };
                                 string[] tokens = line.Split(separator, 2);
                                 mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
+
+								Char[] separator = { ':' };
+								string[] tokens = line.Split(separator, 2);
+								mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
+
 							}
 						}
 						else if (line.IndexOf("ADDRS:") == 0)
@@ -252,7 +259,7 @@ namespace VICEPDBMonitor
 						mSourceFiles.Add(aFile);
 						mSourceFileNamesFound.Add(newPath);
 					}
-					catch (System.Exception ex)
+					catch (System.Exception)
 					{
 						mSourceFiles.Add(new List<string>());
 						mSourceFileNamesFound.Add("");
@@ -292,16 +299,225 @@ namespace VICEPDBMonitor
 		int mRegX = 0;
 		int mRegY = 0;
 		int mSP = 0;
-		int mNV_BDIZC = 0;
+//		int mNV_BDIZC = 0;
 		List<string> mCommands = new List<string>();
 
 		Socket mSocket;
 		String mGotTextWorking = "";
 
-		private void UpdateSourceView(String text)
+		TextPointer GetTextPositionAtOffset(TextPointer position, int characterCount)
 		{
-			mTextBox.Text = text;
+			while (position != null)
+			{
+				if (position.GetPointerContext(LogicalDirection.Forward) == TextPointerContext.Text)
+				{
+					int count = position.GetTextRunLength(LogicalDirection.Forward);
+					if (characterCount <= count)
+					{
+						return position.GetPositionAtOffset(characterCount);
+					}
+
+					characterCount -= count;
+				}
+
+				TextPointer nextContextPosition = position.GetNextContextPosition(LogicalDirection.Forward);
+				if (nextContextPosition == null)
+					return position;
+
+				position = nextContextPosition;
+			}
+
+			return position;
 		}
+
+		int getSafeC64Memory(int addr)
+		{
+			return (int)mMemoryC64[addr & 0xffff];
+		}
+
+		static int kMicroDumpStringLength = 16;
+		string getMicroDump(int addr)
+		{
+			if (mDump == false)
+			{
+				return "";
+			}
+			string ret;
+			ret = " >(" + getSafeC64Memory(addr).ToString("X2") + " " + getSafeC64Memory(addr+1).ToString("X2") + " " + getSafeC64Memory(addr+2).ToString("X2") + " " + getSafeC64Memory(addr+3).ToString("X2") + ")<";
+			return ret;
+		}
+
+		string EnrichDumpWithMemory(string text)
+		{
+			if (mDump == false)
+			{
+				return text;
+			}
+			int pos = 0;
+			while (pos < text.Length)
+			{
+				try
+				{
+					int pos2 = text.IndexOf("$" , pos);
+					if (pos2 < 1)
+					{
+						break;
+					}
+
+					// Skip #$xx
+					if (text[pos2 - 1] == '#')
+					{
+						pos = pos2 + 3;
+						continue;
+					}
+
+
+					// Enrich ($xx),Y
+					if (text[pos2 + 3] == ')' && text[pos2 + 4] == ',')
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int indirect = mMemoryC64[addr] + (((int)mMemoryC64[addr+1]) << 8);
+						text = text.Insert(pos2 + 5 + 3, getMicroDump(indirect + mRegY));
+
+						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich ($xx,X)
+					if (text[pos2 + 3] == ',' && text[pos2 + 5] == ')')
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int indirect = mMemoryC64[(addr + mRegX) & 0xff] + (((int)mMemoryC64[(addr + mRegX + 1) & 0xff]) << 8);
+						text = text.Insert(pos2 + 5 + 3, getMicroDump(indirect));
+
+						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xxxx,x/y
+					if (text[pos2 + 5] == ',' && (text[pos2 + 5 + 1] == 'X' || text[pos2 + 5 + 1] == 'x' || text[pos2 + 5 + 1] == 'Y' || text[pos2 + 5 + 1] == 'y'))
+					{
+						string tAddr = text.Substring(pos2 + 1, 4);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int offset = mRegX;
+						if (text[pos2 + 5 + 1] == 'Y' || text[pos2 + 5 + 1] == 'y')
+						{
+							offset = mRegY;
+						}
+						text = text.Insert(pos2 + 5 + 3, getMicroDump(addr + offset));
+
+						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xx,
+					if (text[pos2 + 3] == ',' && (text[pos2 + 3 + 1] == 'X' || text[pos2 + 3 + 1] == 'x' || text[pos2 + 3 + 1] == 'Y' || text[pos2 + 3 + 1] == 'y'))
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						int offset = mRegX;
+						if (text[pos2 + 3 + 1] == 'Y' || text[pos2 + 3 + 1] == 'y')
+						{
+							offset = mRegY;
+						}
+						text = text.Insert(pos2 + 3 + 3, getMicroDump(addr + offset));
+
+						pos = pos2 + 3 + 3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xxxx
+					int pos3 = text.IndexOfAny(new[] {' ','\n','\r'} , pos2);
+					if (pos3 >= 0 && (pos3 - pos2) == 5)
+					{
+						string tAddr = text.Substring(pos2 + 1, 4);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						text = text.Insert(pos3, getMicroDump(addr));
+
+						pos = pos3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					// Enrich $xx
+					if (pos3 >= 0 && (pos3 - pos2) == 3)
+					{
+						string tAddr = text.Substring(pos2 + 1, 2);
+						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
+						text = text.Insert(pos3, getMicroDump(addr));
+
+						pos = pos3 + kMicroDumpStringLength;
+						continue;
+					}
+
+					pos = pos2 + 1;
+				}
+				catch (System.Exception)
+				{
+					// Skip whatever was giving problems and try again
+					pos += 4;
+				}
+			}
+			return text;
+		}
+
+		private void SetSourceView(String text)
+		{
+			text = EnrichDumpWithMemory(text);
+			mTextBox.BeginChange();
+			mTextBox.Document.Blocks.Clear();
+			if (null == text || text.Length == 0)
+			{
+				mTextBox.EndChange();
+				return;
+			}
+			try
+			{
+				Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+				r.Background = null;
+
+				mTextBox.AppendText(text);
+
+				// mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
+				TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
+				int offset = searchRange.Text.IndexOf("=>");
+				if (offset < 0)
+				{
+					offset = searchRange.Text.IndexOf(">>>>");
+				}
+				if (offset >= 0)
+				{
+					int lineLength = searchRange.Text.IndexOf("\r", offset);
+					lineLength = lineLength - offset;
+					TextPointer start = GetTextPositionAtOffset(searchRange.Start, offset);
+					TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
+
+					result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
+				}
+			}
+			catch (System.Exception)
+			{
+			}
+			mTextBox.EndChange();
+		}
+
+		private void AppendTextSourceView(String text, Brush brush)
+		{
+			if (null == text || text.Length == 0)
+			{
+				return;
+			}
+
+			Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+			r.Background = brush;
+
+			mTextBox.AppendText(text);
+
+			r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+			r.Background = null;
+		}
+	
 		private void UpdateLabelView(String text)
 		{
 			mLabelsBox.Text = text;
@@ -318,18 +534,24 @@ namespace VICEPDBMonitor
 				// Add padding to avoid the VICE monitor command truncation bug
 				command += "                                                                           \n";
 				byte[] msg = Encoding.ASCII.GetBytes(command);
-				int sent = 0;
-				while (mSocket.Connected && (sent < msg.Length))
+				ConsumeData();
+				SendBytes(msg);
+			}
+		}
+
+		private void SendBytes(byte[] msg)
+		{
+			int sent = 0;
+			while (mSocket.Connected && (sent < msg.Length))
+			{
+				int ret = mSocket.Send(msg, sent, msg.Length - sent, SocketFlags.None);
+				if (ret > 0)
 				{
-					int ret = mSocket.Send(msg, sent, msg.Length - sent, SocketFlags.None);
-					if (ret > 0)
-					{
-						sent += ret;
-					}
-					else
-					{
-						Thread.Sleep(10);
-					}
+					sent += ret;
+				}
+				else
+				{
+					Thread.Sleep(10);
 				}
 			}
 		}
@@ -349,7 +571,7 @@ namespace VICEPDBMonitor
 						mGotTextWorking += Encoding.ASCII.GetString(bytes, 0, got);
 					}
 				}
-				catch (System.Exception ex)
+				catch (System.Exception)
 				{
 //					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
 					Thread.Sleep(100);
@@ -467,6 +689,56 @@ namespace VICEPDBMonitor
         Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
 		Dictionary<int, int> mExecutedCount = new Dictionary<int, int>();
 
+		byte[] mMemoryC64 = new byte[65536];
+		bool mNeedNewMemoryDump = true;
+
+		private void TestForMemoryDump(bool force = false)
+		{
+			if (mDump == false)
+			{
+				return;
+			}
+			if (force || mNeedNewMemoryDump)
+			{
+				mNeedNewMemoryDump = false;
+				mCommands.Add("!domem");
+			}
+		}
+
+		private void ParseMemory(string theReply)
+		{
+			string[] split = theReply.Split('\n');
+			int index = 0;
+			while (index < split.Length)
+			{
+				string line = split[index++];
+				//>C:0010  4c 39 32 39  4c 69 8b ad  ca dd e4 dd  ca ad 8b 69   L929Li.........i
+				line = line.ToLower();
+				if (!line.StartsWith(">c:"))
+				{
+					continue;
+				}
+
+				try
+				{
+					string tAddr = line.Substring(3, 4);
+					int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+					string remain = line.Substring(9);
+					string[] splits2 = remain.Split(new[]{' '}, StringSplitOptions.RemoveEmptyEntries);
+					int index2 = 0;
+					while (index2 < splits2.Length - 1)
+					{
+						mMemoryC64[theAddr + index2] = (byte)int.Parse(splits2[index2], NumberStyles.HexNumber); ;
+						index2++;
+					}
+				}
+				catch (System.Exception)
+				{
+				}
+			}
+
+		}
+
 		private void ParseProfileInformation(string theReply)
 		{
 //			addr: IO ROM RAM
@@ -525,7 +797,6 @@ namespace VICEPDBMonitor
 //			mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
 
 			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
-
 		}
 
 		private void UpdateLabels()
@@ -558,7 +829,7 @@ namespace VICEPDBMonitor
 								labelText = ".";
 							}
 
-							labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X");
+							labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X") + getMicroDump(aLabel.mAddr);
 							allLabels.Add(labelText);
 						}
 					}
@@ -579,7 +850,7 @@ namespace VICEPDBMonitor
 					labels += line + "\n";
 				}
 			}
-			catch (System.Exception ex)
+			catch (System.Exception)
 			{
 				
 			}
@@ -622,6 +893,7 @@ namespace VICEPDBMonitor
 						wasConnected = true;
 						if (mCommands.Count > 0)
 						{
+							ConsumeData();
 							lastCommand = mCommands[0];
 							mCommands.RemoveAt(0);
 
@@ -649,6 +921,70 @@ namespace VICEPDBMonitor
 								theReply = GetReply();
 								SendCommand("x");
 							}
+							else if (lastCommand.IndexOf("!domem") == 0)
+							{
+								// https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l267
+								byte[] sendCommand = new byte[8];
+								sendCommand[0] = 0x2;
+								sendCommand[1] = 0x5;
+								sendCommand[2] = 0x1; // mem dump
+								sendCommand[3] = 0;
+								sendCommand[4] = 0;
+								sendCommand[5] = 255;
+								sendCommand[6] = 255;
+								sendCommand[7] = 0;
+
+								SendBytes(sendCommand);
+
+								byte[] replyHeader = new byte[6];
+
+								int actual = 0;
+								while (actual < replyHeader.Length && mSocket.Connected)
+								{
+									try
+									{
+										actual += mSocket.Receive(replyHeader, actual, replyHeader.Length - actual, SocketFlags.None);
+									}
+									catch (System.Exception)
+									{
+										Thread.Sleep(100);
+									}
+
+								}
+
+								if (replyHeader[0] == 0x2)
+								{
+									int responseLength = replyHeader[1] + (replyHeader[2] << 8) + (replyHeader[3] << 16) + (replyHeader[4] << 24);
+
+									if (replyHeader[5] == 0 && responseLength <= mMemoryC64.Length)
+									{
+										byte[] responseBuffer = new Byte[responseLength];
+										actual = 0;
+
+										while (actual < responseBuffer.Length && mSocket.Connected)
+										{
+											try
+											{
+												actual += mSocket.Receive(responseBuffer, actual, responseBuffer.Length - actual, SocketFlags.None);
+											}
+											catch (System.Exception)
+											{
+												Thread.Sleep(100);
+											}
+										}
+
+										if (actual >= mMemoryC64.Length)
+										{
+											for (int i = 0; i < mMemoryC64.Length; i++)
+											{
+												mMemoryC64[i] = responseBuffer[i];
+											}
+										}
+									}
+								}
+
+								byte a = mMemoryC64[0];
+							}
 							else if (lastCommand.IndexOf("!sm") == 0)
 							{
 								SendCommand("r");
@@ -668,7 +1004,7 @@ namespace VICEPDBMonitor
 										lastDisplayedLine[i] = 0;
 									}
 									// MPi: TODO: Tweak the 10 range based on the display height?
-									int range = 10;
+									int range = 15;
 									int startPrev = mPC;
 									// Step backwards trying to find a good starting point to disassemble
 									while (range-- > 0)
@@ -724,6 +1060,10 @@ namespace VICEPDBMonitor
 									{
 										string line = split[index++];
 										if (line.Length < 7)
+										{
+											continue;
+										}
+										if (!line.StartsWith(".C:"))
 										{
 											continue;
 										}
@@ -881,6 +1221,7 @@ namespace VICEPDBMonitor
 							else if (lastCommand.IndexOf("!cls") == 0)
 							{
 								gotText = "";
+								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
 							}
 							else if (lastCommand.IndexOf("!d") == 0)
 							{
@@ -949,12 +1290,17 @@ namespace VICEPDBMonitor
 											continue;
 										}
 
+										Brush brush = null;
 										if (theAddr == mPC)
 										{
-											gotText += ">>>> ";
+											line = ">>>> " + line;
+											brush = Brushes.LightBlue;
 										}
-										gotText += line + "\n";
+										line += "\r";
+
+										gotText += line;
 									}
+
 								}
 								catch (System.Exception)
 								{
@@ -971,6 +1317,17 @@ namespace VICEPDBMonitor
 							else
 							{
 								// Any other commands get here
+								bool silent = false;
+								if (lastCommand.IndexOf('!') == 0)
+								{
+									lastCommand = lastCommand.Substring(1);
+									silent = true;
+								}
+								if (!silent)
+								{
+									gotText += "Sending command: " + lastCommand + "\n";
+								}
+
 								SendCommand(lastCommand);
 								string theReply = "";
 								if (lastCommand.IndexOf("x") != 0)
@@ -978,19 +1335,29 @@ namespace VICEPDBMonitor
 									theReply = GetReply();
 									gotText += theReply;
 								}
+								if (silent)
+								{
+									gotText = "";
+								}
 							}
 
-							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), gotText);
+							if (gotText.Length > 0)
+							{
+								gotText = gotText.Replace("\n", "\r");
+								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
+							}
 						}
 						else
 						{
 							Thread.Sleep(100);
 							if (mSocket.Available > 0)
 							{
+								mNeedNewMemoryDump = true;
 								// This happens if a break/watch point is hit, then a reply is received without any command being sent
 								string theReply = GetReply();
 								gotText += theReply;
-								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), gotText);
+//								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
+								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new NoArgDelegate(HandleCodeView));
 							}
 						}
 					} //< while (mSocket.Connected)
@@ -1002,7 +1369,7 @@ namespace VICEPDBMonitor
 						{
 							mSocket.Dispose();
 							mSocket = null;
-							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), "Not connected");
+							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), "Not connected");
 						}
 					}
 
@@ -1010,7 +1377,7 @@ namespace VICEPDBMonitor
 				}
 				catch (System.Exception /*ex*/)
 				{
-					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateSourceView), "Exception. Not connected");
+					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), "Exception. Not connected");
 					if (mSocket != null)
 					{
 						mSocket.Dispose();
@@ -1022,21 +1389,104 @@ namespace VICEPDBMonitor
 
 		}
 
+		private void ConsumeData()
+		{
+			// Try to consume anything before sending commands...
+			while (mSocket.Available > 0)
+			{
+				byte[] bytes = new byte[500000];
+				mSocket.Receive(bytes);
+			}
+		}
+
 		private void commandBox_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
 			{
 				string command = mCommandBox.Text;
+
+				// Produce a list of variable names and values relevant to the current PC and its zone
+				List<LabelInfo> allLabels = new List<LabelInfo>();
+
+				try
+				{
+					int theZone = mAddrInfoByAddr[mPC].mZone;
+					while (theZone >= 0)
+					{
+						List<LabelInfo> theLabels = mLabelInfoByZone[theZone];
+						allLabels.AddRange(theLabels);
+
+						// MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
+						if (theZone > 0)
+						{
+							theZone = 0;	// For now just display the global zone
+						}
+						else
+						{
+							break;
+						}
+					}
+					allLabels.Sort((a,b) => b.mLabel.Length.CompareTo(a.mLabel.Length));
+				}
+				catch (System.Exception)
+				{
+
+				}
+
+				// Look for labels after each whitespace
+				int pos = 0;
+				while (pos < command.Length)
+				{
+					int testPos = command.IndexOf(' ', pos);
+					if (testPos < 0)
+					{
+						testPos = command.IndexOf('~', pos);
+					}
+					if (testPos < 0)
+					{
+						break;
+					}
+					pos = testPos + 1;
+
+					string remaining = command.Substring(pos);
+					if (remaining[0] == '.')
+					{
+						remaining = remaining.Substring(1);
+					}
+
+					// Note the length order gets the most precise match
+					LabelInfo found = null;
+		
+					foreach (LabelInfo label in allLabels)
+					{
+						if (remaining.StartsWith(label.mLabel))
+						{
+							found = label;
+							break;
+						}
+					}
+
+					// If it's found then reconstruct the command with the label replaced as a hex number
+					if (null != found)
+					{
+						string theHex = "$" + found.mAddr.ToString("X");
+						command = command.Substring(0, pos) + theHex + remaining.Substring(found.mLabel.Length);
+						pos += theHex.Length;
+					}
+					else
+					{
+						pos++;
+					}
+				}
+
 				mCommands.Add(command);
 				mCommandBox.Clear();
 			}
 		}
 
-		// The first command should be to "step" to pause the CPU. Unless there is a breakpoint triggered then this can be disabled.
-		bool mNeverStepped = true;
-
 		private void HandleCheckBoxes()
 		{
+			mDump = (mDoDump.IsChecked == true);
 			mUsedLabels = (mCheckUsedLabels.IsChecked == true);
 			mAccessUsed = (mCheckAccessUse.IsChecked == true);
 			mExecUsed = (mCheckExecUse.IsChecked == true);
@@ -1044,11 +1494,8 @@ namespace VICEPDBMonitor
 		private void HandleCodeView()
 		{
 			HandleCheckBoxes();
-			if (mNeverStepped == true)
-			{
-				mNeverStepped = false;
-				mCommands.Add("r");
-			}
+			TestForMemoryDump();
+			mCommands.Add("!r");
 			if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == true )
 			{
 				mCommands.Add("!sm");
@@ -1069,17 +1516,20 @@ namespace VICEPDBMonitor
 
 		private void Button_Click_Break(object sender, RoutedEventArgs e)
 		{
+			mNeedNewMemoryDump = true;
 			HandleCodeView();
 		}
 
 		private void Button_Click_Go(object sender, RoutedEventArgs e)
 		{
+			mNeedNewMemoryDump = true;
 			mCommands.Add("x");
 		}
 
 		private void Button_Click_StepIn(object sender, RoutedEventArgs e)
 		{
-			mCommands.Add("z");
+			mNeedNewMemoryDump = true;
+			mCommands.Add("!z");
 			HandleCodeView();
 		}
 
@@ -1100,13 +1550,15 @@ namespace VICEPDBMonitor
 
 		private void Button_Click_StepOver(object sender, RoutedEventArgs e)
 		{
-			mCommands.Add("n");
+			mNeedNewMemoryDump = true;
+			mCommands.Add("!n");
 			HandleCodeView();
 		}
 
 		private void Button_Click_StepOut(object sender, RoutedEventArgs e)
 		{
-			mCommands.Add("ret");
+			mNeedNewMemoryDump = true;
+			mCommands.Add("!ret");
 			HandleCodeView();
 		}
 
@@ -1146,5 +1598,13 @@ namespace VICEPDBMonitor
             CharView CV = new CharView(this);
             CV.Show();
         }
-    }
+
+		private void mDoDump_Checked(object sender, RoutedEventArgs e)
+		{
+			HandleCheckBoxes();
+			UpdateLabels();
+		}
+
+	}
+
 }

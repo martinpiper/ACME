@@ -87,3 +87,29 @@ Mixed asm and source mode, all on one line?
 
 
 * add more buttons for step over and step out on that one
+
+
+* Recovering from remote debugger connection issues much better
+
+
+
+* Highlight the current line in the source view - Grey background
+
+
+
+* Remap known labels entered in the edit window to hex values for Vice to use
+	Use the current, or last known, PC and zone to map backwards through the labels list to find the most likely label
+	Handle missing '.' prefix as well
+
+
+
+* Get a full memory dump from Vice at breakpoint and step
+	Use it to give hints of label values in the label window
+	Use it to give hints of label values in the source
+
+
+
+* Binary remote monitor commands https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l182
+	* Replace "!domem" with binary dump
+		SendCommand("m 0 ffff");
+		ParseMemory(theReply); gets a lot simpler

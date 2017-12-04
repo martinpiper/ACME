@@ -19,7 +19,13 @@
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="270" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="mTextBox" Margin="10,48,10,0" Text="Waiting to connect..." IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False"/>
+            <RichTextBox x:Name="mTextBox" Margin="10,48,10,0" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False">
+                <FlowDocument>
+                    <Paragraph>
+                        <Run Language="en-gb" Text="Waiting to connect..."/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
             <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Consolas"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
             <TextBox x:Name="mLabelsBox" Margin="10,10,10,171" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2"/>
@@ -31,7 +37,11 @@
         <Button Content="Go" HorizontalAlignment="Right" Margin="0,0,104,142" VerticalAlignment="Bottom" Width="75" Click="Button_Click_Go" Height="20"/>
         <Button Content="Profile clear" HorizontalAlignment="Right" Margin="0,0,184,65" VerticalAlignment="Bottom" Width="75" Click="Button_Click_ProfileClear" Height="20"/>
         <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,192,45" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
+
         <Button x:Name="viewSprites" Content="Sprites" Margin="0,0,10,142" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewSprites_Click"/>
         <Button x:Name ="viewChars" Content="Chars" Grid.Column="2" Margin="0,0,10,116" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewChars_Click"/>
+
+        <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,167" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
+
     </Grid>
 </Window>

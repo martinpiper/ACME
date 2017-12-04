@@ -1,5 +1,23 @@
 ﻿TODO File for VICE PDB Monitor
 
+* now I have the full memory dump I don't need to ask Vice for the disassembly
+	which will make the view much easier to code
+
+
+
+* Add extra watches view, which is an extra filtered list of variables
+
+
+
+* Reduce the code scrolling to more of a push/jump scroll?
+
+
+
+* Breakpoint from clicking a source view line
+	* Indicate lines with break points set in Vice
+
+
+
 * a label search
 
 
@@ -9,6 +27,15 @@
 
 
 * probably use the memory interface not the TCP interface
+
+
+
+* when it finds a lda (zp,x) or lda (zp),y it looks up contents of ZP and show the @XXXX
+	Same for all hex values from the disassembly, convert to known labels with the best zone
+
+
+
+* also pulling $01 and working out what bank each command is it... number of times I accidentally load from 
 
 
 
