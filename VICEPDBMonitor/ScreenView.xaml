@@ -1,0 +1,40 @@
+﻿<Window x:Class="VICEPDBMonitor.ScreenView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VICEPDBMonitor"
+        mc:Ignorable="d"
+        Title="ScreenView" Height="720" Width="1000">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Image x:Name="canvas" Height="200" Margin="16,36,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" MouseDown="canvas_MouseDown" OpacityMask="Black">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="3" ScaleY="3"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <ComboBox x:Name="backgroundColour" HorizontalAlignment="Left" Margin="70,0,0,10" Width="120" ItemsSource="{Binding VICColourNames}" SelectedIndex="0" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="mcol0" HorizontalAlignment="Left" Margin="245,0,0,10" Width="120" ItemsSource="{Binding VICColourNames}" SelectedIndex="2" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom"/>
+        <Label x:Name="label" Content="BckGrnd" HorizontalAlignment="Left" Margin="10,0,0,10" Width="55" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="label1" Content="MCol0" HorizontalAlignment="Left" Margin="195,0,0,10" Width="45" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="label1_Copy" Content="MCol1" HorizontalAlignment="Left" Margin="370,0,0,10" Width="45" Height="26" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="mcol1" HorizontalAlignment="Left" Margin="420,0,0,10" Width="120" ItemsSource="{Binding VICColourNames}" SelectedIndex="3" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom"/>
+        <Label x:Name="label1_Copy1" Content="Char Col" HorizontalAlignment="Left" Margin="545,0,0,10" Height="26" VerticalAlignment="Bottom" Width="56"/>
+        <ComboBox x:Name="charCol" HorizontalAlignment="Left" Margin="606,0,0,10" Width="120" ItemsSource="{Binding VICColourNames}" SelectedIndex="1" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom"/>
+        <CheckBox Content="From CRAM" HorizontalAlignment="Left" Margin="731,0,0,15" Height="15" VerticalAlignment="Bottom"/>
+        <Label Content="Screen Mem" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="screenMem" HorizontalAlignment="Left" Margin="86,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="screenMem_SelectionChanged"/>
+        <Label Content="Charset Mem" HorizontalAlignment="Left" Margin="211,6,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="charMem" HorizontalAlignment="Left" Margin="297,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="charMem_SelectionChanged"/>
+        <Button x:Name="allMultiButton" Content="All Multi" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="75" Click="allMultiButton_Click"/>
+        <Button x:Name="allHiresButton" Content="All Hires" HorizontalAlignment="Right" Margin="0,10,90,0" VerticalAlignment="Top" Width="75" Click="allHiresButton_Click"/>
+        <Button x:Name="refreshButton" Content="Refresh" HorizontalAlignment="Left" Margin="465,10,0,0" VerticalAlignment="Top" Width="75" Click="refreshButton_Click"/>
+    </Grid>
+</Window>
