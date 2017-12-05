@@ -613,40 +613,6 @@ namespace VICEPDBMonitor
 			}
 		}
 
-		private void ParseMemory(string theReply)
-		{
-			string[] split = theReply.Split('\n');
-			int index = 0;
-			while (index < split.Length)
-			{
-				string line = split[index++];
-				//>C:0010  4c 39 32 39  4c 69 8b ad  ca dd e4 dd  ca ad 8b 69   L929Li.........i
-				line = line.ToLower();
-				if (!line.StartsWith(">c:"))
-				{
-					continue;
-				}
-
-				try
-				{
-					string tAddr = line.Substring(3, 4);
-					int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
-					string remain = line.Substring(9);
-					string[] splits2 = remain.Split(new[]{' '}, StringSplitOptions.RemoveEmptyEntries);
-					int index2 = 0;
-					while (index2 < splits2.Length - 1)
-					{
-						mMemoryC64[theAddr + index2] = (byte)int.Parse(splits2[index2], NumberStyles.HexNumber); ;
-						index2++;
-					}
-				}
-				catch (System.Exception)
-				{
-				}
-			}
-
-		}
-
 		private void ParseProfileInformation(string theReply)
 		{
 //			addr: IO ROM RAM
@@ -890,6 +856,9 @@ namespace VICEPDBMonitor
 										}
 									}
 								}
+
+								C64RAM sharedRAM = C64RAM.getInstace();
+								sharedRAM.injectBinaryData(0, mMemoryC64);
 
 								byte a = mMemoryC64[0];
 							}
@@ -1500,5 +1469,17 @@ namespace VICEPDBMonitor
 			UpdateLabels();
 		}
 
+		private void viewSprites_Click(object sender, RoutedEventArgs e)
+		{
+			SpriteView SV = new SpriteView(this);
+			//set up here
+			SV.Show();
+		}
+
+		private void viewChars_Click(object sender, RoutedEventArgs e)
+		{
+			CharView CV = new CharView(this);
+			CV.Show();
+		}
 	}
 }

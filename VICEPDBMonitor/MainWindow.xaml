@@ -38,5 +38,7 @@
         <Button Content="Profile clear" HorizontalAlignment="Right" Margin="0,0,184,65" VerticalAlignment="Bottom" Width="75" Click="Button_Click_ProfileClear" Height="20"/>
         <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,192,45" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
         <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,167" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
+        <Button x:Name="viewSprites" Content="Sprites" Margin="0,0,10,142" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewSprites_Click"/>
+        <Button x:Name ="viewChars" Content="Chars" Grid.Column="2" Margin="0,0,10,116" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewChars_Click"/>
     </Grid>
 </Window>
