@@ -602,7 +602,7 @@ namespace VICEPDBMonitor
 
 		private void TestForMemoryDump(bool force = false)
 		{
-			if (mDump == false)
+			if (!force && mDump == false)
 			{
 				return;
 			}
@@ -734,6 +734,7 @@ namespace VICEPDBMonitor
 
 		private void BackgroundThread()
 		{
+			bool firstTime = true;
 			while (true)
 			{
 				try
@@ -760,6 +761,11 @@ namespace VICEPDBMonitor
 
 					while (mSocket.Connected)
 					{
+						if (firstTime)
+						{
+							firstTime = false;
+							TestForMemoryDump(true);
+						}
 						if (mSocket.Poll(0, SelectMode.SelectError))
 						{
 							break;
