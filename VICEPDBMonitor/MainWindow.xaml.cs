@@ -1665,6 +1665,11 @@ namespace VICEPDBMonitor
 			UpdateLabels();
 		}
 
-	}
+        private void mScreenButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScreenView SV = new ScreenView(this);
+            SV.Show();
+        }
+    }
 
 }
