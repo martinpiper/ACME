@@ -21,8 +21,6 @@ namespace VICEPDBMonitor
     {
         MainWindow m_mainWindow;
         int m_startAddress;
-        int m_bytesRead;
-        int m_rounds; //how many times have we requested sprite data
 
         int m_backgroundColour;
         int m_mulCol0;
@@ -73,7 +71,7 @@ namespace VICEPDBMonitor
                 dataPtr += CharX * 8;
                 int sprCol = spriteCol.SelectedIndex;
 
-                renderChar(dataPtr, CharX, CharY, m_hiresOrMulti[CharX, CharY], sprCol, m_wb);
+                VICIIRenderer.renderChar(dataPtr, CharX, CharY, m_hiresOrMulti[CharX, CharY], sprCol, m_backgroundColour, m_mulCol0, m_mulCol1, m_wb);
             }
         }
 
@@ -113,20 +111,34 @@ namespace VICEPDBMonitor
 
         private void handleDisplayChars()
         {
-            m_mainWindow.SendCommand("bank ram\n");
-            m_mainWindow.GetReply();
-
             int index = address.SelectedIndex;
             if (index < 0) index = 0;
             m_startAddress = index * 2048;
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+            vcom.addBinaryMemCommand(m_startAddress, m_startAddress + 0x0800, new CommandStruct.CS_BinaryDelegate(got_ram), null, this.Dispatcher);
+            vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+        }
 
-            byte[] data = m_mainWindow.sendBinaryMemCommandAndGetData(m_startAddress, m_startAddress + (2 * 1024) - 1);
+        private void got_ram(byte[] data, object none)
+        {
             C64RAM ram = C64RAM.getInstace();
             ram.injectBinaryData(m_startAddress, data);
             renderChars(m_startAddress);
-            m_mainWindow.SendCommand("bank cpu\n");
-            m_mainWindow.GetReply();
         }
+        /*m_mainWindow.SendCommand("bank ram\n");
+        m_mainWindow.GetReply();
+
+        int index = address.SelectedIndex;
+        if (index < 0) index = 0;
+        m_startAddress = index * 2048;
+
+        byte[] data = m_mainWindow.sendBinaryMemCommandAndGetData(m_startAddress, m_startAddress + (2 * 1024) - 1);
+        C64RAM ram = C64RAM.getInstace();
+        ram.injectBinaryData(m_startAddress, data);
+        renderChars(m_startAddress);
+        m_mainWindow.SendCommand("bank cpu\n");
+        m_mainWindow.GetReply();*/
 
         public void renderChars(int dataPtr)
         {
@@ -138,7 +150,7 @@ namespace VICEPDBMonitor
             {
                 for (int x = 0; x < 16; ++x)
                 {
-                    renderChar(dataPtr, x, y, m_hiresOrMulti[x, y], charCol, m_wb);
+                    VICIIRenderer.renderChar(dataPtr, x, y, m_hiresOrMulti[x, y], charCol, m_backgroundColour, m_mulCol0, m_mulCol1, m_wb);
                     dataPtr += 8;
                 } //x
             }// y
@@ -146,80 +158,7 @@ namespace VICEPDBMonitor
             canvas.Source = m_wb;
         }
 
-        void renderChar(int addr, int charX, int charY, bool multicolour, int charColour, WriteableBitmap wb)
-        {
-
-            C64RAM ramObjc = C64RAM.getInstace();
-            byte[] ram = ramObjc.getRAM();
-
-            Int32Rect rect = new Int32Rect();
-            if (multicolour)
-            {
-                rect.Width = 2;
-            }
-            else
-            {
-                rect.Width = 1;
-            }
-            rect.Height = 1;
-            int spriteTLX = charX * 8;
-            int spriteTLY = charY * 8;
-
-
-            for (int sy = 0; sy < 8; ++sy)
-            {
-                rect.Y = spriteTLY + sy;
-                for (int sx = 0; sx < 1; ++sx)
-                {
-
-                    byte r = ram[addr];
-                    //int bitmapIndex = ((spriteTLY + sy) * (24 * 4)) + ((spriteTLX + (sx*8)) * 4);
-                    if (multicolour)
-                    {
-                        for (int p = 0; p < 8; p += 2)
-                        {
-                            rect.X = spriteTLX + (sx * 8) + p;
-                            switch (r & 192)
-                            {
-                                default:
-                                case 0:  //%00
-                                    wb.WritePixels(rect, VICPallete.palBGR32[m_backgroundColour], 8, 0);
-                                    break;
-                                case 64: //%01
-                                    wb.WritePixels(rect, VICPallete.palBGR32[m_mulCol0], 8, 0);
-                                    break;
-                                case 128: //%10
-                                    wb.WritePixels(rect, VICPallete.palBGR32[m_mulCol1], 8, 0);
-                                    break;
-                                case 192: //%11
-                                    wb.WritePixels(rect, VICPallete.palBGR32[charColour], 8, 0);
-                                    break;
-                            }
-                            r = (byte)(r << 2); //get next pixel
-                        }
-                    }
-                    else
-                    {
-                        for (int p = 0; p < 8; ++p)
-                        {
-
-                            rect.X = spriteTLX + (sx * 8) + p;
-
-                            if ((r & 128) == 128)
-                            {
-                                wb.WritePixels(rect, VICPallete.palBGR32[charColour], 4, 0);
-                            }
-                            else
-                            {
-                                wb.WritePixels(rect, VICPallete.palBGR32[m_backgroundColour], 4, 0);
-                            }
-                            r = (byte)(r << 1); //get next pixel
-                        } // p
-                    }
-                    addr++;
-                } //sx
-            } //sy
-        }
+        
 
         private void address_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

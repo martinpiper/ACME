@@ -72,17 +72,28 @@ namespace VICEPDBMonitor
             m_startAddress = startAddress;
             m_startBank = bank;
 
-            m_mainWindow.SendCommand("bank ram\n");
-            m_mainWindow.GetReply();           
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+            vcom.addBinaryMemCommand(m_startAddress, m_startAddress + 0x4000, new CommandStruct.CS_BinaryDelegate(got_ram), null, this.Dispatcher);
+            vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+        }
 
-            byte[] data = m_mainWindow.sendBinaryMemCommandAndGetData(startAddress, startAddress + (16 * 1024) - 1);
+        private void got_ram(byte[] data, object none)
+        {
             C64RAM ram = C64RAM.getInstace();
             ram.injectBinaryData(m_startAddress, data);
             renderSprites();
-            m_mainWindow.SendCommand("bank cpu\n");
-            m_mainWindow.GetReply();
         }
+        /*m_mainWindow.SendCommand("bank ram\n");
+        m_mainWindow.GetReply();           
 
+        byte[] data = m_mainWindow.sendBinaryMemCommandAndGetData(startAddress, startAddress + (16 * 1024) - 1);
+        C64RAM ram = C64RAM.getInstace();
+        ram.injectBinaryData(m_startAddress, data);
+        renderSprites();
+        m_mainWindow.SendCommand("bank cpu\n");
+        m_mainWindow.GetReply();*/
+   
 		/*public bool handleDataFromVICESprite(string data)
 		{
 			C128RAM ram = C128RAM.getInstace();

@@ -58,7 +58,13 @@
     <Compile Include="CharView.xaml.cs">
       <DependentUpon>CharView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MultiMap.cs" />
+    <Compile Include="ScreenView.xaml.cs">
+      <DependentUpon>ScreenView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SpriteView.xaml.cs" />
+    <Compile Include="VICECOMManager.cs" />
+    <Compile Include="VICIIRenderer.cs" />
     <Compile Include="VICPallete.cs" />
     <Page Include="CharView.xaml">
       <SubType>Designer</SubType>
@@ -76,6 +82,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ScreenView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SpriteView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
