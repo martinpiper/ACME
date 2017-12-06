@@ -175,16 +175,16 @@ namespace VICEPDBMonitor
 							{
 								default:
 								case 0:  //%00
-									wb.WritePixels(rect, VICPallete.palBGR32[m_backgroundColour], 8, 0);
+									wb.WritePixels(rect, VICPallete.getSafePalBGR32(m_backgroundColour), 8, 0);
 									break;
 								case 64: //%01
-									wb.WritePixels(rect, VICPallete.palBGR32[m_mulCol0], 8, 0);
+									wb.WritePixels(rect, VICPallete.getSafePalBGR32(m_mulCol0), 8, 0);
 									break;
 								case 128: //%10
-									wb.WritePixels(rect, VICPallete.palBGR32[sprColour], 8, 0);
+									wb.WritePixels(rect, VICPallete.getSafePalBGR32(sprColour), 8, 0);
 									break;
 								case 192: //%11
-									wb.WritePixels(rect, VICPallete.palBGR32[m_mulCol1], 8, 0);
+									wb.WritePixels(rect, VICPallete.getSafePalBGR32(m_mulCol1), 8, 0);
 									break;
 							}
 							r = (byte)(r << 2); //get next pixel
@@ -199,11 +199,11 @@ namespace VICEPDBMonitor
 
 							if ((r & 128) == 128)
 							{
-								wb.WritePixels(rect, VICPallete.palBGR32[sprColour], 4, 0);
+								wb.WritePixels(rect, VICPallete.getSafePalBGR32(sprColour), 4, 0);
 							}
 							else
 							{
-								wb.WritePixels(rect, VICPallete.palBGR32[m_backgroundColour], 4, 0);
+								wb.WritePixels(rect, VICPallete.getSafePalBGR32(m_backgroundColour), 4, 0);
 							}
 							r = (byte)(r << 1); //get next pixel
 						} // p

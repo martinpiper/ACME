@@ -8,7 +8,20 @@ namespace VICEPDBMonitor
 {
 	class VICPallete
 	{
-		static public byte[][] palBGR32 =
+		static public byte[] getSafePalBGR32(int index)
+		{
+			if (index < 0)
+			{
+				index = 0;
+			}
+			else if (index >= palBGR32.Length)
+			{
+				index = palBGR32.Length - 1;
+			}
+			return palBGR32[index];
+		}
+
+    static private byte[][] palBGR32 =
 		{
 			new byte[]{ 0,0,0,255,0,0,0,255},
 			new byte[]{ 255,255,255,255,255,255,255,255 },
