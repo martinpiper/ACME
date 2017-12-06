@@ -98,27 +98,25 @@ namespace VICEPDBMonitor
         private void drawScreen()
         {
             //first we need to get the RAM upto date
-//             VICECOMManager vcom = VICECOMManager.getVICEComManager();
-//             vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
-//             vcom.addBinaryMemCommand(m_screenAddress, m_screenAddress + 0x400, new CommandStruct.CS_BinaryDelegate(got_screen), null, this.Dispatcher);
-            
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+            vcom.addBinaryMemCommand(m_screenAddress, m_screenAddress + 0x400, new CommandStruct.CS_BinaryDelegate(got_screen), null, this.Dispatcher);
         }
 
         private void got_screen(byte[] data, object none)
         {
             C64RAM ram = C64RAM.getInstace();
             ram.injectBinaryData(m_screenAddress, data);
-//             VICECOMManager vcom = VICECOMManager.getVICEComManager();
-//             vcom.addBinaryMemCommand(m_screenAddress, m_charAddress + 0x800, new CommandStruct.CS_BinaryDelegate(got_char), null, this.Dispatcher);
-
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addBinaryMemCommand(m_screenAddress, m_charAddress + 0x800, new CommandStruct.CS_BinaryDelegate(got_char), null, this.Dispatcher);
         }
 
         private void got_char(byte[] data, object none)
         {
             C64RAM ram = C64RAM.getInstace();
             ram.injectBinaryData(m_screenAddress, data);
-//             VICECOMManager vcom = VICECOMManager.getVICEComManager();
-//             vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
             renderScreen();
         }
        

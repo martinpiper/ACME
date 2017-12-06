@@ -114,10 +114,10 @@ namespace VICEPDBMonitor
             int index = address.SelectedIndex;
             if (index < 0) index = 0;
             m_startAddress = index * 2048;
-//             VICECOMManager vcom = VICECOMManager.getVICEComManager();
-//             vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
-//             vcom.addBinaryMemCommand(m_startAddress, m_startAddress + 0x0800, new CommandStruct.CS_BinaryDelegate(got_ram), null, this.Dispatcher);
-//             vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+            vcom.addBinaryMemCommand(m_startAddress, m_startAddress + 0x0800, new CommandStruct.CS_BinaryDelegate(got_ram), null, this.Dispatcher);
+            vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
         }
 
         private void got_ram(byte[] data, object none)

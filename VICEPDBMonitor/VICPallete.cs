@@ -20,7 +20,8 @@ namespace VICEPDBMonitor
 			}
 			return palBGR32[index];
 		}
-		static private byte[][] palBGR32 =
+
+    static private byte[][] palBGR32 =
 		{
 			new byte[]{ 0,0,0,255,0,0,0,255},
 			new byte[]{ 255,255,255,255,255,255,255,255 },

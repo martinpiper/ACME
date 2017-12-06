@@ -18,58 +18,6 @@ using System.Threading;
 
 namespace VICEPDBMonitor
 {
-	public class MultiMap<K, V>
-	{
-		Dictionary<K, List<V>> mDictionary = new Dictionary<K, List<V>>();
-
-		public void Add(K key, V value)
-		{
-			List<V> list;
-			if (mDictionary.TryGetValue(key, out list))
-			{
-				// 2A.
-				list.Add(value);
-			}
-			else
-			{
-				// 2B.
-				list = new List<V>();
-				list.Add(value);
-				mDictionary[key] = list;
-			}
-		}
-
-		public int Count
-		{
-			get
-			{
-				return mDictionary.Count;
-			}
-		}
-
-		public IEnumerable<K> Keys
-		{
-			get
-			{
-				return mDictionary.Keys;
-			}
-		}
-
-		public List<V> this[K key]
-		{
-			get
-			{
-				List<V> list;
-				if (!mDictionary.TryGetValue(key, out list))
-				{
-					list = new List<V>();
-					mDictionary[key] = list;
-				}
-				return list;
-			}
-		}
-	}
-	
 	public class AddrInfo
 	{
 		public int mAddr = -1;
@@ -108,14 +56,18 @@ namespace VICEPDBMonitor
 		MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
 		MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
 
-		private delegate void NoArgDelegate();
-		private delegate void OneArgDelegate(String arg);
-		private delegate void TwoArgDelegate(String arg , Brush brush);
+        private delegate void NoArgDelegate();
+        private delegate void OneArgDelegate(String arg);
+        private delegate void TwoArgDelegate(String arg, Brush brush);
 
-		public MainWindow()
+        public MainWindow()
 		{
 			InitializeComponent();
-
+            //install the error callback before we do anything in case something connects to VICE
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.setErrorCallback(new VICECOMManager.OneArgDelegate(SetSourceView), this.Dispatcher);
+            vcom.setVICEmsgCallback(new VICECOMManager.OneArgDelegate(GotMsgFromVice));
+            
 			string line;
 			string[] commandLineArgs = Environment.GetCommandLineArgs();
 
@@ -162,9 +114,10 @@ namespace VICEPDBMonitor
 							while (lines-- > 0)
 							{
 								line = file.ReadLine();
-								Char[] separator = { ':' };
-								string[] tokens = line.Split(separator, 2);
-								mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
+
+                                Char[] separator = { ':' };
+                                string[] tokens = line.Split(separator, 2);
+                                mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
 							}
 						}
 						else if (line.IndexOf("ADDRS:") == 0)
@@ -283,9 +236,7 @@ namespace VICEPDBMonitor
 //			mCommands.Add("!sm");
 
 			HandleCodeView();
-
-			NoArgDelegate fetcher = new NoArgDelegate(this.BackgroundThread);
-			fetcher.BeginInvoke(null, null);
+	
 		}
 
 		int mPC = 0;
@@ -294,10 +245,7 @@ namespace VICEPDBMonitor
 		int mRegY = 0;
 		int mSP = 0;
 //		int mNV_BDIZC = 0;
-		List<string> mCommands = new List<string>();
-
-		Socket mSocket;
-		String mGotTextWorking = "";
+		
 
 		TextPointer GetTextPositionAtOffset(TextPointer position, int characterCount)
 		{
@@ -361,6 +309,7 @@ namespace VICEPDBMonitor
 					// Skip #$xx
 					if (text[pos2 - 1] == '#')
 					{
+                        //text = text.Insert(pos + 4, "\t\t\t\t");
 						pos = pos2 + 3;
 						continue;
 					}
@@ -456,7 +405,7 @@ namespace VICEPDBMonitor
 			return text;
 		}
 
-		private void SetSourceView(String text)
+		public void SetSourceView(String text)
 		{
 			text = EnrichDumpWithMemory(text);
 			mTextBox.BeginChange();
@@ -468,11 +417,46 @@ namespace VICEPDBMonitor
 			}
 			try
 			{
-				Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-				r.Background = null;
-
-				mTextBox.AppendText(text);
-
+                /*Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+				r.Background = null;*/
+                int split = text.IndexOf("=>");
+                if(split < 0 )
+                {
+                    split = text.IndexOf(">>>>");
+                }
+                if (split < 0)
+                {
+                    mTextBox.AppendText(text);
+                    mTextBox.EndChange();
+                }
+                else
+                {
+                    mTextBox.EndChange();
+                    string before = text.Substring(0, split);
+                    int endOfLine = text.IndexOf('\r', split);
+                    string currLine = text.Substring(split, endOfLine - split);
+                    string after = text.Substring(endOfLine);
+                    Run topRun = new Run(before)
+                    {
+                        Background = mTextBox.Background
+                    };
+                    Run currRun = new Run(currLine)
+                    {
+                        Background = Brushes.LightGray
+                    };
+                    Run afterRun = new Run(after)
+                    {
+                        Background = mTextBox.Background
+                    };
+                    Paragraph para = new Paragraph();
+                    para.Inlines.Add(topRun);
+                    para.Inlines.Add(currRun);
+                    para.Inlines.Add(afterRun);
+                    FlowDocument flow = new FlowDocument(para);
+                    mTextBox.Document = flow;
+                   
+                }
+                /*
 				// mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
 				TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
 				int offset = searchRange.Text.IndexOf("=>");
@@ -488,12 +472,11 @@ namespace VICEPDBMonitor
 					TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
 
 					result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
-				}
+				}*/
 			}
 			catch (System.Exception)
 			{
-			}
-			mTextBox.EndChange();
+			}			
 		}
 
 		private void AppendTextSourceView(String text, Brush brush)
@@ -521,80 +504,8 @@ namespace VICEPDBMonitor
 			mRegsBox.Text = text;
 		}
 
-		private void SendCommand(string command)
-		{
-			if (command.Length > 0)
-			{
-				// Add padding to avoid the VICE monitor command truncation bug
-				command += "                                                                           \n";
-				byte[] msg = Encoding.ASCII.GetBytes(command);
-				ConsumeData();
-				SendBytes(msg);
-			}
-		}
-
-		private void SendBytes(byte[] msg)
-		{
-			int sent = 0;
-			while (mSocket.Connected && (sent < msg.Length))
-			{
-				int ret = mSocket.Send(msg, sent, msg.Length - sent, SocketFlags.None);
-				if (ret > 0)
-				{
-					sent += ret;
-				}
-				else
-				{
-					Thread.Sleep(10);
-				}
-			}
-		}
-
-		private string GetReply()
-		{
-			string theReply = "";
-
-			while (mSocket.Connected)
-			{
-				byte[] bytes = new byte[500000];
-				try
-				{
-					int got = mSocket.Receive(bytes);
-					if (got > 0)
-					{
-						mGotTextWorking += Encoding.ASCII.GetString(bytes, 0, got);
-					}
-				}
-				catch (System.Exception)
-				{
-//					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
-					Thread.Sleep(100);
-				}
-
-				int foundFirstPos = mGotTextWorking.IndexOf("(C:$");
-				if (foundFirstPos >= 0 && mGotTextWorking.Length > 16)
-				{
-					int foundSecondPos = mGotTextWorking.IndexOf("(C:$", foundFirstPos + 9);
-					if (foundSecondPos > foundFirstPos)
-					{
-						int foundThirdPos = mGotTextWorking.IndexOf(") ", foundSecondPos + 4);
-						if (foundThirdPos > foundSecondPos)
-						{
-							foundFirstPos += 10;	// End of the first "(C:$"
-							theReply = mGotTextWorking.Substring(foundFirstPos, foundSecondPos - foundFirstPos);
-							// Start the next command buffer with valid text
-							mGotTextWorking = mGotTextWorking.Substring(foundSecondPos);
-							return theReply;
-						}
-					}
-				}
-			}			
-			
-			return "";
-		}
-
-
-		Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
+		
+        Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
 		Dictionary<int, int> mExecutedCount = new Dictionary<int, int>();
 
 		byte[] mMemoryC64 = new byte[65536];
@@ -609,7 +520,7 @@ namespace VICEPDBMonitor
 			if (force || mNeedNewMemoryDump)
 			{
 				mNeedNewMemoryDump = false;
-				mCommands.Add("!domem");
+                dispatchCommand("!domem");
 			}
 		}
 
@@ -732,557 +643,821 @@ namespace VICEPDBMonitor
 			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateLabelView), labels);
 		}
 
-		private void BackgroundThread()
-		{
-			bool firstTime = true;
-			while (true)
-			{
-				try
-				{
-					String gotText = "";
-					bool wasConnected = false;
+        private void dispatchCommand(string command)
+        {
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
 
-					if (mSocket == null)
-					{
-						mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            if (command.IndexOf("!memmapzap") == 0)
+            {
+                vcom.addTextCommand("memmapzap", CommandStruct.eMode.DoCommandThenExit, null, null,this.Dispatcher);
+                /*string theReply;
+                mGotTextWorking = "";
+                SendCommand("memmapzap");
+                theReply = GetReply();
+                SendCommand("x");*/
+            }
+            else if (command.IndexOf("!memmapshow") == 0)
+            {
+                vcom.addTextCommand("memmapshow", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(memmapshow_callback),null, this.Dispatcher);
+                /*string theReply;
+                mGotTextWorking = "";
+                //								SendCommand("r");
+                //								theReply = GetReply();
+                SendCommand("memmapshow");
+                theReply = GetReply();
 
-						mSocket.Blocking = false;
-					}
+                ParseProfileInformation(theReply);
+                UpdateLabels();
 
-					try
-					{
-						mSocket.Connect("localhost", 6510);
-					}
-					catch (System.Exception /*ex*/)
-					{
-					}
+                SendCommand("memmapzap");
+                theReply = GetReply();
+                SendCommand("x");*/
+            }
+            else if (command.IndexOf("!domem") == 0)
+            {
+                vcom.addBinaryMemCommand(0, 0xFFFF, full_mem_dump, null, this.Dispatcher);
+                /*
+                // https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l267
+                byte[] sendCommand = new byte[8];
+                sendCommand[0] = 0x2;
+                sendCommand[1] = 0x5;
+                sendCommand[2] = 0x1; // mem dump
+                sendCommand[3] = 0;
+                sendCommand[4] = 0;
+                sendCommand[5] = 255;
+                sendCommand[6] = 255;
+                sendCommand[7] = 0;
 
-					string lastCommand = "";
+                SendBytes(sendCommand);
 
-					while (mSocket.Connected)
-					{
-						if (firstTime)
-						{
-							firstTime = false;
-							TestForMemoryDump(true);
-						}
-						if (mSocket.Poll(0, SelectMode.SelectError))
-						{
-							break;
-						}
-						wasConnected = true;
-						if (mCommands.Count > 0)
-						{
-							ConsumeData();
-							lastCommand = mCommands[0];
-							mCommands.RemoveAt(0);
+                byte[] replyHeader = new byte[6];
 
-							if (lastCommand.IndexOf("!memmapzap") == 0)
-							{
-								string theReply;
-								mGotTextWorking = "";
-								SendCommand("memmapzap");
-								theReply = GetReply();
-								SendCommand("x");
-							}
-							else if (lastCommand.IndexOf("!memmapshow") == 0)
-							{
-								string theReply;
-								mGotTextWorking = "";
-//								SendCommand("r");
-//								theReply = GetReply();
-								SendCommand("memmapshow");
-								theReply = GetReply();
+                int actual = 0;
+                while (actual < replyHeader.Length && mSocket.Connected)
+                {
+                    try
+                    {
+                        actual += mSocket.Receive(replyHeader, actual, replyHeader.Length - actual, SocketFlags.None);
+                    }
+                    catch (System.Exception)
+                    {
+                        Thread.Sleep(100);
+                    }
 
-								ParseProfileInformation(theReply);
-								UpdateLabels();
+                }
 
-								SendCommand("memmapzap");
-								theReply = GetReply();
-								SendCommand("x");
-							}
-							else if (lastCommand.IndexOf("!domem") == 0)
-							{
-								// https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l267
-								byte[] sendCommand = new byte[8];
-								sendCommand[0] = 0x2;
-								sendCommand[1] = 0x5;
-								sendCommand[2] = 0x1; // mem dump
-								sendCommand[3] = 0;
-								sendCommand[4] = 0;
-								sendCommand[5] = 255;
-								sendCommand[6] = 255;
-								sendCommand[7] = 0;
+                if (replyHeader[0] == 0x2)
+                {
+                    int responseLength = replyHeader[1] + (replyHeader[2] << 8) + (replyHeader[3] << 16) + (replyHeader[4] << 24);
 
-								SendBytes(sendCommand);
+                    if (replyHeader[5] == 0 && responseLength <= mMemoryC64.Length)
+                    {
+                        byte[] responseBuffer = new Byte[responseLength];
+                        actual = 0;
 
-								byte[] replyHeader = new byte[6];
+                        while (actual < responseBuffer.Length && mSocket.Connected)
+                        {
+                            try
+                            {
+                                actual += mSocket.Receive(responseBuffer, actual, responseBuffer.Length - actual, SocketFlags.None);
+                            }
+                            catch (System.Exception)
+                            {
+                                Thread.Sleep(100);
+                            }
+                        }
 
-								int actual = 0;
-								while (actual < replyHeader.Length && mSocket.Connected)
-								{
-									try
-									{
-										actual += mSocket.Receive(replyHeader, actual, replyHeader.Length - actual, SocketFlags.None);
-									}
-									catch (System.Exception)
-									{
-										Thread.Sleep(100);
-									}
+                        if (actual >= mMemoryC64.Length)
+                        {
+                            for (int i = 0; i < mMemoryC64.Length; i++)
+                            {
+                                mMemoryC64[i] = responseBuffer[i];
+                            }
+                        }
+                    }
+                }
 
-								}
+                byte a = mMemoryC64[0];*/
+            }
+            else if (command.IndexOf("!sm") == 0)
+            {
+                get_registers_callmeback(new NoArgDelegate(show_src_diss_post_registers));
+                /* SendCommand("r");
+                //string theReply = GetReply();
 
-								if (replyHeader[0] == 0x2)
-								{
-									int responseLength = replyHeader[1] + (replyHeader[2] << 8) + (replyHeader[3] << 16) + (replyHeader[4] << 24);
+                //ParseRegisters(theReply);
+                //UpdateLabels();
 
-									if (replyHeader[5] == 0 && responseLength <= mMemoryC64.Length)
-									{
-										byte[] responseBuffer = new Byte[responseLength];
-										actual = 0;
+                //gotText = "";
 
-										while (actual < responseBuffer.Length && mSocket.Connected)
-										{
-											try
-											{
-												actual += mSocket.Receive(responseBuffer, actual, responseBuffer.Length - actual, SocketFlags.None);
-											}
-											catch (System.Exception)
-											{
-												Thread.Sleep(100);
-											}
-										}
+                try
+                {
+                    /*int[] lastDisplayedLine = new int[mSourceFileNamesLength];
+                    int i;
+                    for (i = 0; i < mSourceFileNamesLength; i++)
+                    {
+                        lastDisplayedLine[i] = 0;
+                    }
+                    // MPi: TODO: Tweak the 10 range based on the display height?
+                    int range = 15;
+                    int startPrev = mPC;
+                    // Step backwards trying to find a good starting point to disassemble
+                    while (range-- > 0)
+                    {
+                        AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+                        if (addrInfo2.mPrevAddr < 0)
+                        {
+                            break;
+                        }
+                        startPrev = addrInfo2.mPrevAddr;
+                    }
+                    // MPi: TODO: Tweak the 10 range based on the display height?
+                    range = 20;
+                    // Step forwards trying to find a good ending point to disassemble
+                    int endNext = mPC;
+                    while (range-- > 0)
+                    {
+                        AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
+                        if (addrInfo2.mNextAddr < 0)
+                        {
+                            break;
+                        }
+                        endNext = addrInfo2.mNextAddr;
+                    }
 
-										if (actual >= mMemoryC64.Length)
-										{
-											for (int i = 0; i < mMemoryC64.Length; i++)
-											{
-												mMemoryC64[i] = responseBuffer[i];
-											}
-										}
-									}
-								}
+                    string command = "d " + startPrev.ToString("X") + " " + mPC.ToString("X");
+                    SendCommand(command);
+                    string disassemblyBefore = GetReply();
+                    command = "d " + mPC.ToString("X") + " " + endNext.ToString("X");
+                    SendCommand(command);
+                    string disassemblyAfter = GetReply();
 
-								C64RAM sharedRAM = C64RAM.getInstace();
-								sharedRAM.injectBinaryData(0, mMemoryC64);
+                    string lastSourceDisplayed = "";
+                    int lastSourceIndexDisplayed = -1;
+                    int lastSourceLineDisplayed = -1;
 
-								byte a = mMemoryC64[0];
-							}
-							else if (lastCommand.IndexOf("!sm") == 0)
-							{
-								SendCommand("r");
-								string theReply = GetReply();
+                    //							gotText += disassemblyBefore;
+                    //							gotText += ">>>\n";
+                    //							gotText += disassemblyAfter;
+                    // Get something like:*/
+                    /*
+                        .C:0427  AD 00 04    LDA $0400
+                        .C:042a  AD 27 04    LDA $0427
+                        ...
+                        .C:0439  60          RTS
+                        .C:043a  AD 3A 04    LDA $043A
+                    *//*
+                    string[] split = disassemblyBefore.Split('\n');
+                    bool doingBefore = true;
+                    int index = 0;
+                    String lastSourceLine = "";
+                    while (index < split.Length)
+                    {
+                        string line = split[index++];
+                        if (line.Length < 7)
+                        {
+                            continue;
+                        }
+                        if (!line.StartsWith(".C:"))
+                        {
+                            continue;
+                        }
+                        string tAddr = line.Substring(3);
+                        tAddr = tAddr.Substring(0, 4);
+                        int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+                        if (doingBefore && theAddr >= mPC)
+                        {
+                            split = disassemblyAfter.Split('\n');
+                            index = 0;
+                            doingBefore = false;
+                            continue;
+                        }
 
-								ParseRegisters(theReply);
-								UpdateLabels();
+                        try
+                        {
+                            AddrInfo addrInfo = mAddrInfoByAddr[theAddr];
+                            if (lastSourceDisplayed != mSourceFileNames[addrInfo.mFile])
+                            {
+                                lastSourceDisplayed = mSourceFileNames[addrInfo.mFile];
+                                gotText += "--- " + lastSourceDisplayed + " ---\n";
+                            }
+                            if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
+                            {
+                                lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine - 5;
+                                if (lastDisplayedLine[addrInfo.mFile] < 0)
+                                {
+                                    lastDisplayedLine[addrInfo.mFile] = 0;
+                                }
+                            }
+                            if (lastDisplayedLine[addrInfo.mFile] > addrInfo.mLine)
+                            {
+                                lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine;
+                            }
+                            for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
+                            {
+                                if (lastSourceLine.Length > 0)
+                                {
+                                    //													gotText += "     " + "                                  " + lastSourceLine + "\n";
+                                    gotText += "     " + lastSourceLine + "\n";
+                                    lastSourceLine = "";
+                                }
 
-								gotText = "";
+                                if ((lastSourceIndexDisplayed == addrInfo.mFile) && (lastSourceLineDisplayed == i))
+                                {
+                                    // Stop displaying the same source and line multiple times in a row
+                                    continue;
+                                }
+                                lastSourceLine = string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i];
+                                lastSourceIndexDisplayed = addrInfo.mFile;
+                                lastSourceLineDisplayed = i;
+                            }
+                            lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine + 1;
+                        }
+                        catch (System.Exception)
+                        {
 
-								try
-								{
-									int[] lastDisplayedLine = new int[mSourceFileNamesLength];
-									int i;
-									for (i = 0; i < mSourceFileNamesLength; i++)
-									{
-										lastDisplayedLine[i] = 0;
-									}
-									// MPi: TODO: Tweak the 10 range based on the display height?
-									int range = 15;
-									int startPrev = mPC;
-									// Step backwards trying to find a good starting point to disassemble
-									while (range-- > 0)
-									{
-										AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
-										if (addrInfo2.mPrevAddr < 0)
-										{
-											break;
-										}
-										startPrev = addrInfo2.mPrevAddr;
-									}
-									// MPi: TODO: Tweak the 10 range based on the display height?
-									range = 20;
-									// Step forwards trying to find a good ending point to disassemble
-									int endNext = mPC;
-									while (range-- > 0)
-									{
-										AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
-										if (addrInfo2.mNextAddr < 0)
-										{
-											break;
-										}
-										endNext = addrInfo2.mNextAddr;
-									}
+                        }
 
-									string command = "d " + startPrev.ToString("X") + " " + mPC.ToString("X");
-									SendCommand(command);
-									string disassemblyBefore = GetReply();
-									command = "d " + mPC.ToString("X") + " " + endNext.ToString("X");
-									SendCommand(command);
-									string disassemblyAfter = GetReply();
+                        if (theAddr == mPC)
+                        {
+                            gotText += ">>>> ";
+                        }
+                        else
+                        {
+                            gotText += "     ";
+                        }
+                        if (lastSourceLine.Length > 0)
+                        {
+                            line = line.PadRight(34, ' ');
+                            gotText += line + lastSourceLine + "\n";
+                            lastSourceLine = "";
+                        }
+                        else
+                        {
+                            gotText += line + "\n";
+                        }
+                    }
+                }
+                catch (System.Exception)
+                {
+                    SendCommand("m 0000 ffff");
+                    theReply = GetReply();
+                    // No source info, so just dump memory
+                    gotText += theReply;
+                    //>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+                    //>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+                    //...
+                    //>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+                }*/
+            }
+            else if (command.IndexOf("!s") == 0)
+            {
+                get_registers_callmeback(new NoArgDelegate(show_src_post_registers));
 
-									string lastSourceDisplayed = "";
-									int lastSourceIndexDisplayed = -1;
-									int lastSourceLineDisplayed = -1;
+                /*SendCommand("r");
+                string theReply = GetReply();
 
-									//							gotText += disassemblyBefore;
-									//							gotText += ">>>\n";
-									//							gotText += disassemblyAfter;
-									// Get something like:
-									/*
-										.C:0427  AD 00 04    LDA $0400
-										.C:042a  AD 27 04    LDA $0427
-										...
-										.C:0439  60          RTS
-										.C:043a  AD 3A 04    LDA $043A
-									*/
-									string[] split = disassemblyBefore.Split('\n');
-									bool doingBefore = true;
-									int index = 0;
-									String lastSourceLine = "";
-									while (index < split.Length)
-									{
-										string line = split[index++];
-										if (line.Length < 7)
-										{
-											continue;
-										}
-										if (!line.StartsWith(".C:"))
-										{
-											continue;
-										}
-										string tAddr = line.Substring(3);
-										tAddr = tAddr.Substring(0, 4);
-										int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
-										if (doingBefore && theAddr >= mPC)
-										{
-											split = disassemblyAfter.Split('\n');
-											index = 0;
-											doingBefore = false;
-											continue;
-										}
+                ParseRegisters(theReply);
+                UpdateLabels();
 
-										try
-										{
-											AddrInfo addrInfo = mAddrInfoByAddr[theAddr];
-											if (lastSourceDisplayed != mSourceFileNames[addrInfo.mFile])
-											{
-												lastSourceDisplayed = mSourceFileNames[addrInfo.mFile];
-												gotText += "--- " + lastSourceDisplayed + " ---\n";
-											}
-											if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
-											{
-												lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine - 5;
-												if (lastDisplayedLine[addrInfo.mFile] < 0)
-												{
-													lastDisplayedLine[addrInfo.mFile] = 0;
-												}
-											}
-											if (lastDisplayedLine[addrInfo.mFile] > addrInfo.mLine)
-											{
-												lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine;
-											}
-											for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
-											{
-												if (lastSourceLine.Length > 0)
-												{
-//													gotText += "     " + "                                  " + lastSourceLine + "\n";
-													gotText += "     " + lastSourceLine + "\n";
-													lastSourceLine = "";
-												}
+                gotText = "";
 
-												if ((lastSourceIndexDisplayed == addrInfo.mFile) && (lastSourceLineDisplayed == i))
-												{
-													// Stop displaying the same source and line multiple times in a row
-													continue;
-												}
-												lastSourceLine = string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i];
-												lastSourceIndexDisplayed = addrInfo.mFile;
-												lastSourceLineDisplayed = i;
-											}
-											lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine + 1;
-										}
-										catch (System.Exception)
-										{
+                try
+                {
+                    AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+                    // MPi: TODO: Tweak the 20 range based on the display height?
+                    int range = 20;
+                    int startPrev = mPC;
+                    // Step backwards trying to find a good starting point to disassemble
+                    while (range-- > 0)
+                    {
+                        AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+                        if (addrInfo2.mPrevAddr < 0)
+                        {
+                            break;
+                        }
+                        startPrev = addrInfo2.mPrevAddr;
+                    }
 
-										}
+                    gotText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
+                    gotText += "Line:" + (addrInfo.mLine + 1) + "\n";
+                    int theLine = addrInfo.mLine - 10;  // MPi: TODO: Tweak the - 10 based on the display height?
+                    if (theLine < 0)
+                    {
+                        theLine = 0;
+                    }
+                    // MPi: TODO: Tweak the 20 toDisplay based on the display height?
+                    int toDisplay = 30;
+                    while (toDisplay-- > 0)
+                    {
+                        if (theLine == addrInfo.mLine)
+                        {
+                            gotText += "=>";
+                        }
+                        else
+                        {
+                            gotText += "  ";
+                        }
 
-										if (theAddr == mPC)
-										{
-											gotText += ">>>> ";
-										}
-										else
-										{
-											gotText += "     ";
-										}
-										if (lastSourceLine.Length > 0)
-										{
-											line = line.PadRight(34, ' ');
-											gotText += line + lastSourceLine + "\n";
-											lastSourceLine = "";
-										}
-										else
-										{
-											gotText += line + "\n";
-										}
-									}
-								}
-								catch (System.Exception)
-								{
-									SendCommand("m 0000 ffff");
-									theReply = GetReply();
-									// No source info, so just dump memory
-									gotText += theReply;
-									//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
-									//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
-									//...
-									//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
-								}
-							}
-							else if (lastCommand.IndexOf("!s") == 0)
-							{
-								SendCommand("r");
-								string theReply = GetReply();
+                        gotText += mSourceFiles[addrInfo.mFile][theLine++];
+                        gotText += "\n";
+                    }
+                }
+                catch (System.Exception)
+                {
+                    SendCommand("m 0000 ffff");
+                    theReply = GetReply();
+                    // No source info, so just dump memory
+                    gotText += theReply;
+                    //>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+                    //>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+                    //...
+                    //>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+                }*/
+            }
+            /*else if (lastCommand.IndexOf("!cls") == 0)
+            {
+                gotText = "";
+                this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
+            }*/
+            else if (command.IndexOf("!d") == 0)
+            {
+                get_registers_callmeback(new NoArgDelegate(show_diss_post_registers));
+                /*SendCommand("r");
+                string theReply = GetReply();
 
-								ParseRegisters(theReply);
-								UpdateLabels();
+                ParseRegisters(theReply);
+                UpdateLabels();
 
-								gotText = "";
+                gotText = "";
 
-								try
-								{
-									AddrInfo addrInfo = mAddrInfoByAddr[mPC];
-									// MPi: TODO: Tweak the 20 range based on the display height?
-									int range = 20;
-									int startPrev = mPC;
-									// Step backwards trying to find a good starting point to disassemble
-									while (range-- > 0)
-									{
-										AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
-										if (addrInfo2.mPrevAddr < 0)
-										{
-											break;
-										}
-										startPrev = addrInfo2.mPrevAddr;
-									}
+                try
+                {
+                    // MPi: TODO: Tweak the 20 range based on the display height?
+                    int range = 20;
+                    int startPrev = mPC;
+                    // Step backwards trying to find a good starting point to disassemble
+                    while (range-- > 0)
+                    {
+                        AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+                        if (addrInfo2.mPrevAddr < 0)
+                        {
+                            break;
+                        }
+                        startPrev = addrInfo2.mPrevAddr;
+                    }
+                    // MPi: TODO: Tweak the 20 range based on the display height?
+                    range = 20;
+                    // Step forwards trying to find a good ending point to disassemble
+                    int endNext = mPC;
+                    while (range-- > 0)
+                    {
+                        AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
+                        if (addrInfo2.mNextAddr < 0)
+                        {
+                            break;
+                        }
+                        endNext = addrInfo2.mNextAddr;
+                    }
 
-									gotText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
-									gotText += "Line:" + (addrInfo.mLine + 1) + "\n";
-									int theLine = addrInfo.mLine - 10;	// MPi: TODO: Tweak the - 10 based on the display height?
-									if (theLine < 0)
-									{
-										theLine = 0;
-									}
-									// MPi: TODO: Tweak the 20 toDisplay based on the display height?
-									int toDisplay = 30;
-									while (toDisplay-- > 0)
-									{
-										if (theLine == addrInfo.mLine)
-										{
-											gotText += "=>";
-										}
-										else
-										{
-											gotText += "  ";
-										}
+                    string command = "d " + startPrev.ToString("X") + " " + mPC.ToString("X");
+                    SendCommand(command);
+                    string disassemblyBefore = GetReply();
+                    command = "d " + mPC.ToString("X") + " " + endNext.ToString("X");
+                    SendCommand(command);
+                    string disassemblyAfter = GetReply();
 
-										gotText += mSourceFiles[addrInfo.mFile][theLine++];
-										gotText += "\n";
-									}
-								}
-								catch (System.Exception)
-								{
-									SendCommand("m 0000 ffff");
-									theReply = GetReply();
-									// No source info, so just dump memory
-									gotText += theReply;
-									//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
-									//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
-									//...
-									//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
-								}
-							}
-							else if (lastCommand.IndexOf("!cls") == 0)
-							{
-								gotText = "";
-								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
-							}
-							else if (lastCommand.IndexOf("!d") == 0)
-							{
-								SendCommand("r");
-								string theReply = GetReply();
+                    string[] split = disassemblyBefore.Split('\n');
+                    bool doingBefore = true;
+                    int index = 0;
+                    while (index < split.Length)
+                    {
+                        string line = split[index++];
+                        if (line.Length < 7)
+                        {
+                            continue;
+                        }
+                        string tAddr = line.Substring(3);
+                        tAddr = tAddr.Substring(0, 4);
+                        int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+                        if (doingBefore && theAddr >= mPC)
+                        {
+                            split = disassemblyAfter.Split('\n');
+                            index = 0;
+                            doingBefore = false;
+                            continue;
+                        }
 
-								ParseRegisters(theReply);
-								UpdateLabels();
+                        Brush brush = null;
+                        if (theAddr == mPC)
+                        {
+                            line = ">>>> " + line;
+                            brush = Brushes.LightBlue;
+                        }
+                        line += "\r";
 
-								gotText = "";
+                        gotText += line;
+                    }
 
-								try
-								{
-									// MPi: TODO: Tweak the 20 range based on the display height?
-									int range = 20;
-									int startPrev = mPC;
-									// Step backwards trying to find a good starting point to disassemble
-									while (range-- > 0)
-									{
-										AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
-										if (addrInfo2.mPrevAddr < 0)
-										{
-											break;
-										}
-										startPrev = addrInfo2.mPrevAddr;
-									}
-									// MPi: TODO: Tweak the 20 range based on the display height?
-									range = 20;
-									// Step forwards trying to find a good ending point to disassemble
-									int endNext = mPC;
-									while (range-- > 0)
-									{
-										AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
-										if (addrInfo2.mNextAddr < 0)
-										{
-											break;
-										}
-										endNext = addrInfo2.mNextAddr;
-									}
+                }
+                catch (System.Exception)
+                {
+                    SendCommand("m 0000 ffff");
+                    theReply = GetReply();
+                    // No source info, so just dump memory
+                    gotText += theReply;
+                    //>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+                    //>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+                    //...
+                    //>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
+                }*/
+            }
+            else
+            {
+                // Any other commands get here
+                bool silent = false;
+                if (command.IndexOf('!') == 0)
+                {
+                    command = command.Substring(1);
+                    silent = true;
+                }
+                //if (!silent)
+                //{
+                //    gotText += "Sending command: " + command + "\n";
+                //}
 
-									string command = "d " + startPrev.ToString("X") + " " + mPC.ToString("X");
-									SendCommand(command);
-									string disassemblyBefore = GetReply();
-									command = "d " + mPC.ToString("X") + " " + endNext.ToString("X");
-									SendCommand(command);
-									string disassemblyAfter = GetReply();
+                //SendCommand(command);
+                string theReply = "";
+                if (command.IndexOf("x") != 0)
+                {
+                    //theReply = GetReply();
+                    //gotText += theReply;
+                    vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(command_just_show_reply),null, this.Dispatcher);
+                }
+                else
+                {
+                    vcom.addTextCommand(command, CommandStruct.eMode.DoCommandOnly, null, null, this.Dispatcher);
+                }
+                //if (silent)
+                //{
+                //    gotText = "";
+                //}
+            }
+        }
+		
+        private void memmapshow_callback(string reply, object userData)
+        {
+            ParseProfileInformation(reply);
+            UpdateLabels();
+            dispatchCommand("!memmapzap");
+        }
 
-									string[] split = disassemblyBefore.Split('\n');
-									bool doingBefore = true;
-									int index = 0;
-									while (index < split.Length)
-									{
-										string line = split[index++];
-										if (line.Length < 7)
-										{
-											continue;
-										}
-										string tAddr = line.Substring(3);
-										tAddr = tAddr.Substring(0, 4);
-										int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
-										if (doingBefore && theAddr >= mPC)
-										{
-											split = disassemblyAfter.Split('\n');
-											index = 0;
-											doingBefore = false;
-											continue;
-										}
+        private void get_registers_callmeback(NoArgDelegate callme)
+        {
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), callme, this.Dispatcher);
+        }
 
-										Brush brush = null;
-										if (theAddr == mPC)
-										{
-											line = ">>>> " + line;
-											brush = Brushes.LightBlue;
-										}
-										line += "\r";
+        private void get_registers_callback(string reply, object userData)
+        {
+            if (reply.Length > 0)
+            {
+                ParseRegisters(reply);
+                UpdateLabels();
+                NoArgDelegate del = userData as NoArgDelegate;
+                del(); //call back
+            }
+        }
 
-										gotText += line;
-									}
+        private class ShowSrcDissStruct
+        {
+            public int startPrev;
+            public int endNext;
+            public string disassemblyBefore;
+            public string disassemblyAfter;
+            public CommandStruct.CS_TextDelegate displayDissCallback;
+        }
 
-								}
-								catch (System.Exception)
-								{
-									SendCommand("m 0000 ffff");
-									theReply = GetReply();
-									// No source info, so just dump memory
-									gotText += theReply;
-									//>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
-									//>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
-									//...
-									//>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....					
-								}
-							}
-							else
-							{
-								// Any other commands get here
-								bool silent = false;
-								if (lastCommand.IndexOf('!') == 0)
-								{
-									lastCommand = lastCommand.Substring(1);
-									silent = true;
-								}
-								if (!silent)
-								{
-									gotText += "Sending command: " + lastCommand + "\n";
-								}
+        private ShowSrcDissStruct show_diss_common()
+        {
+            try
+            {
+                // MPi: TODO: Tweak the 10 range based on the display height?
+                int range = 15;
+                int startPrev = mPC;
+                // Step backwards trying to find a good starting point to disassemble
+                while (range-- > 0)
+                {
+                    AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+                    if (addrInfo2.mPrevAddr < 0)
+                    {
+                        break;
+                    }
+                    startPrev = addrInfo2.mPrevAddr;
+                }
+                // MPi: TODO: Tweak the 10 range based on the display height?
+                range = 20;
+                // Step forwards trying to find a good ending point to disassemble
+                int endNext = mPC;
+                while (range-- > 0)
+                {
+                    AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
+                    if (addrInfo2.mNextAddr < 0)
+                    {
+                        break;
+                    }
+                    endNext = addrInfo2.mNextAddr;
+                }
+                
+                ShowSrcDissStruct sms = new ShowSrcDissStruct()
+                {
+                    endNext = endNext
+                    ,startPrev = startPrev
+                };
+                return sms;
+            }
+            catch (Exception ex)
+            {
 
-								SendCommand(lastCommand);
-								string theReply = "";
-								if (lastCommand.IndexOf("x") != 0)
-								{
-									theReply = GetReply();
-									gotText += theReply;
-								}
-								if (silent)
-								{
-									gotText = "";
-								}
-							}
+            }
+            return null;
+        }
 
-							if (gotText.Length > 0)
-							{
-								gotText = gotText.Replace("\n", "\r");
-								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
-							}
-						}
-						else
-						{
-							Thread.Sleep(100);
-							if (mSocket.Available > 0)
-							{
-								mNeedNewMemoryDump = true;
-								// This happens if a break/watch point is hit, then a reply is received without any command being sent
-								string theReply = GetReply();
-								gotText += theReply;
-//								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), gotText);
-								this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new NoArgDelegate(HandleCodeView));
-							}
-						}
-					} //< while (mSocket.Connected)
+        private void show_src_diss_post_registers()
+        {
+            ShowSrcDissStruct sms = show_diss_common();
+            if(sms == null) { SetSourceView("Source not found for this address "); return; }
 
-					if (wasConnected)
-					{
-						// Only if it was connected the dispose and try again
-						if (mSocket != null)
-						{
-							mSocket.Dispose();
-							mSocket = null;
-							this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), "Not connected");
-						}
-					}
+            sms.displayDissCallback = show_src_diss_get_post_dissasem;
+            string command = "d " + sms.startPrev.ToString("X") + " " + mPC.ToString("X");
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            CommandStruct.CS_TextDelegate callback = new CommandStruct.CS_TextDelegate(show_src_diss_get_pre_dissasem);
+            vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, callback, sms, this.Dispatcher);
+        }
 
-					Thread.Sleep(250);
-				}
-				catch (System.Exception /*ex*/)
-				{
-					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(SetSourceView), "Exception. Not connected");
-					if (mSocket != null)
-					{
-						mSocket.Dispose();
-						mSocket = null;
-					}
-					Thread.Sleep(250);
-				}
-			}
+        private void show_src_diss_get_pre_dissasem(string reply, object userData)
+        {
+            ShowSrcDissStruct sms = userData as ShowSrcDissStruct;
+            sms.disassemblyBefore = reply;
+            string command = "d " + mPC.ToString("X") + " " + sms.endNext.ToString("X");
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, sms.displayDissCallback, sms, this.Dispatcher);
+        }
 
-		}
+        private void show_src_diss_get_post_dissasem(string reply, object userData)
+        {
+            ShowSrcDissStruct sms = userData as ShowSrcDissStruct;
+            sms.disassemblyAfter = reply;
+            string displayText = String.Empty;
+            try
+            {
+                string lastSourceDisplayed = "";
+                int lastSourceIndexDisplayed = -1;
+                int lastSourceLineDisplayed = -1;
 
-		private void ConsumeData()
-		{
-			// Try to consume anything before sending commands...
-			while (mSocket.Available > 0)
-			{
-				byte[] bytes = new byte[500000];
-				mSocket.Receive(bytes);
-			}
-		}
+                int[] lastDisplayedLine = new int[mSourceFileNamesLength];
+                int i;
+                for (i = 0; i < mSourceFileNamesLength; i++)
+                {
+                    lastDisplayedLine[i] = 0;
+                }
 
-		private void commandBox_KeyDown(object sender, KeyEventArgs e)
+                //							gotText += disassemblyBefore;
+                //							gotText += ">>>\n";
+                //							gotText += disassemblyAfter;
+                // Get something like:
+                /*
+                    .C:0427  AD 00 04    LDA $0400
+                    .C:042a  AD 27 04    LDA $0427
+                    ...
+                    .C:0439  60          RTS
+                    .C:043a  AD 3A 04    LDA $043A
+                */
+                string[] split = sms.disassemblyBefore.Split('\r');
+                bool doingBefore = true;
+                int index = 0;
+                String lastSourceLine = "";
+                while (index < split.Length)
+                {
+                    string line = split[index++];
+                    if (line.Length < 7)
+                    {
+                        continue;
+                    }
+                    if (!line.StartsWith(".C:"))
+                    {
+                        continue;
+                    }
+                    string tAddr = line.Substring(3);
+                    tAddr = tAddr.Substring(0, 4);
+                    int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+                    if (doingBefore && theAddr >= mPC)
+                    {
+                        split = sms.disassemblyAfter.Split('\r');
+                        index = 0;
+                        doingBefore = false;
+                        continue;
+                    }
+
+                    try
+                    {
+                        AddrInfo addrInfo = mAddrInfoByAddr[theAddr];
+                        if (lastSourceDisplayed != mSourceFileNames[addrInfo.mFile])
+                        {
+                            lastSourceDisplayed = mSourceFileNames[addrInfo.mFile];
+                            displayText += "--- " + lastSourceDisplayed + " ---\r";
+                        }
+                        if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
+                        {
+                            lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine - 5;
+                            if (lastDisplayedLine[addrInfo.mFile] < 0)
+                            {
+                                lastDisplayedLine[addrInfo.mFile] = 0;
+                            }
+                        }
+                        if (lastDisplayedLine[addrInfo.mFile] > addrInfo.mLine)
+                        {
+                            lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine;
+                        }
+                        for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
+                        {
+                            if (lastSourceLine.Length > 0)
+                            {
+                                //gotText += "     " + "                                  " + lastSourceLine + "\n";
+                                displayText += "     " + lastSourceLine + "\r";
+                                lastSourceLine = "";
+                            }
+
+                            if ((lastSourceIndexDisplayed == addrInfo.mFile) && (lastSourceLineDisplayed == i))
+                            {
+                                // Stop displaying the same source and line multiple times in a row
+                                continue;
+                            }
+                            lastSourceLine = string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i];
+                            lastSourceIndexDisplayed = addrInfo.mFile;
+                            lastSourceLineDisplayed = i;
+                        }
+                        lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine + 1;
+                    }
+                    catch (System.Exception)
+                    {
+
+                    }
+
+                    if (theAddr == mPC)
+                    {
+                        displayText += ">>>> ";
+                    }
+                    else
+                    {
+                        displayText += "     ";
+                    }
+                    if (lastSourceLine.Length > 0)
+                    {
+                        line = line.PadRight(34, ' ');
+                        displayText += line + lastSourceLine + "\r";
+                        lastSourceLine = "";
+                    }
+                    else
+                    {
+                        displayText += line + "\r";
+                    }
+                }
+            }
+            catch (System.Exception)
+            {
+            }
+
+            SetSourceView(displayText);
+        }
+
+        private void show_diss_post_registers()
+        {
+            ShowSrcDissStruct sms = show_diss_common();
+            if (sms == null) { SetSourceView("Source not found for this address "); return; }
+            sms.displayDissCallback = new CommandStruct.CS_TextDelegate(show_diss_get_post_dissasem);
+            string command = "d " + sms.startPrev.ToString("X") + " " + mPC.ToString("X");
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(show_src_diss_get_pre_dissasem), sms, this.Dispatcher);
+        }
+
+        private void show_diss_get_post_dissasem(string reply, object userData)
+        {
+            string displayText = String.Empty;
+            try
+            {
+                ShowSrcDissStruct sms = userData as ShowSrcDissStruct;
+                string[] split = sms.disassemblyBefore.Split('\r');
+                bool doingBefore = true;
+                int index = 0;
+                while (index < split.Length)
+                {
+                    string line = split[index++];
+                    if (line.Length < 7)
+                    {
+                        continue;
+                    }
+                    string tAddr = line.Substring(3);
+                    tAddr = tAddr.Substring(0, 4);
+                    int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+                    if (doingBefore && theAddr >= mPC)
+                    {
+                        split = reply.Split('\r');
+                        index = 0;
+                        doingBefore = false;
+                        continue;
+                    }
+
+                    Brush brush = null;
+                    if (theAddr == mPC)
+                    {
+                        line = ">>>> " + line;
+                        brush = Brushes.LightBlue;
+                    }
+                    else
+                    {
+                        line = "     " + line;
+                    }
+                    line += "\r";
+
+                    displayText += line;
+                }
+            }
+            catch (System.Exception)
+            {
+            }
+
+            SetSourceView(displayText);
+        }
+
+        private void show_src_post_registers()
+        {
+            string displayText = string.Empty;
+            try
+            {
+                AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+                // MPi: TODO: Tweak the 20 range based on the display height?
+                int range = 20;
+                int startPrev = mPC;
+                // Step backwards trying to find a good starting point to disassemble
+                while (range-- > 0)
+                {
+                    AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+                    if (addrInfo2.mPrevAddr < 0)
+                    {
+                        break;
+                    }
+                    startPrev = addrInfo2.mPrevAddr;
+                }
+
+                displayText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
+                displayText += "Line:" + (addrInfo.mLine + 1) + "\n";
+                int theLine = addrInfo.mLine - 10;  // MPi: TODO: Tweak the - 10 based on the display height?
+                if (theLine < 0)
+                {
+                    theLine = 0;
+                }
+                // MPi: TODO: Tweak the 20 toDisplay based on the display height?
+                int toDisplay = 30;
+                while (toDisplay-- > 0)
+                {
+                    if (theLine == addrInfo.mLine)
+                    {
+                        displayText += "=>";
+                    }
+                    else
+                    {
+                        displayText += "  ";
+                    }
+                    string source = mSourceFiles[addrInfo.mFile][theLine++];
+                    source = source.Replace('\n', '\r');
+                    source.TrimEnd();
+
+                    displayText += source;
+                    displayText += "\r";
+                }
+            }
+            catch (System.Exception)
+            {
+                /*SendCommand("m 0000 ffff");
+                theReply = GetReply();
+                // No source info, so just dump memory
+                gotText += theReply;
+                //>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+                //>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+                //...
+                //>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....*/					
+            }
+
+            SetSourceView(displayText);
+        }
+
+        private void command_just_show_reply(string reply, object userData)
+        {
+            SetSourceView(reply);
+        }
+
+        private void commandBox_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
 			{
@@ -1362,38 +1537,48 @@ namespace VICEPDBMonitor
 					}
 				}
 
-				mCommands.Add(command);
+                dispatchCommand(command);
 				mCommandBox.Clear();
 			}
 		}
 
-		private void HandleCheckBoxes()
+        private void full_mem_dump(byte[] reply, object userData)
+        {
+            Buffer.BlockCopy(reply, 0, mMemoryC64, 0, reply.Length);
+        }
+
+        private void HandleCheckBoxes()
 		{
 			mDump = (mDoDump.IsChecked == true);
 			mUsedLabels = (mCheckUsedLabels.IsChecked == true);
 			mAccessUsed = (mCheckAccessUse.IsChecked == true);
 			mExecUsed = (mCheckExecUse.IsChecked == true);
 		}
-		private void HandleCodeView()
+        private void GotMsgFromVice(string text)
+        {
+            HandleCodeView(); //for now
+        }
+        private void HandleCodeView()
 		{
 			HandleCheckBoxes();
 			TestForMemoryDump();
-			mCommands.Add("!r");
+			//mCommands.Add("!r"); //all the sub commands do this anyway
 			if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == true )
 			{
-				mCommands.Add("!sm");
+                dispatchCommand("!sm");
 			}
 			else if (mDoSource.IsChecked == true && mDoDisassembly.IsChecked == false)
 			{
-				mCommands.Add("!s");
+                dispatchCommand("!s");
 			}
 			else if (mDoSource.IsChecked == false && mDoDisassembly.IsChecked == true)
 			{
-				mCommands.Add("!d");
+                dispatchCommand("!d");
 			}
 			else if (mDoSource.IsChecked == false && mDoDisassembly.IsChecked == false)
 			{
-				mCommands.Add("!cls");
+                //mCommands.Add("!cls");
+                SetSourceView(String.Empty);
 			}
 		}
 
@@ -1406,13 +1591,13 @@ namespace VICEPDBMonitor
 		private void Button_Click_Go(object sender, RoutedEventArgs e)
 		{
 			mNeedNewMemoryDump = true;
-			mCommands.Add("x");
+            dispatchCommand("x");
 		}
 
 		private void Button_Click_StepIn(object sender, RoutedEventArgs e)
 		{
 			mNeedNewMemoryDump = true;
-			mCommands.Add("!z");
+            dispatchCommand("!z");
 			HandleCodeView();
 		}
 
@@ -1434,14 +1619,14 @@ namespace VICEPDBMonitor
 		private void Button_Click_StepOver(object sender, RoutedEventArgs e)
 		{
 			mNeedNewMemoryDump = true;
-			mCommands.Add("!n");
+            dispatchCommand("!n");
 			HandleCodeView();
 		}
 
 		private void Button_Click_StepOut(object sender, RoutedEventArgs e)
 		{
 			mNeedNewMemoryDump = true;
-			mCommands.Add("!ret");
+            dispatchCommand("!ret");
 			HandleCodeView();
 		}
 
@@ -1449,12 +1634,12 @@ namespace VICEPDBMonitor
 		{
 			mAccessedCount.Clear();
 			mExecutedCount.Clear();
-			mCommands.Add("!memmapzap");
+            dispatchCommand("!memmapzap");
 		}
 
 		private void Button_Click_ProfileAdd(object sender, RoutedEventArgs e)
 		{
-			mCommands.Add("!memmapshow");
+            dispatchCommand("!memmapshow");
 		}
 
 		private void CheckBox_Checked(object sender, RoutedEventArgs e)
@@ -1469,23 +1654,29 @@ namespace VICEPDBMonitor
 			UpdateLabels();
 		}
 
+        private void viewSprites_Click(object sender, RoutedEventArgs e)
+        {
+            SpriteView SV = new SpriteView(this);
+            //set up here
+            SV.Show();
+        }
+
+        private void viewChars_Click(object sender, RoutedEventArgs e)
+        {
+            CharView CV = new CharView(this);
+            CV.Show();
+        }
+
 		private void mDoDump_Checked(object sender, RoutedEventArgs e)
 		{
 			HandleCheckBoxes();
 			UpdateLabels();
 		}
 
-		private void viewSprites_Click(object sender, RoutedEventArgs e)
-		{
-			SpriteView SV = new SpriteView(this);
-			//set up here
-			SV.Show();
-		}
-
-		private void viewChars_Click(object sender, RoutedEventArgs e)
-		{
-			CharView CV = new CharView(this);
-			CV.Show();
-		}
-	}
+        private void mScreenButton_Click(object sender, RoutedEventArgs e)
+        {
+            ScreenView SV = new ScreenView(this);
+            SV.Show();
+        }
+    }
 }
