@@ -26,12 +26,12 @@
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Consolas"/>
+            <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Courier New" TextOptions.TextFormattingMode="Display" FontStretch="ExtraExpanded" FontSize="14"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
             <TextBox x:Name="mLabelsBox" Margin="10,10,10,171" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2"/>
             <Button Content="Profile add" Margin="91,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom"/>
             <CheckBox x:Name="mCheckAccessUse" Content="Access use" Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,102,8" VerticalAlignment="Bottom" Checked="CheckBox_Checked_1"/>
-            <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" HorizontalAlignment="Left" Margin="185,405,0,0" VerticalAlignment="Top" Width="75" Click="mScreenButton_Click"/>
+            <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" HorizontalAlignment="Left" Margin="185,0,0,54" Width="75" Click="mScreenButton_Click" Height="20" VerticalAlignment="Bottom"/>
         </Grid>
         <Button Content="Step over" HorizontalAlignment="Right" Margin="0,0,184,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOver" Height="20"/>
         <Button Content="Step out" HorizontalAlignment="Right" Margin="0,0,184,91" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOut" Height="20"/>

@@ -309,6 +309,7 @@ namespace VICEPDBMonitor
 					// Skip #$xx
 					if (text[pos2 - 1] == '#')
 					{
+                        //text = text.Insert(pos + 4, "\t\t\t\t");
 						pos = pos2 + 3;
 						continue;
 					}
@@ -416,11 +417,46 @@ namespace VICEPDBMonitor
 			}
 			try
 			{
-				Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-				r.Background = null;
-
-				mTextBox.AppendText(text);
-
+                /*Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+				r.Background = null;*/
+                int split = text.IndexOf("=>");
+                if(split < 0 )
+                {
+                    split = text.IndexOf(">>>>");
+                }
+                if (split < 0)
+                {
+                    mTextBox.AppendText(text);
+                    mTextBox.EndChange();
+                }
+                else
+                {
+                    mTextBox.EndChange();
+                    string before = text.Substring(0, split);
+                    int endOfLine = text.IndexOf('\r', split);
+                    string currLine = text.Substring(split, endOfLine - split);
+                    string after = text.Substring(endOfLine);
+                    Run topRun = new Run(before)
+                    {
+                        Background = mTextBox.Background
+                    };
+                    Run currRun = new Run(currLine)
+                    {
+                        Background = Brushes.LightGray
+                    };
+                    Run afterRun = new Run(after)
+                    {
+                        Background = mTextBox.Background
+                    };
+                    Paragraph para = new Paragraph();
+                    para.Inlines.Add(topRun);
+                    para.Inlines.Add(currRun);
+                    para.Inlines.Add(afterRun);
+                    FlowDocument flow = new FlowDocument(para);
+                    mTextBox.Document = flow;
+                   
+                }
+                /*
 				// mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
 				TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
 				int offset = searchRange.Text.IndexOf("=>");
@@ -436,12 +472,11 @@ namespace VICEPDBMonitor
 					TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
 
 					result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
-				}
+				}*/
 			}
 			catch (System.Exception)
 			{
-			}
-			mTextBox.EndChange();
+			}			
 		}
 
 		private void AppendTextSourceView(String text, Brush brush)
@@ -981,7 +1016,7 @@ namespace VICEPDBMonitor
             }*/
             else if (command.IndexOf("!d") == 0)
             {
-                get_registers_callmeback(new NoArgDelegate(show_src_diss_post_registers));
+                get_registers_callmeback(new NoArgDelegate(show_diss_post_registers));
                 /*SendCommand("r");
                 string theReply = GetReply();
 
@@ -1232,7 +1267,7 @@ namespace VICEPDBMonitor
                     .C:0439  60          RTS
                     .C:043a  AD 3A 04    LDA $043A
                 */
-                string[] split = sms.disassemblyBefore.Split('\n');
+                string[] split = sms.disassemblyBefore.Split('\r');
                 bool doingBefore = true;
                 int index = 0;
                 String lastSourceLine = "";
@@ -1252,7 +1287,7 @@ namespace VICEPDBMonitor
                     int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
                     if (doingBefore && theAddr >= mPC)
                     {
-                        split = sms.disassemblyAfter.Split('\n');
+                        split = sms.disassemblyAfter.Split('\r');
                         index = 0;
                         doingBefore = false;
                         continue;
@@ -1264,7 +1299,7 @@ namespace VICEPDBMonitor
                         if (lastSourceDisplayed != mSourceFileNames[addrInfo.mFile])
                         {
                             lastSourceDisplayed = mSourceFileNames[addrInfo.mFile];
-                            displayText += "--- " + lastSourceDisplayed + " ---\n";
+                            displayText += "--- " + lastSourceDisplayed + " ---\r";
                         }
                         if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
                         {
@@ -1283,7 +1318,7 @@ namespace VICEPDBMonitor
                             if (lastSourceLine.Length > 0)
                             {
                                 //gotText += "     " + "                                  " + lastSourceLine + "\n";
-                                displayText += "     " + lastSourceLine + "\n";
+                                displayText += "     " + lastSourceLine + "\r";
                                 lastSourceLine = "";
                             }
 
@@ -1314,12 +1349,12 @@ namespace VICEPDBMonitor
                     if (lastSourceLine.Length > 0)
                     {
                         line = line.PadRight(34, ' ');
-                        displayText += line + lastSourceLine + "\n";
+                        displayText += line + lastSourceLine + "\r";
                         lastSourceLine = "";
                     }
                     else
                     {
-                        displayText += line + "\n";
+                        displayText += line + "\r";
                     }
                 }
             }
@@ -1330,7 +1365,7 @@ namespace VICEPDBMonitor
             SetSourceView(displayText);
         }
 
-        private void show_diss_post_registers(string reply, object userData)
+        private void show_diss_post_registers()
         {
             ShowSrcDissStruct sms = show_diss_common();
             if (sms == null) { SetSourceView("Source not found for this address "); return; }
@@ -1346,7 +1381,7 @@ namespace VICEPDBMonitor
             try
             {
                 ShowSrcDissStruct sms = userData as ShowSrcDissStruct;
-                string[] split = sms.disassemblyBefore.Split('\n');
+                string[] split = sms.disassemblyBefore.Split('\r');
                 bool doingBefore = true;
                 int index = 0;
                 while (index < split.Length)
@@ -1361,7 +1396,7 @@ namespace VICEPDBMonitor
                     int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
                     if (doingBefore && theAddr >= mPC)
                     {
-                        split = sms.disassemblyAfter.Split('\n');
+                        split = reply.Split('\r');
                         index = 0;
                         doingBefore = false;
                         continue;
@@ -1372,6 +1407,10 @@ namespace VICEPDBMonitor
                     {
                         line = ">>>> " + line;
                         brush = Brushes.LightBlue;
+                    }
+                    else
+                    {
+                        line = "     " + line;
                     }
                     line += "\r";
 
@@ -1424,9 +1463,12 @@ namespace VICEPDBMonitor
                     {
                         displayText += "  ";
                     }
+                    string source = mSourceFiles[addrInfo.mFile][theLine++];
+                    source = source.Replace('\n', '\r');
+                    source.TrimEnd();
 
-                    displayText += mSourceFiles[addrInfo.mFile][theLine++];
-                    displayText += "\n";
+                    displayText += source;
+                    displayText += "\r";
                 }
             }
             catch (System.Exception)
