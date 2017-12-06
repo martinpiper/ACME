@@ -529,7 +529,7 @@ namespace VICEPDBMonitor
 //			addr: IO ROM RAM
 //			0000: -- --- rw-
 //			0001: -- --- rw-
-			string[] split = theReply.Split('\n');
+			string[] split = theReply.Split('\r');
 			int index = 0;
 			bool gotProfileInfo = false;
 			while (index < split.Length)
