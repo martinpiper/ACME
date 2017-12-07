@@ -76,7 +76,10 @@ namespace VICEPDBMonitor
 
         public void addBinaryMemCommand(int start, int end, CommandStruct.CS_BinaryDelegate callback, object userData, Dispatcher dispatch)
         {
-            byte[] sendCommand = new byte[5];
+			// https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l267
+			
+			byte[] sendCommand = new byte[5];
+
             sendCommand[0] = 0x1; // mem dump
             sendCommand[1] = (byte)(start & 255);
             sendCommand[2] = (byte)((start >> 8) & 255);
@@ -136,7 +139,7 @@ namespace VICEPDBMonitor
                         wasConnected = true;
                         if (mCommands.Count > 0)
                         {
-                            ConsumeData();
+							ConsumeData();
                             lastCommand = mCommands[0];
                             mCommands.RemoveAt(0);
 
@@ -166,7 +169,6 @@ namespace VICEPDBMonitor
                                     case CommandStruct.eMode.DoCommandThenExit:
                                         GetReply();
                                         SendCommand("x");
-                                        GetReply();
                                         break;
                                     case CommandStruct.eMode.DoCommandOnly:
                                         break; //don't a single thing
@@ -252,8 +254,9 @@ namespace VICEPDBMonitor
             }
         }
 
-        public string GetReply()
+        public string GetReply(bool canBeEmptyReply = false)
         {
+			mGotTextWorking = "";
             string theReply = "";
 
             while (mSocket.Connected)
@@ -270,25 +273,26 @@ namespace VICEPDBMonitor
                 catch (System.Exception)
                 {
                     //					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
                 }
 
                 int foundFirstPos = mGotTextWorking.IndexOf("(C:$");
-                if (foundFirstPos >= 0 && mGotTextWorking.Length > 16)
+                if (foundFirstPos >= 0 && mGotTextWorking.Length >= 9)
                 {
-                    int foundSecondPos = mGotTextWorking.IndexOf("(C:$", foundFirstPos + 9);
-                    if (foundSecondPos > foundFirstPos)
+                    int foundThirdPos = mGotTextWorking.IndexOf(") ", foundFirstPos);
+                    if (foundThirdPos > foundFirstPos)
                     {
-                        int foundThirdPos = mGotTextWorking.IndexOf(") ", foundSecondPos + 4);
-                        if (foundThirdPos > foundSecondPos)
-                        {
-                            foundFirstPos += 10;    // End of the first "(C:$"
-                            theReply = mGotTextWorking.Substring(foundFirstPos, foundSecondPos - foundFirstPos);
-                            // Start the next command buffer with valid text
-                            mGotTextWorking = mGotTextWorking.Substring(foundSecondPos);
-                            theReply = theReply.Replace("\n", "\r");
-                            return theReply;
-                        }
+						theReply = mGotTextWorking.Substring(0, foundFirstPos);
+                        // Start the next command buffer with valid text
+						mGotTextWorking = mGotTextWorking.Substring(foundThirdPos + 2);
+						mGotTextWorking.Trim();
+                        theReply = theReply.Replace("\n", "\r");
+						theReply.Trim();
+						if (theReply.Length == 0 && mGotTextWorking.Length > 0)
+						{
+							continue;
+						}
+                        return theReply;
                     }
                 }
             }
@@ -304,6 +308,7 @@ namespace VICEPDBMonitor
                 byte[] bytes = new byte[500000];
                 mSocket.Receive(bytes);
             }
+			mGotTextWorking = "";
         }
 
         private byte[] sendBinaryCommand(byte[] binaryParams)
