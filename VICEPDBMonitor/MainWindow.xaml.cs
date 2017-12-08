@@ -57,6 +57,7 @@ namespace VICEPDBMonitor
 		MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
 		MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
         Regex mBreakPointResultRegex;
+        Regex mBreakPointHitRegex;
         List<BreakPointDataSource> mBreakPoints;
 
         private delegate void NoArgDelegate();
@@ -70,9 +71,7 @@ namespace VICEPDBMonitor
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.setErrorCallback(new VICECOMManager.OneArgDelegate(SetSourceView), this.Dispatcher);
             vcom.setVICEmsgCallback(new VICECOMManager.OneArgDelegate(GotMsgFromVice));
-
-            mBreakPointResultRegex = new Regex(@"^(BREAK|WATCH|):\s([0-9]+)\s+C:\$(([0-9a-fA-F]{4})\-?\$?([0-9a-fA-F]{4})?)\s+\(Stop on\s([a-z\s]+)\)\s*(disabled)?");
-
+           
             mBreakPoints = new List<BreakPointDataSource>();
 
 
@@ -582,18 +581,22 @@ namespace VICEPDBMonitor
 
 		private void ParseRegisters(string theReply)
 		{
-			//  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
-			//.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
-			string parse = theReply.Substring(theReply.IndexOf(".;"));
-			string[] parse2 = parse.Split(' ');
-			mPC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
-			mRegA = int.Parse(parse2[1], NumberStyles.HexNumber);
-			mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
-			mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
-			mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
-//			mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
+            //  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
+            //.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
+            int index = theReply.IndexOf(".;"); //seems when you have break point this can get messed up
+            if (index >= 0)
+            {
+                string parse = theReply.Substring(index);
+                string[] parse2 = parse.Split(' ');
+                mPC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
+                mRegA = int.Parse(parse2[1], NumberStyles.HexNumber);
+                mRegX = int.Parse(parse2[2], NumberStyles.HexNumber);
+                mRegY = int.Parse(parse2[3], NumberStyles.HexNumber);
+                mSP = int.Parse(parse2[4], NumberStyles.HexNumber);
+                //			mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
 
-			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
+                this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
+            }
 		}
 
 		private void UpdateLabels()
@@ -1082,7 +1085,7 @@ namespace VICEPDBMonitor
             mBreakPointDisplay.ItemsSource = null;
             foreach (string line in lines)
             {
-                Match match = mBreakPointResultRegex.Match(line);
+                Match match = RegexMan.BreakPointResult.Match(line);
                 if (match.Success)
                 {
                     BreakPointDataSource test = new BreakPointDataSource();
@@ -1206,7 +1209,19 @@ namespace VICEPDBMonitor
 		}
         private void GotMsgFromVice(string text)
         {
-            HandleCodeView(); //for now
+            Match match = RegexMan.BreakPointHit.Match(text);
+            if (match.Success)
+            {
+                //we have a break point hit, but does anybody want it?
+                if( BreakPointDispatcher.getBreakPointDispatcher().checkBreakPointAndDisptach(match) == false)
+                {
+                    HandleCodeView();
+                }
+            }
+            else
+            {
+                HandleCodeView(); //for now
+            }
         }
         private void HandleCodeView()
 		{

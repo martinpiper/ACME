@@ -21,23 +21,23 @@ namespace VICEPDBMonitor
 
         public void setFromMatch(Match match)
         {
-            Number = Int32.Parse(match.Groups[2].Value);
-            Address = match.Groups[3].Value;
-            Disabled = match.Groups[7].Length == 0;
-            Mode = match.Groups[6].Value;
+            Number = Int32.Parse(match.Groups[(int)RegexMan.eBreakPointResult.number].Value);
+            Address = match.Groups[(int)RegexMan.eBreakPointResult.address_range].Value;
+            Disabled = match.Groups[(int)RegexMan.eBreakPointResult.ifDisabled].Length == 0;
+            Mode = match.Groups[(int)RegexMan.eBreakPointResult.operation].Value;
             try
             {
-                AddressNumber = Int32.Parse(match.Groups[4].Value, System.Globalization.NumberStyles.HexNumber);
+                AddressNumber = Int32.Parse(match.Groups[(int)RegexMan.eBreakPointResult.first_address].Value, System.Globalization.NumberStyles.HexNumber);
             }
             catch (Exception ex)
             {
                 AddressNumber = -1;
             }
-            if( match.Groups[5].Value.Length > 0 )
+            if( match.Groups[(int)RegexMan.eBreakPointResult.second_address].Value.Length > 0 )
             {
                 try
                 {
-                    EndAddressNumber = Int32.Parse(match.Groups[5].Value, System.Globalization.NumberStyles.HexNumber);
+                    EndAddressNumber = Int32.Parse(match.Groups[(int)RegexMan.eBreakPointResult.second_address].Value, System.Globalization.NumberStyles.HexNumber);
                 }
                 catch (Exception ex)
                 {
