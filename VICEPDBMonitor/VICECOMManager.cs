@@ -171,6 +171,7 @@ namespace VICEPDBMonitor
                                         SendCommand("x");
                                         break;
                                     case CommandStruct.eMode.DoCommandOnly:
+                                        ConsumeData(); 
                                         break; //don't a single thing
                                 }
                             }

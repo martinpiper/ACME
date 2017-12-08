@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.Net.Sockets;
 using System.Globalization;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace VICEPDBMonitor
 {
@@ -55,6 +56,8 @@ namespace VICEPDBMonitor
 		MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
 		MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
 		MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
+        Regex mBreakPointResultRegex;
+        List<BreakPointDataSource> mBreakPoints;
 
         private delegate void NoArgDelegate();
         private delegate void OneArgDelegate(String arg);
@@ -67,7 +70,14 @@ namespace VICEPDBMonitor
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.setErrorCallback(new VICECOMManager.OneArgDelegate(SetSourceView), this.Dispatcher);
             vcom.setVICEmsgCallback(new VICECOMManager.OneArgDelegate(GotMsgFromVice));
-            
+
+            mBreakPointResultRegex = new Regex(@"^(BREAK|WATCH|):\s([0-9]+)\s+C:\$(([0-9a-fA-F]{4})\-?\$?([0-9a-fA-F]{4})?)\s+\(Stop on\s([a-z\s]+)\)\s*(disabled)?");
+
+            mBreakPoints = new List<BreakPointDataSource>();
+
+
+            mBreakPointDisplay.ItemsSource = mBreakPoints;
+                
 			string line;
 			string[] commandLineArgs = Environment.GetCommandLineArgs();
 
@@ -234,6 +244,8 @@ namespace VICEPDBMonitor
 //			mCommands.Add("x");
 //			mCommands.Add("!s");
 //			mCommands.Add("!sm");
+
+            dispatchCommand("!breaklist");
 
 			HandleCodeView();
 	
@@ -675,6 +687,14 @@ namespace VICEPDBMonitor
             {
                 get_registers_callmeback(new NoArgDelegate(show_diss_post_registers));
             }
+            else if (command.IndexOf("!breaklist") == 0)
+            {
+                vcom.addTextCommand("break", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(breaklist_callback), null, this.Dispatcher);
+            }
+            else if (command.IndexOf("break") == 0 || command.IndexOf("watch") == 0)
+            {
+                vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(break_callback), null, this.Dispatcher);
+            }
             else
             {
                 // Any other commands get here
@@ -1048,14 +1068,53 @@ namespace VICEPDBMonitor
             SetSourceView(reply);
         }
 
+        private void breaklist_callback(string reply, object userData)
+        {
+            mBreakPoints.Clear();
+            break_callback(reply, userData);
+            
+        }
+
+        private void break_callback(string reply, object userData)
+        {
+            string[] lines = reply.Split('\r');
+
+            mBreakPointDisplay.ItemsSource = null;
+            foreach (string line in lines)
+            {
+                Match match = mBreakPointResultRegex.Match(line);
+                if (match.Success)
+                {
+                    BreakPointDataSource test = new BreakPointDataSource();
+                    test.setFromMatch(match);
+                    mBreakPoints.Add(test);
+                }
+            }
+            mBreakPointDisplay.ItemsSource = mBreakPoints;
+        }
+
         private void commandBox_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
 			{
-				string command = mCommandBox.Text;
+				string command = mCommandBox.Text.Trim();
 
-				// Produce a list of variable names and values relevant to the current PC and its zone
-				List<LabelInfo> allLabels = new List<LabelInfo>();
+                //trap and evelvate commands 
+                if(command.StartsWith("z"))
+                {
+                    command = "!" + command;
+                }
+                else if (command.StartsWith("n"))
+                {
+                    command = "!" + command;
+                }
+                else if (command.StartsWith("ret"))
+                {
+                    command = "!" + command;
+                }
+               
+                // Produce a list of variable names and values relevant to the current PC and its zone
+                List<LabelInfo> allLabels = new List<LabelInfo>();
 
 				try
 				{
@@ -1181,7 +1240,7 @@ namespace VICEPDBMonitor
 
 		private void Button_Click_Go(object sender, RoutedEventArgs e)
 		{
-			mNeedNewMemoryDump = true;
+            // mNeedNewMemoryDump = true; //do we really need a new mem dump on an X won't that cause the data backup when you quit?
             dispatchCommand("x");
 		}
 
@@ -1268,6 +1327,33 @@ namespace VICEPDBMonitor
         {
             ScreenView SV = new ScreenView(this);
             SV.Show();
+        }
+
+        private void mBreakpointEnabledCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+            BreakPointDataSource ds = cb.DataContext as BreakPointDataSource;
+            int breakNum = ds.Number;
+            dispatchCommand("enable " + breakNum);
+        }
+
+        private void mBreakpointEnabledCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+            BreakPointDataSource ds = cb.DataContext as BreakPointDataSource;
+            int breakNum = ds.Number;
+            dispatchCommand("disable " + breakNum);
+        }
+
+        private void removeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            BreakPointDataSource ds = button.DataContext as BreakPointDataSource;
+            int breakNum = ds.Number;
+            dispatchCommand("del " + breakNum);
+            mBreakPoints.Remove(ds);
+            mBreakPointDisplay.ItemsSource = null;
+            mBreakPointDisplay.ItemsSource = mBreakPoints;
         }
     }
 }
