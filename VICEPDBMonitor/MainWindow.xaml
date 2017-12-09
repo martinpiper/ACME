@@ -1,7 +1,20 @@
 ﻿<Window x:Class="VICEPDBMonitor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="VICE PDB Monitor" Height="546.684" Width="1073.526" ResizeMode="CanResizeWithGrip">
+        Title="VICE PDB Monitor" Height="717.417" Width="1073.526" ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <DataTemplate x:Key="FirstCell">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox x:Name="mBreakpointEnabledCheckbox"  IsChecked="{Binding Disabled}" Checked="mBreakpointEnabledCheckbox_Checked" Unchecked="mBreakpointEnabledCheckbox_Unchecked" />
+                <TextBlock Text="{Binding NumberString}" FontFamily="Courier New" ></TextBlock>
+                <TextBlock Text=" : " FontFamily="Courier New" ></TextBlock>
+                <TextBlock Text="{Binding Address}" FontFamily="Courier New"></TextBlock>
+                <TextBlock Text=" " FontFamily="Courier New"></TextBlock>
+                <TextBlock Text="{Binding Mode}" FontFamily="Courier New"></TextBlock>
+                <Button x:Name="removeButton" Content="Del" Background="Red" Foreground="White" FontFamily="Courier New" Click="removeButton_Click"></Button>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
     <Grid x:Name="monitorText" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -28,10 +41,17 @@
             </RichTextBox>
             <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Courier New" TextOptions.TextFormattingMode="Display" FontStretch="ExtraExpanded" FontSize="14"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
-            <TextBox x:Name="mLabelsBox" Margin="10,10,10,171" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2"/>
+            <TextBox x:Name="mLabelsBox" Margin="10,10,10,334" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2"/>
             <Button Content="Profile add" Margin="91,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom"/>
             <CheckBox x:Name="mCheckAccessUse" Content="Access use" Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,102,8" VerticalAlignment="Bottom" Checked="CheckBox_Checked_1"/>
             <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" HorizontalAlignment="Left" Margin="185,0,0,54" Width="75" Click="mScreenButton_Click" Height="20" VerticalAlignment="Bottom"/>
+            <ListView x:Name="mBreakPointDisplay" Grid.Column="2" HorizontalAlignment="Left" Height="148" Margin="10,320,0,0" VerticalAlignment="Top" Width="250">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn CellTemplate="{StaticResource FirstCell}" Width="230"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </Grid>
         <Button Content="Step over" HorizontalAlignment="Right" Margin="0,0,184,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOver" Height="20"/>
         <Button Content="Step out" HorizontalAlignment="Right" Margin="0,0,184,91" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOut" Height="20"/>

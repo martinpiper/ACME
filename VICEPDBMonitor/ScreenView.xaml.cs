@@ -17,11 +17,12 @@ namespace VICEPDBMonitor
     /// <summary>
     /// Interaction logic for ScreenView.xaml
     /// </summary>
-    public partial class ScreenView : Window
+    public partial class ScreenView : Window, IBreakpointReturn
     {
         MainWindow m_mainWindow;
         int m_screenAddress;
         int m_charAddress;
+        int m_breakpointNumber;
 
         int m_backgroundColour;
         int m_mulCol0;
@@ -50,6 +51,7 @@ namespace VICEPDBMonitor
             // setAllHires();
             m_screenAddress = 0;
             m_charAddress = 0;
+            m_breakpointNumber = -1;
         }
 
         private void backgroundColour_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -165,6 +167,58 @@ namespace VICEPDBMonitor
                 }
             }
             renderScreen();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            BreakPointDispatcher bpd = BreakPointDispatcher.getBreakPointDispatcher();
+            if (m_breakpointNumber >= 0)
+            {
+                Button butt = sender as Button;
+                butt.Content = "Trace Reads";
+                bpd.removeBreakpoint(m_breakpointNumber);
+                m_breakpointNumber = -1;
+            }
+            else
+            {
+                Button butt = sender as Button;
+                butt.Content = "Stop Trace";
+                int end = m_screenAddress + 1000;
+                bpd.addWatchPointAndNotifyMe(m_screenAddress, end, new BreakPointDispatcher.BreakPointEventDelegate(hitBreakpoint), this.Dispatcher, true, false, this);
+            }
+        }
+
+        private void hitBreakpoint(String eventType, int number, int address)
+        {
+            int relAddr = address - m_screenAddress;
+            int y = relAddr / 40;
+            int x = relAddr % 40;
+            int[] pixels = new int[8 * 8];
+            Int32Rect rect = new Int32Rect(x * 8, y * 8, 8, 8);
+            m_wb.CopyPixels(rect, pixels, 8*4, 0);
+            for( int dy = 0; dy < 8; dy++)
+            {
+                for(int dx = 0; dx < 8; dx++)
+                {
+                    int value = pixels[dy * 8 + dx];
+                    value = (int)(value ^ 0xFFFFFFFF);
+                    pixels[dy * 8 + dx] = value;
+                }
+            }
+            m_wb.WritePixels(rect, pixels, 8*4, 0);
+            canvas.Source = null;
+            canvas.Source = m_wb;
+
+            if(autorunCB.IsChecked ?? true)
+            {
+                VICECOMManager vcom = VICECOMManager.getVICEComManager();
+                vcom.addTextCommand("x", CommandStruct.eMode.DoCommandOnly, null, null, null);
+            }
+        }
+
+        public void yourBreakpointNumberIs(int number)
+        {
+            m_breakpointNumber = number;
         }
     }
 }

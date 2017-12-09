@@ -79,6 +79,7 @@ namespace VICEPDBMonitor
 			// https://sourceforge.net/p/vice-emu/code/HEAD/tree/trunk/vice/src/monitor/monitor_network.c#l267
 			
 			byte[] sendCommand = new byte[5];
+
             sendCommand[0] = 0x1; // mem dump
             sendCommand[1] = (byte)(start & 255);
             sendCommand[2] = (byte)((start >> 8) & 255);
@@ -170,6 +171,7 @@ namespace VICEPDBMonitor
                                         SendCommand("x");
                                         break;
                                     case CommandStruct.eMode.DoCommandOnly:
+                                        ConsumeData(); 
                                         break; //don't a single thing
                                 }
                             }
