@@ -60,6 +60,9 @@
     <Compile Include="CharView.xaml.cs">
       <DependentUpon>CharView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MemCalc.xaml.cs">
+      <DependentUpon>MemCalc.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MultiMap.cs" />
     <Compile Include="RegexMan.cs" />
     <Compile Include="ScreenView.xaml.cs">
@@ -85,6 +88,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MemCalc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ScreenView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -112,6 +119,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="charsets\CHARROM.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="charsets\hexcharset1.prg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

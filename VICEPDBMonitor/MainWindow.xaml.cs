@@ -1370,5 +1370,11 @@ namespace VICEPDBMonitor
             mBreakPointDisplay.ItemsSource = null;
             mBreakPointDisplay.ItemsSource = mBreakPoints;
         }
+
+        private void calculator_Click(object sender, RoutedEventArgs e)
+        {
+            MemCalc MC = new MemCalc();
+            MC.Show();
+        }
     }
 }

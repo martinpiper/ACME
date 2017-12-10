@@ -48,6 +48,8 @@ namespace VICEPDBMonitor
             charMem.Items.Add("hex 1");
             charMem.Items.Add("hex 2");
             charMem.Items.Add("hex 3");
+            charMem.Items.Add("CharROM lo");
+            charMem.Items.Add("CharROM hi");
             for (int i = 0; i < 0xFFFF; i += 0x400)
             {
                 screenMem.Items.Add(string.Format("{0:X4}", i));
@@ -115,6 +117,12 @@ namespace VICEPDBMonitor
                         break;
                     case kNumRAMCharsets+2:
                         m_charAddress = (int)VICIIRenderer.eExtraCharsets.hexCharset3;
+                        break;
+                    case kNumRAMCharsets + 3:
+                        m_charAddress = (int)VICIIRenderer.eExtraCharsets.charrom_lo;
+                        break;
+                    case kNumRAMCharsets + 4:
+                        m_charAddress = (int)VICIIRenderer.eExtraCharsets.charrom_hi;
                         break;
                 }
             }

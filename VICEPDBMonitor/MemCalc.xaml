@@ -1,0 +1,29 @@
+﻿<Window x:Class="VICEPDBMonitor.MemCalc"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VICEPDBMonitor"
+        mc:Ignorable="d"
+        Title="MemCalc" Height="300" Width="248.667">
+    <Grid Margin="0,0,0,0">
+        <Label Content="Char Calculator" HorizontalAlignment="Left" Margin="8,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="Base" HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mCharBase"  HorizontalAlignment="Left" Height="23" Margin="71,40,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="35" KeyDown="mCharBase_KeyDown"/>
+        <Label Content="Address" HorizontalAlignment="Left" Margin="111,36,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mCharAddress"  HorizontalAlignment="Left" Height="23" Margin="169,40,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="35" KeyDown="mCharBase_KeyDown"/>
+        <Label Content="Char Num" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mCharNum"  HorizontalAlignment="Left" Height="23" Margin="74,67,0,0" TextWrapping="Wrap" Text="254" VerticalAlignment="Top" Width="32" KeyDown="charChangeCharLine"/>
+        <Label Content="Char Line" HorizontalAlignment="Left" Margin="108,65,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mCharLine"  HorizontalAlignment="Left" Height="23" Margin="172,68,0,0" TextWrapping="Wrap" Text="254" VerticalAlignment="Top" Width="32" KeyDown="charChangeCharLine"/>
+        <Label Content="Screen Calculator" HorizontalAlignment="Left" Margin="10,95,0,0" VerticalAlignment="Top"/>
+        <Label Content="Base" HorizontalAlignment="Left" Margin="10,121,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mScreenrBase"  HorizontalAlignment="Left" Height="23" Margin="71,125,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="35" KeyDown="ScreenAddr_KeyDown"/>
+        <Label Content="Address" HorizontalAlignment="Left" Margin="111,121,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mScreenAddress"  HorizontalAlignment="Left" Height="23" Margin="169,125,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="35" KeyDown="ScreenAddr_KeyDown"/>
+        <Label Content="Char Num" HorizontalAlignment="Left" Margin="105,150,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mScreenCharNum"  HorizontalAlignment="Left" Height="23" Margin="169,153,0,0" TextWrapping="Wrap" Text="254" VerticalAlignment="Top" Width="32" KeyDown="ScreenLine_KeyDown"/>
+        <Label Content="Screen Line" HorizontalAlignment="Left" Margin="10,150,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mScreenLine"  HorizontalAlignment="Left" Height="23" Margin="76,153,0,0" TextWrapping="Wrap" Text="254" VerticalAlignment="Top" Width="32" KeyDown="ScreenLine_KeyDown"/>
+    </Grid>
+</Window>
