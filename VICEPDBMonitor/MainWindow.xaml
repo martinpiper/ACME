@@ -52,6 +52,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            <Button x:Name="mCalculator" Content="Calculator" Grid.Column="2" HorizontalAlignment="Left" Margin="185,619,0,0" VerticalAlignment="Top" Width="75" Click="calculator_Click"/>
         </Grid>
         <Button Content="Step over" HorizontalAlignment="Right" Margin="0,0,184,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOver" Height="20"/>
         <Button Content="Step out" HorizontalAlignment="Right" Margin="0,0,184,91" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOut" Height="20"/>

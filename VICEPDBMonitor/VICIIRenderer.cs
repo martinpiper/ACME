@@ -15,8 +15,7 @@ namespace VICEPDBMonitor
         public static byte[] charsetHex1;
         public static byte[] charsetHex2;
         public static byte[] charsetHex3;
-        //public static byte[] charsetCHARROMLo;
-        //public static byte[] charsetCHARROMHi;
+        public static byte[] charsetCHARROM;
 
         public static void initRenderer()
         {
@@ -26,6 +25,7 @@ namespace VICEPDBMonitor
             charsetHex1 = File.ReadAllBytes(Path.Combine(charsetFolder, "hexcharset1.prg"));
             charsetHex2 = File.ReadAllBytes(Path.Combine(charsetFolder, "hexcharset2.prg"));
             charsetHex3 = File.ReadAllBytes(Path.Combine(charsetFolder, "hexcharset3.prg"));
+            charsetCHARROM = File.ReadAllBytes(Path.Combine(charsetFolder, "CHARROM.chr"));
 
             for (int i = 2; i < 2048; ++i) //strip off the prg header
             {
@@ -41,6 +41,8 @@ namespace VICEPDBMonitor
             ,hexCharset1 = 0x20000
             ,hexCharset2 = 0x20800
             ,hexCharset3 = 0x21000
+            ,charrom_lo = 0x21800
+            ,charrom_hi = 0x22000
         }
 
         public static void renderChar(int addr, int charX, int charY, bool multicolour, int charColour, int backgroundColour, int mulCol0, int mulCol1, WriteableBitmap wb)
@@ -69,6 +71,11 @@ namespace VICEPDBMonitor
                 {
                     ram = charsetHex3;
                     addr &= 0x7ff;
+                }
+                else if (addr >= (int)eExtraCharsets.charrom_lo && addr < (int)eExtraCharsets.charrom_hi + 0x800)
+                {
+                    ram = charsetCHARROM;
+                    addr &= 0xfff;
                 }
                 else
                 {
