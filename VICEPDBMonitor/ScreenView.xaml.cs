@@ -33,6 +33,8 @@ namespace VICEPDBMonitor
 
         WriteableBitmap m_wb;
 
+        const int kNumRAMCharsets = 0x10000 / 0x800;
+
         public ScreenView(MainWindow mainWindow)
         {
             InitializeComponent();
@@ -43,6 +45,9 @@ namespace VICEPDBMonitor
             {
                 charMem.Items.Add(string.Format("{0:X4}", i));
             }
+            charMem.Items.Add("hex 1");
+            charMem.Items.Add("hex 2");
+            charMem.Items.Add("hex 3");
             for (int i = 0; i < 0xFFFF; i += 0x400)
             {
                 screenMem.Items.Add(string.Format("{0:X4}", i));
@@ -93,7 +98,26 @@ namespace VICEPDBMonitor
 
         private void charMem_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            m_charAddress = charMem.SelectedIndex * 0x800;
+            if (charMem.SelectedIndex < kNumRAMCharsets)
+            {
+                m_charAddress = charMem.SelectedIndex * 0x800;
+            }
+            else
+            {
+                switch(charMem.SelectedIndex)
+                {
+                    default:
+                    case kNumRAMCharsets:
+                        m_charAddress = (int)VICIIRenderer.eExtraCharsets.hexCharset1;
+                        break;
+                    case kNumRAMCharsets+1:
+                        m_charAddress = (int)VICIIRenderer.eExtraCharsets.hexCharset2;
+                        break;
+                    case kNumRAMCharsets+2:
+                        m_charAddress = (int)VICIIRenderer.eExtraCharsets.hexCharset3;
+                        break;
+                }
+            }
             drawScreen();
         }
 

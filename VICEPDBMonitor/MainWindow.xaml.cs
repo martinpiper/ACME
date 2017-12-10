@@ -73,9 +73,9 @@ namespace VICEPDBMonitor
             vcom.setVICEmsgCallback(new VICECOMManager.OneArgDelegate(GotMsgFromVice));
            
             mBreakPoints = new List<BreakPointDataSource>();
-
-
             mBreakPointDisplay.ItemsSource = mBreakPoints;
+
+            VICIIRenderer.initRenderer(); //load charsets
                 
 			string line;
 			string[] commandLineArgs = Environment.GetCommandLineArgs();
