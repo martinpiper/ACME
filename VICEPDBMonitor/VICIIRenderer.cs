@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,11 +12,71 @@ namespace VICEPDBMonitor
 {
     class VICIIRenderer
     {
+        public static byte[] charsetHex1;
+        public static byte[] charsetHex2;
+        public static byte[] charsetHex3;
+        //public static byte[] charsetCHARROMLo;
+        //public static byte[] charsetCHARROMHi;
+
+        public static void initRenderer()
+        {
+            string currentDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            string charsetFolder = Path.Combine(currentDirectory, "charsets");
+
+            charsetHex1 = File.ReadAllBytes(Path.Combine(charsetFolder, "hexcharset1.prg"));
+            charsetHex2 = File.ReadAllBytes(Path.Combine(charsetFolder, "hexcharset2.prg"));
+            charsetHex3 = File.ReadAllBytes(Path.Combine(charsetFolder, "hexcharset3.prg"));
+
+            for (int i = 2; i < 2048; ++i) //strip off the prg header
+            {
+                charsetHex1[i - 2] = charsetHex1[i];
+                charsetHex2[i - 2] = charsetHex2[i];
+                charsetHex3[i - 2] = charsetHex3[i];
+            }
+        }
+
+        public enum eExtraCharsets
+        {
+            extraCharsetStart = 0x2000
+            ,hexCharset1 = 0x20000
+            ,hexCharset2 = 0x20800
+            ,hexCharset3 = 0x21000
+        }
+
         public static void renderChar(int addr, int charX, int charY, bool multicolour, int charColour, int backgroundColour, int mulCol0, int mulCol1, WriteableBitmap wb)
         {
+            byte[] ram;
 
-            C64RAM ramObjc = C64RAM.getInstace();
-            byte[] ram = ramObjc.getRAM();
+            //check to see if we are using an extra charset
+            if (addr < (int)eExtraCharsets.extraCharsetStart)
+            {
+                C64RAM ramObjc = C64RAM.getInstace();
+                ram = ramObjc.getRAM();
+            }
+            else
+            {
+                if (addr >= (int)eExtraCharsets.hexCharset1 && addr < (int)eExtraCharsets.hexCharset1 + 0x800)
+                {
+                    ram = charsetHex1;
+                    addr &= 0x7ff;
+                }
+                else if (addr >= (int)eExtraCharsets.hexCharset2 && addr < (int)eExtraCharsets.hexCharset2 + 0x800)
+                {
+                    ram = charsetHex2;
+                    addr &= 0x7ff;
+                }
+                else if (addr >= (int)eExtraCharsets.hexCharset3 && addr < (int)eExtraCharsets.hexCharset3 + 0x800)
+                {
+                    ram = charsetHex3;
+                    addr &= 0x7ff;
+                }
+                else
+                {
+                    C64RAM ramObjc = C64RAM.getInstace();
+                    ram = ramObjc.getRAM();
+                }
+            }
+            
 
             Int32Rect rect = new Int32Rect();
             if (multicolour)
