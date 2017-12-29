@@ -99,6 +99,48 @@ namespace VICEPDBMonitor
                 }
             }
         }
+
+        private void SpriteAddr_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                try
+                {
+                    int baseAddr = Int32.Parse(mSpriteBase.Text, System.Globalization.NumberStyles.HexNumber);
+                    int sprAddress = Int32.Parse(mSpriteAddress.Text, System.Globalization.NumberStyles.HexNumber);
+                    sprAddress -= baseAddr;
+                    int spriteNum = sprAddress / 64;
+                    int line = (sprAddress % 64) / 3;
+                    int x = (sprAddress % 64) % 3;
+                    mSpriteNum.Text = spriteNum.ToString();
+                    mSpriteLine.Text = line.ToString();
+                    mSpriteX.Text = x.ToString();
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void SpriteLine_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Return)
+            {
+                try
+                {
+                    int baseAddr = Int32.Parse(mSpriteBase.Text, System.Globalization.NumberStyles.HexNumber);
+
+                    int spriteNum = Int32.Parse(mSpriteNum.Text);
+                    int line = Int32.Parse(mSpriteLine.Text);
+                    int x = Int32.Parse(mSpriteX.Text);
+                    int sprAddress = baseAddr + (spriteNum * 64) + (line * 3) + x;
+                    mSpriteAddress.Text = String.Format("{0:X4}", sprAddress);
+                }
+                catch
+                {
+                }
+            }
+        }
     }
 
 }

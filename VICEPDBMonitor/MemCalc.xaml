@@ -25,5 +25,16 @@
         <TextBox x:Name="mScreenCharNum"  HorizontalAlignment="Left" Height="23" Margin="169,153,0,0" TextWrapping="Wrap" Text="254" VerticalAlignment="Top" Width="32" KeyDown="ScreenLine_KeyDown"/>
         <Label Content="Screen Line" HorizontalAlignment="Left" Margin="10,150,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="mScreenLine"  HorizontalAlignment="Left" Height="23" Margin="76,153,0,0" TextWrapping="Wrap" Text="254" VerticalAlignment="Top" Width="32" KeyDown="ScreenLine_KeyDown"/>
+        <Label Content="Sprite Calculator" HorizontalAlignment="Left" Margin="10,178,0,0" VerticalAlignment="Top"/>
+        <Label Content="Base" HorizontalAlignment="Left" Margin="10,204,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mSpriteBase"  HorizontalAlignment="Left" Height="23" Margin="71,208,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="35" KeyDown="SpriteAddr_KeyDown"/>
+        <Label Content="Address" HorizontalAlignment="Left" Margin="111,204,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mSpriteAddress"  HorizontalAlignment="Left" Height="23" Margin="169,208,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="35" KeyDown="SpriteAddr_KeyDown"/>
+        <Label Content="Num" HorizontalAlignment="Left" Margin="10,230,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mSpriteNum" HorizontalAlignment="Left" Height="23" Margin="46,234,0,0" TextWrapping="Wrap" Text="255" VerticalAlignment="Top" Width="34" KeyDown="SpriteLine_KeyDown"/>
+        <Label Content="Line" HorizontalAlignment="Left" Margin="91,230,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mSpriteLine" HorizontalAlignment="Left" Height="23" Margin="128,234,0,0" TextWrapping="Wrap" Text="21" VerticalAlignment="Top" Width="29" KeyDown="SpriteLine_KeyDown"/>
+        <Label Content="x" HorizontalAlignment="Left" Margin="169,230,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="mSpriteX" HorizontalAlignment="Left" Height="23" Margin="185,234,0,0" TextWrapping="Wrap" Text="3" VerticalAlignment="Top" Width="19" KeyDown="SpriteLine_KeyDown"/>
     </Grid>
 </Window>
