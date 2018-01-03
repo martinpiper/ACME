@@ -52,6 +52,7 @@ namespace VICEPDBMonitor
 		int mSourceFileNamesLength = 0;
 		List<string> mSourceFileNamesFound = new List<string>();
 		List<List<string>> mSourceFiles = new List<List<string>>();
+		List<LabelInfo> mAllLabels = new List<LabelInfo>();
 		SortedDictionary<int, AddrInfo> mAddrInfoByAddr = new SortedDictionary<int, AddrInfo>();
 		MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
 		MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
@@ -176,12 +177,15 @@ namespace VICEPDBMonitor
 								labelInfo.mLabel = tokens[2];
 								labelInfo.mUsed = int.Parse(tokens[3]) == 1;
 								labelInfo.mMemory = int.Parse(tokens[4]) == 1;
+								mAllLabels.Add(labelInfo);
 								mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
 								mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
 								mLabelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
 							}
 						}
 					}
+
+					mAllLabels.Sort((a, b) => b.mLabel.Length.CompareTo(a.mLabel.Length));
 
 					file.Close();
 				}
@@ -1144,6 +1148,9 @@ namespace VICEPDBMonitor
 
 				}
 
+				// Now add all other labels to the end of the list
+				allLabels.AddRange(mAllLabels);
+
 				// Look for labels after each whitespace
 				int pos = 0;
 				while (pos < command.Length)
@@ -1167,13 +1174,16 @@ namespace VICEPDBMonitor
 
 					// Note the length order gets the most precise match
 					LabelInfo found = null;
-		
-					foreach (LabelInfo label in allLabels)
+
+					if (remaining.Length > 0)
 					{
-						if (remaining.StartsWith(label.mLabel))
+						foreach (LabelInfo label in allLabels)
 						{
-							found = label;
-							break;
+							if (label.mLabel.Length >= remaining.Length && remaining.StartsWith(label.mLabel))
+							{
+								found = label;
+								break;
+							}
 						}
 					}
 
