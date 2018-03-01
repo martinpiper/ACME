@@ -86,6 +86,10 @@ namespace VICEPDBMonitor
 
             dataList.Items.Clear();
 
+            int aligment = 24;
+
+            Int32.TryParse(mStatusAligment.Text, out aligment);
+
             foreach ( Match m in m_currentMatchData)
             {
                 string StackString = m.Groups[(int)RegexMan.eCPUHistoryLine.sp_reg].ToString();
@@ -100,7 +104,7 @@ namespace VICEPDBMonitor
                     opcode = " " + opcode;
                 }
                 string opcodeParams = m.Groups[(int)RegexMan.eCPUHistoryLine.opcode_params].ToString();
-                while ((opcode.Length + opcodeParams.Length) < 24) opcodeParams += " "; //pad it out
+                while ((opcode.Length + opcodeParams.Length) < aligment) opcodeParams += " "; //pad it out
                 string a_reg = m.Groups[(int)RegexMan.eCPUHistoryLine.a_reg].ToString();
                 string x_reg = m.Groups[(int)RegexMan.eCPUHistoryLine.x_reg].ToString();
                 string y_reg = m.Groups[(int)RegexMan.eCPUHistoryLine.y_reg].ToString();
@@ -183,6 +187,14 @@ namespace VICEPDBMonitor
         {
             fillListBox();
             dataList.SelectedIndex = 0;
+        }
+
+        private void mStatusAligment_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (m_currentMatchData != null)
+            {
+                fillListBox();
+            }
         }
     }
 }
