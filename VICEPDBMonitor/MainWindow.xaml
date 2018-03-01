@@ -49,7 +49,8 @@
             <Button Content="Profile add" Margin="0,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Grid.Row="1"/>
             <CheckBox x:Name="mCheckAccessUse" Content="Access use" Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,102,8" VerticalAlignment="Bottom" Checked="CheckBox_Checked_1" Grid.Row="1"/>
             <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" Margin="0,0,10,54" Click="mScreenButton_Click" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Grid.Row="1"/>
-            <ListView x:Name="mBreakPointDisplay" Grid.Column="2" Height="148" Margin="10.333,0,9.667,182.667" VerticalAlignment="Bottom" Grid.Row="1">
+            <ListView x:Name="mBreakPointDisplay" Grid.Column="2" Margin="10,0,10,181" Grid.Row="1" Height="148" VerticalAlignment="Bottom">
+
                 <ListView.View>
                     <GridView>
                         <GridViewColumn CellTemplate="{StaticResource FirstCell}" Width="230"/>
@@ -67,7 +68,7 @@
         <Button x:Name ="viewChars" Content="Chars" Grid.Column="2" Margin="0,0,10,116" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewChars_Click"/>
 
         <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,167" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
-        <Button x:Name="mCalculator" Content="Calculator" Margin="0,0,9.667,65" Click="calculator_Click" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="76"/>
+        <Button x:Name="mCalculator" Content="Calculator" Margin="0,0,10,65" Click="calculator_Click" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom"/>
         <Button x:Name="mDoChis" Content="CHIS" Margin="0,0,10,37" Click="mDoChis_Click" HorizontalAlignment="Right" Width="75" Height="23" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

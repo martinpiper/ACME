@@ -29,6 +29,6 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <Button x:Name="getButton"  Content="Get" Margin="0,10,10,0" Height="22" Click="getButton_Click" HorizontalAlignment="Right" Width="75" VerticalAlignment="Top"/>
-        <CheckBox x:Name="mHideInterupt"  Content="IRQ/NMI" Margin="711,37,10,0" VerticalAlignment="Top" FontSize="10" IsChecked="True" Click="mHideInterupt_Click"/>
+        <CheckBox x:Name="mHideInterupt"  Content="IRQ/NMI" Margin="0,37,10,0" VerticalAlignment="Top" FontSize="10" IsChecked="True" Click="mHideInterupt_Click" HorizontalAlignment="Right" Width="71"/>
     </Grid>
 </Window>
