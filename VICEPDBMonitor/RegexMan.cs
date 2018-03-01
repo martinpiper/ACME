@@ -49,5 +49,46 @@ namespace VICEPDBMonitor
         }
 
         public static Regex BreakPointHit = new Regex(@"^#([0-9]+)\s+\(Stop on\s+(exec|load|store)\s+([0-9a-fA-F]{4})\)\s+([0-9]{3})\s+([0-9]{3}).*");
+
+        /*
+         * group    desc
+         * 1        address
+         * 2        opcode hex values
+         * 3        last opcode hex value- ignore
+         * 4        opcode string
+         * 5        opcode param string
+         * 6        last char in opcode param string - ingore
+         * 7        A register Hex
+         * 8        X register Hex
+         * 9        Y register Hex
+         * 10       SP register Hex
+         * 11       N or ' '
+         * 12       V or ' '
+         * 13       B or ' '
+         * 14       D or ' '
+         * 15       I or ' '
+         * 16       Z or ' '
+         * 17       C or ' '
+         */
+         
+        public enum eCPUHistoryLine : int
+        {
+             address        = 1
+            ,opcode_hex     = 2
+            ,opcode_string  = 4
+            ,opcode_params  = 5
+            ,a_reg          = 7
+            ,x_reg          = 8
+            ,y_reg          = 9
+            ,sp_reg         = 10
+            ,status_N       = 11
+            ,status_V       = 12
+            ,status_B       = 13
+            ,status_D       = 14
+            ,status_I       = 15
+            ,status_Z       = 16
+            ,status_C       = 17
+        }
+        public static Regex CPUHistoryLine = new Regex("^([0-9a-f][0-9a-f][0-9a-z][0-9a-z])\\s*(([0-9A-F][0-9A-F] ){0,3})\\s*([A-Z][A-Z][A-Z]) (([\\$_\\.\\(\\)\\,a-zA-Z0-9#])*)\\s*- A:([0-9a-f][0-9a-f]) X:([0-9a-f][0-9a-f]) Y:([0-9a-f][0-9a-f]) SP:([0-9a-f][0-9a-f]) (N| )(V| )-(B| )(D| )(I| )(Z| )(C| )");
     }
 }

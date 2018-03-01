@@ -60,6 +60,9 @@
     <Compile Include="CharView.xaml.cs">
       <DependentUpon>CharView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ChisViewer.xaml.cs">
+      <DependentUpon>ChisViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MemCalc.xaml.cs">
       <DependentUpon>MemCalc.xaml</DependentUpon>
     </Compile>
@@ -73,6 +76,10 @@
     <Compile Include="VICIIRenderer.cs" />
     <Compile Include="VICPallete.cs" />
     <Page Include="CharView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ChisViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
