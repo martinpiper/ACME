@@ -952,7 +952,14 @@ namespace VICEPDBMonitor
         private void show_diss_post_registers()
         {
             ShowSrcDissStruct sms = show_diss_common();
-            if (sms == null) { SetSourceView("Source not found for this address "); return; }
+            if (sms == null) {
+                SetSourceView("Source not found for this address ");
+                sms = new ShowSrcDissStruct()
+                {
+                     endNext = mPC+0x20
+                    ,startPrev = mPC
+                };
+            }
             sms.displayDissCallback = new CommandStruct.CS_TextDelegate(show_diss_get_post_dissasem);
             string command = "d " + sms.startPrev.ToString("X") + " " + mPC.ToString("X");
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
@@ -1089,15 +1096,23 @@ namespace VICEPDBMonitor
             mBreakPointDisplay.ItemsSource = null;
             foreach (string line in lines)
             {
-                Match match = RegexMan.BreakPointResult.Match(line);
-                if (match.Success)
+                try
                 {
-                    BreakPointDataSource test = new BreakPointDataSource();
-                    test.setFromMatch(match);
-                    mBreakPoints.Add(test);
+                    Match match = RegexMan.BreakPointResult.Match(line);
+                    if (match.Success)
+                    {
+                        BreakPointDataSource test = new BreakPointDataSource();
+                        test.setFromMatch(match);
+                        mBreakPoints.Add(test);
+                    }
+
+                    mBreakPointDisplay.ItemsSource = mBreakPoints;
+                }
+                catch
+                {
+
                 }
             }
-            mBreakPointDisplay.ItemsSource = mBreakPoints;
         }
 
         private void commandBox_KeyDown(object sender, KeyEventArgs e)
@@ -1385,6 +1400,12 @@ namespace VICEPDBMonitor
         {
             MemCalc MC = new MemCalc();
             MC.Show();
+        }
+
+        private void mDoChis_Click(object sender, RoutedEventArgs e)
+        {
+            ChisViewer CV = new ChisViewer();
+            CV.Show();
         }
     }
 }

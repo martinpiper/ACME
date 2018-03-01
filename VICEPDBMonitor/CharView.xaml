@@ -23,15 +23,15 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <ComboBox x:Name="backgroundColour" Margin="70,0,0,16" SelectedIndex="0" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="120" ItemsSource="{Binding VICColourNames}"/>
-        <ComboBox x:Name="mcol0" Margin="70,0,0,43" ItemsSource="{Binding VICColourNames}" SelectedIndex="2" SelectionChanged="backgroundColour_SelectionChanged" Width="120" HorizontalAlignment="Left" Height="22" VerticalAlignment="Bottom"/>
+        <ComboBox x:Name="backgroundColour" Margin="70,0,0,43" SelectedIndex="0" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="120" ItemsSource="{Binding VICColourNames}"/>
+        <ComboBox x:Name="mcol0" Margin="70,0,0,16" ItemsSource="{Binding VICColourNames}" SelectedIndex="2" SelectionChanged="backgroundColour_SelectionChanged" Width="120" HorizontalAlignment="Left" Height="22" VerticalAlignment="Bottom"/>
         <ComboBox x:Name="mcol1" Margin="253,0,0,16" ItemsSource="{Binding VICColourNames}" SelectedIndex="3" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="120"/>
         <ComboBox x:Name="spriteCol" Margin="253,0,0,43" ItemsSource="{Binding VICColourNames}" SelectedIndex="1" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="120"/>
 
-        <Label x:Name="label" Content="BckGrnd" HorizontalAlignment="Left" Margin="10,0,0,16" Width="55" RenderTransformOrigin="0.473,0.5" Height="26" VerticalAlignment="Bottom"/>
-        <Label x:Name="label1" Content="MCol0" HorizontalAlignment="Left" Margin="10,0,0,43" Width="45" RenderTransformOrigin="0.467,0.462" Height="26" VerticalAlignment="Bottom"/>
-        <Label x:Name="label1_Copy" Content="MCol1" HorizontalAlignment="Left" Margin="203,0,0,39" Width="45" Height="26" VerticalAlignment="Bottom"/>
-        <Label x:Name="label1_Copy1" Content="SprCol" HorizontalAlignment="Left" Margin="203,0,0,12" Width="45" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="labelBG" Content="BckGrnd" HorizontalAlignment="Left" Margin="10,0,0,43" Width="55" RenderTransformOrigin="0.473,0.5" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="labelMCol0" Content="MCol0" HorizontalAlignment="Left" Margin="10,0,0,16" Width="45" RenderTransformOrigin="0.467,0.462" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="labelChar" Content="Char" HorizontalAlignment="Left" Margin="203,0,0,39" Width="45" Height="26" VerticalAlignment="Bottom"/>
+        <Label x:Name="labelMCol1" Content="MCol1" HorizontalAlignment="Left" Margin="203,0,0,12" Width="45" Height="26" VerticalAlignment="Bottom"/>
         <Button x:Name="allHiresButton" Content="All Hires" HorizontalAlignment="Left" Margin="336,10,0,0" VerticalAlignment="Top" Width="75" Click="allHiresButton_Click" Height="20"/>
         <Button x:Name="allMultiButton" Content="All Multi" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="75" Click="allMultiButton_Click" Height="20"/>
         <ComboBox x:Name="address" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" Width="80" SelectionChanged="address_SelectionChanged"/>

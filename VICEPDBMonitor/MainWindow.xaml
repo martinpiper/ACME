@@ -20,43 +20,46 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <TextBox x:Name="mCommandBox" Margin="10,0,10,10" TextWrapping="Wrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" FontFamily="Consolas" KeyDown="commandBox_KeyDown" Height="22" VerticalAlignment="Bottom"/>
-        <Button Content="Break" HorizontalAlignment="Right" Margin="0,0,184,141" VerticalAlignment="Bottom" Width="75" Click="Button_Click_Break" Height="20"/>
+        <Button Content="Break" Margin="0,0,184,141" VerticalAlignment="Bottom" Click="Button_Click_Break" Height="20" HorizontalAlignment="Right" Width="75"/>
         <CheckBox x:Name="mDoSource" Content="Source" HorizontalAlignment="Right" Margin="0,0,203,187" IsChecked="True" Click="mDoSource_Click" Height="15" VerticalAlignment="Bottom" Width="56"/>
         <CheckBox x:Name="mDoDisassembly" Content="Disassembly" Margin="0,0,174,167" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom"/>
         <Button Content="Step in" HorizontalAlignment="Right" Margin="0,0,104,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepIn" Height="20"/>
         <CheckBox x:Name="mCheckUsedLabels" Content="Used labels" Margin="0,0,99,187" VerticalAlignment="Bottom" Click="mCheckUsedLabels_Click" HorizontalAlignment="Right" Width="80" IsChecked="True" Height="15"/>
 
         <Grid Margin="0,0,0,37" RenderTransformOrigin="0.727,0.489">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30*"/>
+                <RowDefinition Height="619*"/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="270" />
             </Grid.ColumnDefinitions>
-            <RichTextBox x:Name="mTextBox" Margin="10,48,10,0" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False">
+            <RichTextBox x:Name="mTextBox" Margin="10,18.333,10,0" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False" Grid.Row="1">
                 <FlowDocument>
                     <Paragraph>
                         <Run Language="en-gb" Text="Waiting to connect..."/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Courier New" TextOptions.TextFormattingMode="Display" FontStretch="ExtraExpanded" FontSize="14"/>
-            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
-            <TextBox x:Name="mLabelsBox" Margin="10,10,10,334" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2"/>
-            <Button Content="Profile add" Margin="91,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom"/>
-            <CheckBox x:Name="mCheckAccessUse" Content="Access use" Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,102,8" VerticalAlignment="Bottom" Checked="CheckBox_Checked_1"/>
-            <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" HorizontalAlignment="Left" Margin="185,0,0,54" Width="75" Click="mScreenButton_Click" Height="20" VerticalAlignment="Bottom"/>
-            <ListView x:Name="mBreakPointDisplay" Grid.Column="2" HorizontalAlignment="Left" Margin="10.333,0,0,183" Width="250" Height="148" VerticalAlignment="Bottom">
+            <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Courier New" TextOptions.TextFormattingMode="Display" FontStretch="ExtraExpanded" FontSize="14" Grid.RowSpan="2"/>
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Grid.RowSpan="2" />
+            <TextBox x:Name="mLabelsBox" Margin="10,10,10,334" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2" Grid.RowSpan="2"/>
+            <Button Content="Profile add" Margin="0,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Grid.Row="1"/>
+            <CheckBox x:Name="mCheckAccessUse" Content="Access use" Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,102,8" VerticalAlignment="Bottom" Checked="CheckBox_Checked_1" Grid.Row="1"/>
+            <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" Margin="0,0,10,54" Click="mScreenButton_Click" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Grid.Row="1"/>
+            <ListView x:Name="mBreakPointDisplay" Grid.Column="2" Height="148" Margin="10.333,0,9.667,182.667" VerticalAlignment="Bottom" Grid.Row="1">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn CellTemplate="{StaticResource FirstCell}" Width="230"/>
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Button x:Name="mCalculator" Content="Calculator" Grid.Column="2" HorizontalAlignment="Left" Margin="185.333,0,0,13" VerticalAlignment="Bottom" Width="75" Click="calculator_Click"/>
         </Grid>
         <Button Content="Step over" HorizontalAlignment="Right" Margin="0,0,184,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOver" Height="20"/>
         <Button Content="Step out" HorizontalAlignment="Right" Margin="0,0,184,91" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOut" Height="20"/>
-        <Button Content="Go" HorizontalAlignment="Right" Margin="0,0,104,142" VerticalAlignment="Bottom" Width="75" Click="Button_Click_Go" Height="20"/>
+        <Button Content="Go" Margin="0,0,104,142" VerticalAlignment="Bottom" Click="Button_Click_Go" Height="20" HorizontalAlignment="Right" Width="75"/>
         <Button Content="Profile clear" HorizontalAlignment="Right" Margin="0,0,184,65" VerticalAlignment="Bottom" Width="75" Click="Button_Click_ProfileClear" Height="20"/>
         <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,192,45" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
 
@@ -64,5 +67,7 @@
         <Button x:Name ="viewChars" Content="Chars" Grid.Column="2" Margin="0,0,10,116" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewChars_Click"/>
 
         <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,167" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
+        <Button x:Name="mCalculator" Content="Calculator" Margin="0,0,9.667,65" Click="calculator_Click" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="76"/>
+        <Button x:Name="mDoChis" Content="CHIS" Margin="0,0,10,37" Click="mDoChis_Click" HorizontalAlignment="Right" Width="75" Height="23" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

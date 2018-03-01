@@ -1,0 +1,34 @@
+﻿<Window x:Class="VICEPDBMonitor.ChisViewer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VICEPDBMonitor"
+        mc:Ignorable="d"
+        Title="ChisViewer" Height="600.0" Width="800.0">
+    <Grid>
+        <ListBox x:Name="dataList" Margin="10,10,100,10" FontFamily="Courier New">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Background" Value="{Binding background}"></Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding address}" FontFamily="Courier New" FontSize="14"></TextBlock>
+                        <TextBlock Text="{Binding opcode}" FontFamily="Courier New" FontWeight="Bold" FontSize="14" Foreground="#FF0066EE"></TextBlock>
+                        <TextBlock Text="{Binding opcode_params}" FontFamily="Courier New" FontSize="14" Foreground="{Binding params_colour}"></TextBlock>
+                        <TextBlock Text="{Binding a}" FontFamily="Courier New" FontSize="14" Foreground="{Binding A_colour}"></TextBlock>
+                        <TextBlock Text="{Binding x}" FontFamily="Courier New" FontSize="14" Foreground="{Binding X_colour}"></TextBlock>
+                        <TextBlock Text="{Binding y}" FontFamily="Courier New" FontSize="14" Foreground="{Binding Y_colour}"></TextBlock>
+                        <TextBlock Text="{Binding sp}" FontFamily="Courier New" FontSize="14"></TextBlock>
+                        <TextBlock Text="{Binding status}" FontFamily="Courier New" FontSize="14"></TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button x:Name="getButton"  Content="Get" Margin="0,10,10,0" Height="22" Click="getButton_Click" HorizontalAlignment="Right" Width="75" VerticalAlignment="Top"/>
+        <CheckBox x:Name="mHideInterupt"  Content="IRQ/NMI" Margin="711,37,10,0" VerticalAlignment="Top" FontSize="10" IsChecked="True" Click="mHideInterupt_Click"/>
+    </Grid>
+</Window>
