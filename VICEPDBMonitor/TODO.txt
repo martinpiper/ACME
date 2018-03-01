@@ -1,5 +1,21 @@
 ﻿TODO File for VICE PDB Monitor
 
+* Nice arrow showing loops https://forums.nesdev.com/viewtopic.php?f=12&t=16625&hilit=debugger
+
+
+
+* another "smaller" window that holds the command responses. but tabbed is nice :slightly_smiling_face:
+	with the memmap code
+	could you have it so you display RAM with the knowledge from it
+	clear it
+	then Show the "delta" which would give you what was exec/read/write since last "check" ?
+
+
+
+* also getting F10, F9 and F11 wired up
+
+
+
 * now I have the full memory dump I don't need to ask Vice for the disassembly
 	which will make the view much easier to code
 
