@@ -45,14 +45,14 @@
             <Button Content="Profile add" Margin="91,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom"/>
             <CheckBox x:Name="mCheckAccessUse" Content="Access use" Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,102,8" VerticalAlignment="Bottom" Checked="CheckBox_Checked_1"/>
             <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" HorizontalAlignment="Left" Margin="185,0,0,54" Width="75" Click="mScreenButton_Click" Height="20" VerticalAlignment="Bottom"/>
-            <ListView x:Name="mBreakPointDisplay" Grid.Column="2" HorizontalAlignment="Left" Height="148" Margin="10,320,0,0" VerticalAlignment="Top" Width="250">
+            <ListView x:Name="mBreakPointDisplay" Grid.Column="2" HorizontalAlignment="Left" Margin="10.333,0,0,183" Width="250" Height="148" VerticalAlignment="Bottom">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn CellTemplate="{StaticResource FirstCell}" Width="230"/>
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Button x:Name="mCalculator" Content="Calculator" Grid.Column="2" HorizontalAlignment="Left" Margin="185,619,0,0" VerticalAlignment="Top" Width="75" Click="calculator_Click"/>
+            <Button x:Name="mCalculator" Content="Calculator" Grid.Column="2" HorizontalAlignment="Left" Margin="185.333,0,0,13" VerticalAlignment="Bottom" Width="75" Click="calculator_Click"/>
         </Grid>
         <Button Content="Step over" HorizontalAlignment="Right" Margin="0,0,184,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOver" Height="20"/>
         <Button Content="Step out" HorizontalAlignment="Right" Margin="0,0,184,91" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOut" Height="20"/>
