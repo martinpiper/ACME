@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="ChisViewer" Height="600.0" Width="800.0">
     <Grid>
-        <ListBox x:Name="dataList" Margin="10,10,100,10" FontFamily="Courier New">
+        <!-- <ListBox x:Name="dataList" Margin="10,10,100,10" FontFamily="Courier New">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Background" Value="{Binding background}"></Setter>
@@ -27,10 +27,35 @@
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
-        </ListBox>
-        <Button x:Name="getButton"  Content="Get" Margin="0,10,10,0" Height="22" Click="getButton_Click" HorizontalAlignment="Right" Width="75" VerticalAlignment="Top"/>
-        <CheckBox x:Name="mHideInterupt"  Content="IRQ/NMI" Margin="0,37,10,0" VerticalAlignment="Top" FontSize="10" IsChecked="True" Click="mHideInterupt_Click" HorizontalAlignment="Right" Width="71"/>
-        <Label Content="Aligment" Margin="0,57,27,0" HorizontalAlignment="Right" Width="58" Height="26" VerticalAlignment="Top"/>
-        <TextBox x:Name="mStatusAligment"  HorizontalAlignment="Right" Height="23" Margin="0,88,10,0" TextWrapping="Wrap" Text="24" VerticalAlignment="Top" Width="75" TextChanged="mStatusAligment_TextChanged"/>        
+        </ListBox> -->
+
+        <Button x:Name="getButton"  Content="Get" Margin="0,71,10,0" Height="22" Click="getButton_Click" HorizontalAlignment="Right" Width="75" VerticalAlignment="Top"/>
+        <CheckBox x:Name="mHideInterupt"  Content="IRQ/NMI" Margin="0,98,14,0" VerticalAlignment="Top" FontSize="10" IsChecked="True" Click="mHideInterupt_Click" HorizontalAlignment="Right" Width="71"/>
+        <Label Content="Aligment" Margin="0,118,27,0" HorizontalAlignment="Right" Width="58" Height="26" VerticalAlignment="Top"/>
+        <TextBox x:Name="mStatusAligment"  HorizontalAlignment="Right" Height="23" Margin="0,149,10,0" TextWrapping="Wrap" Text="24" VerticalAlignment="Top" Width="75" TextChanged="mStatusAligment_TextChanged"/>
+        <TreeView x:Name="dataList" Margin="10,10,90,10">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="Background" Value="{Binding background}"></Setter>
+                    <Setter Property="IsExpanded" Value="True"></Setter>
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type local:LabelInfo}" ItemsSource="{Binding Items}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding address}" FontFamily="Courier New" FontSize="14"></TextBlock>
+                        <TextBlock Text="{Binding opcode}" FontFamily="Courier New" FontWeight="Bold" FontSize="14" Foreground="#FF0066EE"></TextBlock>
+                        <TextBlock Text="{Binding opcode_params}" FontFamily="Courier New" FontSize="14" Foreground="{Binding params_colour}"></TextBlock>
+                        <TextBlock Text="{Binding a}" FontFamily="Courier New" FontSize="14" Foreground="{Binding A_colour}"></TextBlock>
+                        <TextBlock Text="{Binding x}" FontFamily="Courier New" FontSize="14" Foreground="{Binding X_colour}"></TextBlock>
+                        <TextBlock Text="{Binding y}" FontFamily="Courier New" FontSize="14" Foreground="{Binding Y_colour}"></TextBlock>
+                        <TextBlock Text="{Binding sp}" FontFamily="Courier New" FontSize="14"></TextBlock>
+                        <TextBlock Text="{Binding status}" FontFamily="Courier New" FontSize="14"></TextBlock>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+        <TextBox x:Name="mCount"  HorizontalAlignment="Right" Height="23" Margin="0,43,10,0" TextWrapping="Wrap" Text="500" VerticalAlignment="Top" Width="75"/>
+        <Label Content="Count" HorizontalAlignment="Right" Margin="0,12,10,0" VerticalAlignment="Top" Width="75"/>
     </Grid>
 </Window>
