@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -20,22 +21,6 @@ namespace VICEPDBMonitor
     /// </summary>
     public partial class ChisViewer : Window
     {
-        public class ListRowItem
-        {
-            public string address { get; set; }
-            public string opcode { get; set; }
-            public string opcode_params { get; set; }
-            public string a { get; set; }
-            public string x { get; set; }
-            public string y { get; set; }
-            public string sp { get; set; }
-            public string status { get; set; }
-            public Brush background { get; set; }
-            public Brush params_colour { get; set; }
-            public Brush A_colour { get; set; }
-            public Brush X_colour { get; set; }
-            public Brush Y_colour { get; set; }
-        }
 
         private List<Match> m_currentMatchData = null;
         private int m_maxSP = 0;
@@ -48,7 +33,12 @@ namespace VICEPDBMonitor
         private void getButton_Click(object sender, RoutedEventArgs e)
         {
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
-            vcom.addTextCommand("chis", CommandStruct.eMode.DoCommandReturnResults, chis_gotData, null, this.Dispatcher);
+            int count;
+            if(!Int32.TryParse(mCount.Text,out count))
+            {
+                count = 500;
+            }
+            vcom.addTextCommand("chis " + count.ToString(), CommandStruct.eMode.DoCommandReturnResults, chis_gotData, null, this.Dispatcher);
         }
 
         private void chis_gotData(string reply, object userData)
@@ -90,6 +80,11 @@ namespace VICEPDBMonitor
 
             Int32.TryParse(mStatusAligment.Text, out aligment);
 
+            Stack<Tuple<ListRowItem, int>> stackStack = new Stack<Tuple<ListRowItem, int>>(64);
+            ListRowItem root = new ListRowItem();
+            root.address = "root";
+            stackStack.Push(new Tuple<ListRowItem, int>(root, 255));
+            dataList.BeginInit();
             foreach ( Match m in m_currentMatchData)
             {
                 string StackString = m.Groups[(int)RegexMan.eCPUHistoryLine.sp_reg].ToString();
@@ -178,15 +173,31 @@ namespace VICEPDBMonitor
                 colour ^= 1;
                 // string line_string =  + " " + op_hex + " ";
                 //line_string += opcode + " " + opcodeParams + " A:" + a_reg + " X:" + x_reg + " Y:" + y_reg + " SP:" + StackString + " " + stN + stV + "-" + stB + stD + stI + stZ + stC;
+                stackStack.Peek().Item1.Items.Add(row);
+
+                if(opcode.Contains("JSR"))
+                {
+                    stackStack.Push(new Tuple<ListRowItem, int>(row, stack));
+                    aligment -= 2; //shift it down 2 to keep alignment
+                }
+                if(opcode.Contains("RTS"))
+                {
+                    if( stackStack.Count > 1)
+                    {
+                        stackStack.Pop();
+                        aligment += 2; //shift it up 2 to keep alignment
+                    }
+                } 
                 
-                dataList.Items.Add(row);
             }
+            dataList.Items.Add(root);
+            dataList.EndInit();
         }
 
         private void mHideInterupt_Click(object sender, RoutedEventArgs e)
         {
             fillListBox();
-            dataList.SelectedIndex = 0;
+            //dataList.SelectedIndex = 0;
         }
 
         private void mStatusAligment_TextChanged(object sender, TextChangedEventArgs e)
@@ -196,5 +207,28 @@ namespace VICEPDBMonitor
                 fillListBox();
             }
         }
+    }
+
+    public class ListRowItem
+    {
+        public ListRowItem()
+        {
+            this.Items = new ObservableCollection<ListRowItem>();
+        }
+        public string address { get; set; }
+        public string opcode { get; set; }
+        public string opcode_params { get; set; }
+        public string a { get; set; }
+        public string x { get; set; }
+        public string y { get; set; }
+        public string sp { get; set; }
+        public string status { get; set; }
+        public Brush background { get; set; }
+        public Brush params_colour { get; set; }
+        public Brush A_colour { get; set; }
+        public Brush X_colour { get; set; }
+        public Brush Y_colour { get; set; }
+
+        public ObservableCollection<ListRowItem> Items { get; set; }
     }
 }
