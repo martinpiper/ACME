@@ -1107,6 +1107,7 @@ namespace VICEPDBMonitor
                     }
 
                     mBreakPointDisplay.ItemsSource = mBreakPoints;
+                    mBreakPointDisplay.Items.Refresh(); // make sure the other thread knows we changed stuff
                 }
                 catch
                 {
