@@ -252,5 +252,23 @@ namespace VICEPDBMonitor
         {
             m_breakpointNumber = number;
         }
+
+        private void canvas_ToolTipOpening(object sender, ToolTipEventArgs e)
+        {
+            Point mouse = Mouse.GetPosition(canvas);
+            double x = mouse.X / 8.0;
+            double y = mouse.Y / 8.0;
+
+            int charX = (int)Math.Floor(x);
+            int charY = (int)Math.Floor(y);
+
+            C64RAM ram = C64RAM.getInstace();
+            byte[] RAM = ram.getRAM();
+            int rowPtr = m_screenAddress + (charY * 40);
+            byte c = RAM[rowPtr + charX];
+            int charAddress = m_charAddress + ((int)c * 8);
+            
+            hoverTip.Content = string.Format("{0},{1}@{2:X04}({3:X02})", charX,charY,rowPtr+charX, c);
+        }
     }
 }

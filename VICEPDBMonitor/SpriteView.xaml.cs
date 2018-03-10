@@ -274,6 +274,23 @@ namespace VICEPDBMonitor
 			renderSprites();
 		}
 
-		
-	}
+        private void canvas_ToolTipOpening(object sender, ToolTipEventArgs e)
+        {
+            Point mouse = Mouse.GetPosition(canvas);
+            double x = mouse.X / 24.0;
+            double y = mouse.Y / 21.0;
+
+            int SpriteX = (int)Math.Floor(x);
+            int SpriteY = (int)Math.Floor(y);
+
+            C64RAM ram = C64RAM.getInstace();
+            byte[] RAM = ram.getRAM();
+
+            int dataPtr = (m_startBank * (64 * 1024)) + m_startAddress;
+            dataPtr += SpriteY * (16 * 64);
+            dataPtr += SpriteX * 64;
+
+            hoverTip.Content = string.Format("{0:X02}@{1:X04}", SpriteY*16+SpriteX, dataPtr);
+        }
+    }
 }

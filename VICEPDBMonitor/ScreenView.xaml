@@ -10,7 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Image x:Name="canvas" Height="200" Margin="16,36,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" MouseDown="canvas_MouseDown" OpacityMask="Black">
+        <Image x:Name="canvas" Height="200" Margin="16,36,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" MouseDown="canvas_MouseDown" OpacityMask="Black" ToolTipOpening="canvas_ToolTipOpening">
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="3" ScaleY="3"/>
@@ -19,6 +19,9 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Image.RenderTransform>
+            <ToolTipService.ToolTip>
+                <ToolTip x:Name="hoverTip" Content="test"/>
+            </ToolTipService.ToolTip>
         </Image>
         <ComboBox x:Name="backgroundColour" HorizontalAlignment="Left" Margin="70,0,0,10" Width="120" ItemsSource="{Binding VICColourNames}" SelectedIndex="0" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom"/>
         <ComboBox x:Name="mcol0" HorizontalAlignment="Left" Margin="245,0,0,10" Width="120" ItemsSource="{Binding VICColourNames}" SelectedIndex="2" SelectionChanged="backgroundColour_SelectionChanged" Height="22" VerticalAlignment="Bottom"/>
