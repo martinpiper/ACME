@@ -111,13 +111,18 @@ namespace VICEPDBMonitor
 
         private void handleDisplayChars()
         {
-            int index = address.SelectedIndex;
-            if (index < 0) index = 0;
-            m_startAddress = index * 2048;
+            getStartAddress();
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
             vcom.addBinaryMemCommand(m_startAddress, m_startAddress + 0x0800, new CommandStruct.CS_BinaryDelegate(got_ram), null, this.Dispatcher);
             vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
+        }
+
+        private void getStartAddress()
+        {
+            int index = address.SelectedIndex;
+            if (index < 0) index = 0;
+            m_startAddress = index * 2048;
         }
 
         private void got_ram(byte[] data, object none)
@@ -168,6 +173,21 @@ namespace VICEPDBMonitor
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             handleDisplayChars();
+        }
+
+        private void canvas_ToolTipOpening(object sender, ToolTipEventArgs e)
+        {            
+            Point mouse = Mouse.GetPosition(canvas);
+            double x = mouse.X / 8.0;
+            double y = mouse.Y / 8.0;
+
+            int charX = (int)Math.Floor(x);
+            int charY = (int)Math.Floor(y);
+
+            int charNum = charY * 16 + charX;
+            getStartAddress();
+            int charMem = m_startAddress + (charNum * 8);
+            hoverTip.Content = string.Format("{0:X02}@{1:X04}", charNum, charMem);
         }
     }
 }

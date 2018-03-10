@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="SpriteView" Height="780" Width="810">
     <Grid >
-        <Image x:Name="canvas" Height="336" Margin="16,36,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="384" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" MouseDown="canvas_MouseDown">
+        <Image x:Name="canvas" Height="336" Margin="16,36,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="384" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" MouseDown="canvas_MouseDown" ToolTipOpening="canvas_ToolTipOpening">
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="2" ScaleY="2"/>
@@ -16,6 +16,9 @@
                     <TranslateTransform/>
                 </TransformGroup>
             </Image.RenderTransform>
+            <ToolTipService.ToolTip>
+                <ToolTip x:Name="hoverTip" Content="test"/>
+            </ToolTipService.ToolTip>
         </Image>
         <Button x:Name="bank00" Content="0000" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="45" Click="bank00_Click" Height="20"/>
         <Button x:Name="bank01" Content="4000" HorizontalAlignment="Left" Margin="60,10,0,0" VerticalAlignment="Top" Width="45" Click="bank01_Click" Height="20"/>
