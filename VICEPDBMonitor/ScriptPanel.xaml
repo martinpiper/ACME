@@ -1,0 +1,29 @@
+﻿<Window x:Class="VICEPDBMonitor.ScriptPanel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VICEPDBMonitor"
+        mc:Ignorable="d"
+        Title="ScriptPanel" Height="800" Width="800">
+    <Grid>
+        <StackPanel Margin="10">
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="mScriptText" HorizontalAlignment="Left" Height="130" Margin="0,0,0,0" TextWrapping="Wrap" Text="Script" VerticalAlignment="Top" Width="680" MaxLines="100" AcceptsReturn="True" FontFamily="Courier New" FontSize="14"/>
+                <Button x:Name="mRunButton" Content="Run" Width="70" HorizontalAlignment="Right" Click="mRunButton_Click"></Button>
+            </StackPanel>
+            <TextBlock x:Name="mResults" TextWrapping="Wrap" VerticalAlignment="Stretch" ScrollViewer.CanContentScroll="True" FontFamily="Courier New" FontSize="14">
+                <Run Text="Results"></Run>
+                <LineBreak/>
+                <Run Text="Commands can be vice: or host:, vice: will send the command to vice and capture the results. host commands will run a program on the host machine, via the cmd system. It is best to use aboslute paths at all times."/>
+                <LineBreak/>
+                <Run Text="vice:m 400 9ff >> D:\myproject\dump.text"/><LineBreak/>
+                <Run Text="host:python D:\mystuff\script.py D:\myproject\dump.text"/><LineBreak/>
+                <Run Text="del D:\myproject\dump.text"/>
+                <LineBreak/>
+                <Run Text="The vice command can have a >> filename at the end of it, this will put the reply(complete) into a file for passing to a host command"/>
+            </TextBlock>
+        </StackPanel>
+        
+    </Grid>
+</Window>

@@ -1408,5 +1408,11 @@ namespace VICEPDBMonitor
             ChisViewer CV = new ChisViewer();
             CV.Show();
         }
+
+        private void mShowScriptPanel_Click(object sender, RoutedEventArgs e)
+        {
+            ScriptPanel SP = new ScriptPanel();
+            SP.Show();
+        }
     }
 }

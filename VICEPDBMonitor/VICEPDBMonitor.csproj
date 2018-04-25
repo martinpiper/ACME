@@ -71,6 +71,9 @@
     <Compile Include="ScreenView.xaml.cs">
       <DependentUpon>ScreenView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ScriptPanel.xaml.cs">
+      <DependentUpon>ScriptPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SpriteView.xaml.cs" />
     <Compile Include="VICECOMManager.cs" />
     <Compile Include="VICIIRenderer.cs" />
@@ -100,6 +103,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ScreenView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ScriptPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
