@@ -89,6 +89,6 @@ namespace VICEPDBMonitor
             ,status_Z       = 16
             ,status_C       = 17
         }
-        public static Regex CPUHistoryLine = new Regex("^([0-9a-f][0-9a-f][0-9a-z][0-9a-z])\\s*(([0-9A-F][0-9A-F] ){0,3})\\s*([A-Z][A-Z][A-Z]) (([\\$_\\.\\(\\)\\,a-zA-Z0-9#])*)\\s*- A:([0-9a-f][0-9a-f]) X:([0-9a-f][0-9a-f]) Y:([0-9a-f][0-9a-f]) SP:([0-9a-f][0-9a-f]) (N| )(V| )-(B| )(D| )(I| )(Z| )(C| )");
+        public static Regex CPUHistoryLine = new Regex("^([0-9a-f][0-9a-f][0-9a-z][0-9a-z])\\s*(([0-9A-F][0-9A-F] ){0,4})\\s*([A-Z][A-Z][A-Z][A-Z]?) (([\\$_\\.\\(\\)\\,a-zA-Z0-9#])*)\\s*- A:([0-9a-f][0-9a-f]) X:([0-9a-f][0-9a-f]) Y:([0-9a-f][0-9a-f]) SP:([0-9a-f][0-9a-f]) (N| )(V| )-(B| )(D| )(I| )(Z| )(C| )");
     }
 }
