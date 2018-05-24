@@ -25,7 +25,7 @@
         <CheckBox x:Name="mDoDisassembly" Content="Disassembly" Margin="0,0,174,167" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom"/>
         <Button Content="Step in" HorizontalAlignment="Right" Margin="0,0,104,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepIn" Height="20"/>
         <CheckBox x:Name="mCheckUsedLabels" Content="Used labels" Margin="0,0,99,187" VerticalAlignment="Bottom" Click="mCheckUsedLabels_Click" HorizontalAlignment="Right" Width="80" IsChecked="True" Height="15"/>
-
+        <Button x:Name="mShowScriptPanel" Content="Script Panel" Margin="0,0,10,167" HorizontalAlignment="Right" Width="75" Height="22" VerticalAlignment="Bottom" Click="mShowScriptPanel_Click" />
         <Grid Margin="0,0,0,37" RenderTransformOrigin="0.727,0.489">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30*"/>

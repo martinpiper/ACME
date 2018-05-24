@@ -1414,5 +1414,11 @@ namespace VICEPDBMonitor
             TweakPanel TP = new TweakPanel();
             TP.Show();
         }
+
+        private void mShowScriptPanel_Click(object sender, RoutedEventArgs e)
+        {
+            ScriptPanel SP = new ScriptPanel();
+            SP.Show();
+        }
     }
 }
