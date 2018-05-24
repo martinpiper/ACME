@@ -1,0 +1,25 @@
+﻿<Window x:Class="VICEPDBMonitor.TweakPanel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VICEPDBMonitor"
+        mc:Ignorable="d"
+        Title="TweakPanel" Height="300" Width="383.115">
+    <Grid>
+        <StackPanel Margin="0,0,0,0">
+            <TextBox x:Name="mScript"  Height="23" TextWrapping="Wrap" Text="Script" VerticalAlignment="Top"/>
+            <TextBlock TextWrapping="Wrap">
+                <Run>Address in hex:[d|x][b|w] decimal/hex byte/word.use ; to seperate</Run>
+                <Run>Example: d000:db;d001:db;dc04:dw</Run>
+            </TextBlock>
+            <StackPanel Height="25" Orientation="Horizontal">
+                <Button Content="Update C64"/>
+                <Separator Margin="0" Width="100"/>
+                <Button Content="Rebuild Controls"/>
+            </StackPanel>
+            <GroupBox Header="GroupBox"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

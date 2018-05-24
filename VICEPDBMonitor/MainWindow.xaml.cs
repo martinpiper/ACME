@@ -1408,5 +1408,11 @@ namespace VICEPDBMonitor
             ChisViewer CV = new ChisViewer();
             CV.Show();
         }
+
+        private void Button_Click_Tweak(object sender, RoutedEventArgs e)
+        {
+            TweakPanel TP = new TweakPanel();
+            TP.Show();
+        }
     }
 }

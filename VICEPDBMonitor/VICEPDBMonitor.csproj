@@ -72,6 +72,9 @@
       <DependentUpon>ScreenView.xaml</DependentUpon>
     </Compile>
     <Compile Include="SpriteView.xaml.cs" />
+    <Compile Include="TweakPanel.xaml.cs">
+      <DependentUpon>TweakPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="VICECOMManager.cs" />
     <Compile Include="VICIIRenderer.cs" />
     <Compile Include="VICPallete.cs" />
@@ -106,6 +109,10 @@
     <Page Include="SpriteView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="TweakPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
