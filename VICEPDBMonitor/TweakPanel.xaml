@@ -9,16 +9,17 @@
     <Grid>
         <StackPanel Margin="0,0,0,0">
             <TextBox x:Name="mScript"  Height="23" TextWrapping="Wrap" Text="Script" VerticalAlignment="Top"/>
-            <TextBlock TextWrapping="Wrap">
-                <Run>Address in hex:[d|x][b|w] decimal/hex byte/word.use ; to seperate</Run>
-                <Run>Example: d000:db;d001:db;dc04:dw</Run>
-            </TextBlock>
+            <TextBlock TextWrapping="Wrap"><Run Text="Address in hex:[d|"/><Run Text="h"/><Run Text="][b|w] decimal/hex byte/word.use ; to separate"/><Run Text=" "/><Run Text="Example: d000:db;d001:db;dc04:dw"/></TextBlock>
             <StackPanel Height="25" Orientation="Horizontal">
-                <Button Content="Update C64"/>
+                <Button x:Name="buttonUpdateC64" Content="Update C64" Click="buttonUpdateC64_Click"/>
                 <Separator Margin="0" Width="100"/>
-                <Button Content="Rebuild Controls"/>
+                <Button x:Name="buttonRebuildControls" Content="Rebuild Controls" Click="buttonRebuildControls_Click"/>
             </StackPanel>
-            <GroupBox Header="GroupBox"/>
+            <GroupBox x:Name="mGroupBox" Header="GroupBox">
+                <StackPanel x:Name="mDynamic"  Orientation="Vertical">
+                    
+                </StackPanel>
+            </GroupBox>
         </StackPanel>
 
     </Grid>

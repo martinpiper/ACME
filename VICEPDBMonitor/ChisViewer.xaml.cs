@@ -68,7 +68,7 @@ namespace VICEPDBMonitor
             string oldX = string.Empty;
             string oldY = string.Empty;
 
-            Brush[] backs = { new SolidColorBrush(Color.FromRgb(255, 255, 255)), new SolidColorBrush(Color.FromRgb(225, 225, 225)) };
+            Brush[] backs = { new SolidColorBrush(Color.FromRgb(255, 255, 255)), new SolidColorBrush(Color.FromRgb(225, 225, 225)),new SolidColorBrush(Color.FromRgb(255,0,0)),new SolidColorBrush(Color.FromRgb(255,255,0)) };
 
             Brush[] paramsSet = { new SolidColorBrush(Color.FromRgb(0, 0, 0)), new SolidColorBrush(Color.FromRgb(0, 128, 0)) };
 
@@ -116,11 +116,11 @@ namespace VICEPDBMonitor
                 {
                     if( mHideInterupt.IsChecked == false )
                     {
-                        Console.WriteLine("discarded " + m.ToString());
+                        // Console.WriteLine("discarded " + m.ToString());
                         continue;
                     }
                 }
-                Console.WriteLine("Kept " + stI +" : " + m.ToString());
+                // Console.WriteLine("Kept " + stI +" : " + m.ToString());
                 int aColourIndex = 0;
                 int xColourIndex = 0;
                 int yColourIndex = 0;
@@ -166,7 +166,18 @@ namespace VICEPDBMonitor
                 row.y = " Y:" + y_reg;
                 row.sp = " SP:" + StackString;
                 row.status = " " + stN + stV + "-" + stB + stD + stI + stZ + stC;
-                row.background = backs[colour];
+                if (opcode.Contains("BRK"))
+                {
+                    row.background = backs[2];
+                }
+                else if (address.StartsWith("00"))
+                {
+                    row.background = backs[3];
+                }
+                else
+                {
+                    row.background = backs[colour];
+                }
                 row.A_colour = newSet[aColourIndex];
                 row.X_colour = newSet[xColourIndex];
                 row.Y_colour = newSet[yColourIndex];
@@ -206,6 +217,16 @@ namespace VICEPDBMonitor
             {
                 fillListBox();
             }
+        }
+
+        private void mFlagBRK_Click(object sender, RoutedEventArgs e)
+        {
+            fillListBox();
+        }
+
+        private void mShowZP_Click(object sender, RoutedEventArgs e)
+        {
+            fillListBox();
         }
     }
 
