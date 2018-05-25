@@ -287,7 +287,7 @@ namespace VICEPDBMonitor
 			return position;
 		}
 
-		int getSafeC64Memory(int addr)
+		public int getSafeC64Memory(int addr)
 		{
 			return (int)mMemoryC64[addr & 0xffff];
 		}
@@ -526,7 +526,7 @@ namespace VICEPDBMonitor
 		byte[] mMemoryC64 = new byte[65536];
 		bool mNeedNewMemoryDump = true;
 
-		private void TestForMemoryDump(bool force = false)
+		public void TestForMemoryDump(bool force = false)
 		{
 			if (!force && mDump == false)
 			{
@@ -1407,6 +1407,12 @@ namespace VICEPDBMonitor
         {
             ChisViewer CV = new ChisViewer();
             CV.Show();
+        }
+
+        private void Button_Click_Tweak(object sender, RoutedEventArgs e)
+        {
+            TweakPanel TP = new TweakPanel(this);
+            TP.Show();
         }
 
         private void mShowScriptPanel_Click(object sender, RoutedEventArgs e)

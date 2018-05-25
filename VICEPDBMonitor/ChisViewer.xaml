@@ -57,5 +57,7 @@
         </TreeView>
         <TextBox x:Name="mCount"  HorizontalAlignment="Right" Height="23" Margin="0,43,10,0" TextWrapping="Wrap" Text="500" VerticalAlignment="Top" Width="75"/>
         <Label Content="Count" HorizontalAlignment="Right" Margin="0,12,10,0" VerticalAlignment="Top" Width="75"/>
+        <CheckBox x:Name="mFlagBRK" Content="flag BRK" Margin="0,177,14,0" VerticalAlignment="Top" FontSize="10" IsChecked="True" HorizontalAlignment="Right" Width="71" Click="mFlagBRK_Click"/>
+        <CheckBox x:Name="mShowZP" Content="flag ZP" Margin="0,200,14,0" VerticalAlignment="Top" FontSize="10" IsChecked="True" HorizontalAlignment="Right" Width="71" Click="mShowZP_Click" />
     </Grid>
 </Window>
