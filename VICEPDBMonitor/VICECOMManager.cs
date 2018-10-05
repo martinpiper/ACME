@@ -12,7 +12,7 @@ using System.Windows.Threading;
 
 namespace VICEPDBMonitor
 {
-    class CommandStruct
+    public class CommandStruct
     {
         public enum eMode
         {

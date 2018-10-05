@@ -53,9 +53,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AcmePDBRandD.cs" />
     <Compile Include="BreakPointDataSource.cs" />
     <Compile Include="BreakPointDispatcher.cs" />
     <Compile Include="C128ViewModel.cs" />
+    <Compile Include="C64MemDump.cs" />
     <Compile Include="C64RAM.cs" />
     <Compile Include="CharView.xaml.cs">
       <DependentUpon>CharView.xaml</DependentUpon>
@@ -63,11 +65,20 @@
     <Compile Include="ChisViewer.xaml.cs">
       <DependentUpon>ChisViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EnumMatchToBooleanConverter.cs" />
+    <Compile Include="IMemDump.cs" />
+    <Compile Include="IPDBReaderAndDisplay.cs" />
+    <Compile Include="IRegisterSet.cs" />
+    <Compile Include="LiveWatch.xaml.cs">
+      <DependentUpon>LiveWatch.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MemCalc.xaml.cs">
       <DependentUpon>MemCalc.xaml</DependentUpon>
     </Compile>
     <Compile Include="MultiMap.cs" />
+    <Compile Include="PDBData.cs" />
     <Compile Include="RegexMan.cs" />
+    <Compile Include="RegisterSet6510.cs" />
     <Compile Include="ScreenView.xaml.cs">
       <DependentUpon>ScreenView.xaml</DependentUpon>
     </Compile>
@@ -86,6 +97,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ChisViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LiveWatch.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -36,14 +36,14 @@
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="270" />
             </Grid.ColumnDefinitions>
-            <RichTextBox x:Name="mTextBox" Margin="10,18.333,10,0" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False" Grid.Row="1">
+            <RichTextBox x:Name="mTextBox" Margin="10,33,10,0" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False" Grid.Row="1">
                 <FlowDocument>
                     <Paragraph>
                         <Run Language="en-gb" Text="Waiting to connect..."/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
-            <TextBox x:Name="mRegsBox" Margin="10,10,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Courier New" TextOptions.TextFormattingMode="Display" FontStretch="ExtraExpanded" FontSize="14" Grid.RowSpan="2"/>
+            <TextBox x:Name="mRegsBox" Margin="10,25,10,0" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Disabled" Height="33" VerticalAlignment="Top" FontFamily="Courier New" TextOptions.TextFormattingMode="Display" FontStretch="ExtraExpanded" FontSize="14" Grid.RowSpan="2"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Grid.RowSpan="2" />
             <TextBox x:Name="mLabelsBox" Margin="10,10,10,334" Text="TextBox" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Column="2" Grid.RowSpan="2"/>
             <Button Content="Profile add" Margin="0,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Grid.Row="1"/>
@@ -57,6 +57,18 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            <Menu HorizontalAlignment="Left" Height="20" Margin="10,0,0,0" VerticalAlignment="Top" Width="770">
+                <MenuItem Header="_VIC">
+                    <MenuItem Header="_Sprites" Click="viewSprites_Click"/>
+                    <MenuItem Header="_Chars" Click="viewChars_Click"/>
+                    <MenuItem Header="Sc_reen"  Click="mScreenButton_Click"/>
+                </MenuItem>
+                <MenuItem Header="_Data">
+                    <MenuItem Header="_Script" Click="mShowScriptPanel_Click" />
+                    <MenuItem Header="_Tweak" Click="Button_Click_Tweak" />
+                    <MenuItem Header="_Watch" Click="Button_Click_WatchWindow" />
+                </MenuItem>
+            </Menu>
         </Grid>
         <Button Content="Step over" HorizontalAlignment="Right" Margin="0,0,184,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOver" Height="20"/>
         <Button Content="Step out" HorizontalAlignment="Right" Margin="0,0,184,91" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOut" Height="20"/>

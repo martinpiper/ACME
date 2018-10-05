@@ -19,47 +19,26 @@ using System.Text.RegularExpressions;
 
 namespace VICEPDBMonitor
 {
-	public class AddrInfo
-	{
-		public int mAddr = -1;
-		public int mPrevAddr = -1;
-		public int mNextAddr = -1;
-		public int mZone = -1;
-		public int mFile = -1;
-		public int mLine = -1;
-	}
-
-	public class LabelInfo
-	{
-		public int mAddr;
-		public int mZone;
-		public string mLabel;
-		public bool mUsed;
-		public bool mMemory;
-	}
 
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+        IRegisterSet m_registerSet;
+        IPDBReaderAndDisplay m_readerAndDispaly;
+        IMemDump m_memDump;
+
 		bool mDump = false;
 		bool mUsedLabels = false;
 		bool mAccessUsed = false;
 		bool mExecUsed = false;
-		List<string> mSourceIncludes = new List<string>();
-		string[] mSourceFileNames = null;
-		int mSourceFileNamesLength = 0;
-		List<string> mSourceFileNamesFound = new List<string>();
-		List<List<string>> mSourceFiles = new List<List<string>>();
-		List<LabelInfo> mAllLabels = new List<LabelInfo>();
-		SortedDictionary<int, AddrInfo> mAddrInfoByAddr = new SortedDictionary<int, AddrInfo>();
-		MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
-		MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
-		MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
+		
         Regex mBreakPointResultRegex;
         Regex mBreakPointHitRegex;
         List<BreakPointDataSource> mBreakPoints;
+        //PDBData pdbData;
+
 
         private delegate void NoArgDelegate();
         private delegate void OneArgDelegate(String arg);
@@ -72,175 +51,27 @@ namespace VICEPDBMonitor
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.setErrorCallback(new VICECOMManager.OneArgDelegate(SetSourceView), this.Dispatcher);
             vcom.setVICEmsgCallback(new VICECOMManager.OneArgDelegate(GotMsgFromVice));
-           
+
+            m_registerSet = new RegisterSet6510();
+
+            m_memDump = new C64MemDump();
+            m_memDump.SetRegisterSet(m_registerSet);
+
+            m_readerAndDispaly = new AcmePDBRandD();
+            m_readerAndDispaly.SetCodeWindowControl(mTextBox);
+            m_readerAndDispaly.SetLabelsWindowControl(mLabelsBox);
+            m_readerAndDispaly.SetRegisterSet(m_registerSet);
+            m_readerAndDispaly.SetMemDump(m_memDump);
+
             mBreakPoints = new List<BreakPointDataSource>();
             mBreakPointDisplay.ItemsSource = mBreakPoints;
 
             VICIIRenderer.initRenderer(); //load charsets
                 
-			string line;
 			string[] commandLineArgs = Environment.GetCommandLineArgs();
+            // pdbData = PDBData.create(commandLineArgs);
 
-			int i;
-			for (i = 1; i < commandLineArgs.Length; i++)
-			{
-				int localFileIndex = 0;
-
-				// Read the file and parse it line by line.
-				using (System.IO.StreamReader file = new System.IO.StreamReader(commandLineArgs[i]))
-				{
-					while ((line = file.ReadLine()) != null)
-					{
-						if (line.IndexOf("INCLUDES:") == 0)
-						{
-							int lines = int.Parse(line.Substring(9));
-							mSourceIncludes.Clear();
-							while (lines-- > 0)
-							{
-								line = file.ReadLine();
-								mSourceIncludes.Add(line);
-							}
-						}
-						else if (line.IndexOf("FILES:") == 0)
-						{
-							localFileIndex = mSourceFileNamesLength;
-							int lines = int.Parse(line.Substring(6));
-							mSourceFileNamesLength += lines;
-							if (mSourceFileNames != null)
-							{
-								// Copy old into new
-								string[] tempNames = new string[mSourceFileNamesLength];
-								int j;
-								for (j = 0; j < localFileIndex; j++)
-								{
-									tempNames[j] = mSourceFileNames[j];
-								}
-								mSourceFileNames = tempNames;
-							}
-							else
-							{
-								mSourceFileNames = new string[mSourceFileNamesLength];
-							}
-							while (lines-- > 0)
-							{
-								line = file.ReadLine();
-
-                                Char[] separator = { ':' };
-                                string[] tokens = line.Split(separator, 2);
-                                mSourceFileNames[localFileIndex + int.Parse(tokens[0])] = tokens[1];
-							}
-						}
-						else if (line.IndexOf("ADDRS:") == 0)
-						{
-							int lines = int.Parse(line.Substring(6));
-							int baseZone = 0;
-							if (mLabelInfoByZone.Count > 0)
-							{
-								baseZone = mLabelInfoByZone.Keys.Max();
-							}
-							while (lines-- > 0)
-							{
-								line = file.ReadLine();
-								string[] tokens = line.Split(':');
-								AddrInfo addrInfo = new AddrInfo();
-								addrInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
-								addrInfo.mZone = int.Parse(tokens[1]);
-								if (addrInfo.mZone > 0)
-								{
-									addrInfo.mZone += baseZone;
-								}
-								addrInfo.mFile = localFileIndex + int.Parse(tokens[2]);
-								addrInfo.mLine = int.Parse(tokens[3]) - 1;	// Files lines are 1 based in the debug file
-//								mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
-								mAddrInfoByAddr[addrInfo.mAddr] = addrInfo;
-							}
-						}
-						else if (line.IndexOf("LABELS:") == 0)
-						{
-							int lines = int.Parse(line.Substring(7));
-							int baseZone = 0;
-							if (mLabelInfoByZone.Count > 0)
-							{
-								baseZone = mLabelInfoByZone.Keys.Max() + 1;
-							}
-							while (lines-- > 0)
-							{
-								line = file.ReadLine();
-								string[] tokens = line.Split(':');
-								LabelInfo labelInfo = new LabelInfo();
-								labelInfo.mAddr = int.Parse(tokens[0].Substring(1), NumberStyles.HexNumber);
-								labelInfo.mZone = int.Parse(tokens[1]);
-								if (labelInfo.mZone > 0)
-								{
-									labelInfo.mZone += baseZone;	// Helps to distinguish zones for multiple PDB files
-								}
-								labelInfo.mLabel = tokens[2];
-								labelInfo.mUsed = int.Parse(tokens[3]) == 1;
-								labelInfo.mMemory = int.Parse(tokens[4]) == 1;
-								mAllLabels.Add(labelInfo);
-								mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
-								mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
-								mLabelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
-							}
-						}
-					}
-
-					mAllLabels.Sort((a, b) => b.mLabel.Length.CompareTo(a.mLabel.Length));
-
-					file.Close();
-				}
-
-				int l;
-				// Only process new names this iteration
-				// MPi: TODO: Use mSourceIncludes
-				for (l = localFileIndex; l < mSourceFileNamesLength; l++ )
-				{
-					string name = mSourceFileNames[l];
-					try
-					{
-						List<string> aFile = new List<string>();
-						string newPath = name;
-						if (!System.IO.File.Exists(newPath))
-						{
-							newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), name);
-							if (!System.IO.File.Exists(newPath))
-							{
-								newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), System.IO.Path.GetFileName(name));
-							}
-						}
-						using (System.IO.StreamReader file = new System.IO.StreamReader(newPath))
-						{
-							while ((line = file.ReadLine()) != null)
-							{
-								aFile.Add(line);
-							}
-							file.Close();
-						}
-						mSourceFiles.Add(aFile);
-						mSourceFileNamesFound.Add(newPath);
-					}
-					catch (System.Exception)
-					{
-						mSourceFiles.Add(new List<string>());
-						mSourceFileNamesFound.Add("");
-					}
-				}
-			
-			}
-
-			int thePrevAddr = -1;
-			foreach (KeyValuePair<int, AddrInfo> pair in mAddrInfoByAddr)
-			{
-				pair.Value.mPrevAddr = thePrevAddr;
-				thePrevAddr = pair.Value.mAddr;
-			}
-			thePrevAddr = -1;
-			foreach (KeyValuePair<int, AddrInfo> pair in mAddrInfoByAddr.Reverse())
-			{
-				pair.Value.mNextAddr = thePrevAddr;
-				thePrevAddr = pair.Value.mAddr;
-			}
-
+            m_readerAndDispaly.CreatePDBFromARGS(commandLineArgs);
 
 //			mCommands.Add("r");
 //			mCommands.Add("m 0000 ffff");
@@ -254,13 +85,14 @@ namespace VICEPDBMonitor
 	
 		}
 
-		int mPC = 0;
+		/*int mPC = 0;
 		int mRegA = 0;
 		int mRegX = 0;
 		int mRegY = 0;
-		int mSP = 0;
+		int mSP = 0;*/
 //		int mNV_BDIZC = 0;
 		
+
 
 		TextPointer GetTextPositionAtOffset(TextPointer position, int characterCount)
 		{
@@ -289,19 +121,21 @@ namespace VICEPDBMonitor
 
 		public int getSafeC64Memory(int addr)
 		{
-			return (int)mMemoryC64[addr & 0xffff];
+            //return (int)mMemoryC64[addr & 0xffff];
+            return (int)m_memDump.GetMemory(addr & 0xffff);
 		}
 
-		static int kMicroDumpStringLength = 16;
+		//static int kMicroDumpStringLength = 16;
 		string getMicroDump(int addr)
 		{
 			if (mDump == false)
 			{
 				return "";
 			}
-			string ret;
+            /*string ret;
 			ret = " >(" + getSafeC64Memory(addr).ToString("X2") + " " + getSafeC64Memory(addr+1).ToString("X2") + " " + getSafeC64Memory(addr+2).ToString("X2") + " " + getSafeC64Memory(addr+3).ToString("X2") + ")<";
-			return ret;
+			return ret;*/
+            return m_memDump.GetMicroDump(addr);
 		}
 
 		string EnrichDumpWithMemory(string text)
@@ -311,7 +145,10 @@ namespace VICEPDBMonitor
 				return text;
 			}
 			int pos = 0;
-			while (pos < text.Length)
+            int RegY = m_registerSet.GetRegister(e6510Registers.Y);
+            int RegX = m_registerSet.GetRegister(e6510Registers.X);
+
+            while (pos < text.Length)
 			{
 				try
 				{
@@ -335,10 +172,10 @@ namespace VICEPDBMonitor
 					{
 						string tAddr = text.Substring(pos2 + 1, 2);
 						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
-						int indirect = mMemoryC64[addr] + (((int)mMemoryC64[addr+1]) << 8);
-						text = text.Insert(pos2 + 5 + 3, getMicroDump(indirect + mRegY));
+						int indirect = m_memDump.GetMemory(addr) + (((int)m_memDump.GetMemory(addr +1)) << 8);
+						text = text.Insert(pos2 + 5 + 3, getMicroDump(indirect + RegY));
 
-						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						pos = pos2 + 5 + 3 + m_memDump.GetMicroDumpStringLenght();
 						continue;
 					}
 
@@ -347,10 +184,10 @@ namespace VICEPDBMonitor
 					{
 						string tAddr = text.Substring(pos2 + 1, 2);
 						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
-						int indirect = mMemoryC64[(addr + mRegX) & 0xff] + (((int)mMemoryC64[(addr + mRegX + 1) & 0xff]) << 8);
+						int indirect = m_memDump.GetMemory((addr + RegX) & 0xff) + (((int)m_memDump.GetMemory((addr + RegX + 1) & 0xff)) << 8);
 						text = text.Insert(pos2 + 5 + 3, getMicroDump(indirect));
 
-						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						pos = pos2 + 5 + 3 + m_memDump.GetMicroDumpStringLenght();
 						continue;
 					}
 
@@ -359,14 +196,14 @@ namespace VICEPDBMonitor
 					{
 						string tAddr = text.Substring(pos2 + 1, 4);
 						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
-						int offset = mRegX;
+						int offset = RegX;
 						if (text[pos2 + 5 + 1] == 'Y' || text[pos2 + 5 + 1] == 'y')
 						{
-							offset = mRegY;
+							offset = RegY;
 						}
 						text = text.Insert(pos2 + 5 + 3, getMicroDump(addr + offset));
 
-						pos = pos2 + 5 + 3 + kMicroDumpStringLength;
+						pos = pos2 + 5 + 3 + m_memDump.GetMicroDumpStringLenght();
 						continue;
 					}
 
@@ -375,14 +212,14 @@ namespace VICEPDBMonitor
 					{
 						string tAddr = text.Substring(pos2 + 1, 2);
 						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
-						int offset = mRegX;
+						int offset = RegX;
 						if (text[pos2 + 3 + 1] == 'Y' || text[pos2 + 3 + 1] == 'y')
 						{
-							offset = mRegY;
+							offset = RegY;
 						}
 						text = text.Insert(pos2 + 3 + 3, getMicroDump(addr + offset));
 
-						pos = pos2 + 3 + 3 + kMicroDumpStringLength;
+						pos = pos2 + 3 + 3 + m_memDump.GetMicroDumpStringLenght();
 						continue;
 					}
 
@@ -394,7 +231,7 @@ namespace VICEPDBMonitor
 						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
 						text = text.Insert(pos3, getMicroDump(addr));
 
-						pos = pos3 + kMicroDumpStringLength;
+						pos = pos3 + m_memDump.GetMicroDumpStringLenght();
 						continue;
 					}
 
@@ -405,7 +242,7 @@ namespace VICEPDBMonitor
 						int addr = int.Parse(tAddr, NumberStyles.HexNumber);
 						text = text.Insert(pos3, getMicroDump(addr));
 
-						pos = pos3 + kMicroDumpStringLength;
+						pos = pos3 + m_memDump.GetMicroDumpStringLenght();
 						continue;
 					}
 
@@ -422,92 +259,100 @@ namespace VICEPDBMonitor
 
 		public void SetSourceView(String text)
 		{
-			text = EnrichDumpWithMemory(text);
-			mTextBox.BeginChange();
-			mTextBox.Document.Blocks.Clear();
-			if (null == text || text.Length == 0)
-			{
-				mTextBox.EndChange();
-				return;
-			}
-			try
-			{
-                /*Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-				r.Background = null;*/
-                int split = text.IndexOf("=>");
-                if(split < 0 )
-                {
-                    split = text.IndexOf(">>>>");
-                }
-                if (split < 0)
-                {
-                    mTextBox.AppendText(text);
-                    mTextBox.EndChange();
-                }
-                else
+            m_readerAndDispaly.SetSouceView(EnrichDumpWithMemory(text));
+            if (false)
+            {
+                text = EnrichDumpWithMemory(text);
+                mTextBox.BeginChange();
+                mTextBox.Document.Blocks.Clear();
+                if (null == text || text.Length == 0)
                 {
                     mTextBox.EndChange();
-                    string before = text.Substring(0, split);
-                    int endOfLine = text.IndexOf('\r', split);
-                    string currLine = text.Substring(split, endOfLine - split);
-                    string after = text.Substring(endOfLine);
-                    Run topRun = new Run(before)
-                    {
-                        Background = mTextBox.Background
-                    };
-                    Run currRun = new Run(currLine)
-                    {
-                        Background = Brushes.LightGray
-                    };
-                    Run afterRun = new Run(after)
-                    {
-                        Background = mTextBox.Background
-                    };
-                    Paragraph para = new Paragraph();
-                    para.Inlines.Add(topRun);
-                    para.Inlines.Add(currRun);
-                    para.Inlines.Add(afterRun);
-                    FlowDocument flow = new FlowDocument(para);
-                    mTextBox.Document = flow;
-                   
+                    return;
                 }
-                /*
-				// mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
-				TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
-				int offset = searchRange.Text.IndexOf("=>");
-				if (offset < 0)
-				{
-					offset = searchRange.Text.IndexOf(">>>>");
-				}
-				if (offset >= 0)
-				{
-					int lineLength = searchRange.Text.IndexOf("\r", offset);
-					lineLength = lineLength - offset;
-					TextPointer start = GetTextPositionAtOffset(searchRange.Start, offset);
-					TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
+                try
+                {
+                    /*Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+                    r.Background = null;*/
+                    int split = text.IndexOf("=>");
+                    if (split < 0)
+                    {
+                        split = text.IndexOf(">>>>");
+                    }
+                    if (split < 0)
+                    {
+                        mTextBox.AppendText(text);
+                        mTextBox.EndChange();
+                    }
+                    else
+                    {
+                        mTextBox.EndChange();
+                        string before = text.Substring(0, split);
+                        int endOfLine = text.IndexOf('\r', split);
+                        string currLine = text.Substring(split, endOfLine - split);
+                        string after = text.Substring(endOfLine);
+                        Run topRun = new Run(before)
+                        {
+                            Background = mTextBox.Background
+                        };
+                        Run currRun = new Run(currLine)
+                        {
+                            Background = Brushes.LightGray
+                        };
+                        Run afterRun = new Run(after)
+                        {
+                            Background = mTextBox.Background
+                        };
+                        Paragraph para = new Paragraph();
+                        para.Inlines.Add(topRun);
+                        para.Inlines.Add(currRun);
+                        para.Inlines.Add(afterRun);
+                        FlowDocument flow = new FlowDocument(para);
+                        mTextBox.Document = flow;
 
-					result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
-				}*/
-			}
-			catch (System.Exception)
-			{
-			}			
+                    }
+                    /*
+                    // mTextBox.Selection.ApplyPropertyValue(TextElement.BackgroundProperty , Brushes.Red);
+                    TextRange searchRange = new TextRange(mTextBox.Document.ContentStart, mTextBox.Document.ContentEnd);
+                    int offset = searchRange.Text.IndexOf("=>");
+                    if (offset < 0)
+                    {
+                        offset = searchRange.Text.IndexOf(">>>>");
+                    }
+                    if (offset >= 0)
+                    {
+                        int lineLength = searchRange.Text.IndexOf("\r", offset);
+                        lineLength = lineLength - offset;
+                        TextPointer start = GetTextPositionAtOffset(searchRange.Start, offset);
+                        TextRange result = new TextRange(start, GetTextPositionAtOffset(start, lineLength));
+
+                        result.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.LightGray);
+                    }*/
+                }
+                catch (System.Exception)
+                {
+                }
+            }
 		}
 
 		private void AppendTextSourceView(String text, Brush brush)
 		{
-			if (null == text || text.Length == 0)
-			{
-				return;
-			}
+            m_readerAndDispaly.AppendTextSouceView(text, brush);
+            if (false)
+            {
+                if (null == text || text.Length == 0)
+                {
+                    return;
+                }
 
-			Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-			r.Background = brush;
+                Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+                r.Background = brush;
 
-			mTextBox.AppendText(text);
+                mTextBox.AppendText(text);
 
-			r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-			r.Background = null;
+                r = new Run("", mTextBox.CaretPosition.DocumentEnd);
+                r.Background = null;
+            }
 		}
 	
 		private void UpdateLabelView(String text)
@@ -523,7 +368,7 @@ namespace VICEPDBMonitor
         Dictionary<int, int> mAccessedCount = new Dictionary<int, int>();
 		Dictionary<int, int> mExecutedCount = new Dictionary<int, int>();
 
-		byte[] mMemoryC64 = new byte[65536];
+		//byte[] mMemoryC64 = new byte[65536];
 		bool mNeedNewMemoryDump = true;
 
 		public void TestForMemoryDump(bool force = false)
@@ -535,7 +380,8 @@ namespace VICEPDBMonitor
 			if (force || mNeedNewMemoryDump)
 			{
 				mNeedNewMemoryDump = false;
-                dispatchCommand("!domem");
+                //dispatchCommand("!domem");
+                m_memDump.RefreshDump(Dispatcher);
 			}
 		}
 
@@ -585,6 +431,7 @@ namespace VICEPDBMonitor
 
 		private void ParseRegisters(string theReply)
 		{
+            /*
             //  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
             //.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
             int index = theReply.IndexOf(".;"); //seems when you have break point this can get messed up
@@ -600,65 +447,75 @@ namespace VICEPDBMonitor
                 //			mNV_BDIZC = int.Parse(parse2[7], NumberStyles.Binary); // TODO Binary
 
                 this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
+            }*/
+
+            if(m_registerSet.SetFromString(theReply))
+            {
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
             }
 		}
 
 		private void UpdateLabels()
 		{
-			string labels = "";
-			try
-			{
-				List<string> allLabels = new List<string>();
-				int theZone = mAddrInfoByAddr[mPC].mZone;
-				while (theZone >= 0)
-				{
-					List<LabelInfo> theLabels = mLabelInfoByZone[theZone];
+            string labels = m_readerAndDispaly.UpdateLabels(mUsedLabels, mExecUsed, mAccessUsed, mExecutedCount, mAccessedCount); ;
 
-					foreach (LabelInfo aLabel in theLabels)
-					{
-						if ((mUsedLabels == false) || ((mUsedLabels == true) && (aLabel.mUsed == true)))
-						{
-							string labelText = "";
-							int count;
-							if (mExecUsed && mExecutedCount.TryGetValue(aLabel.mAddr, out count))
-							{
-								labelText += "E" + count + ":";
-							}
-							if (mAccessUsed && mAccessedCount.TryGetValue(aLabel.mAddr, out count))
-							{
-								labelText += "A" + count + ":";
-							}
-							if (theZone != 0)
-							{
-								labelText = ".";
-							}
+            /*if (false)
+            {
+                //string labels = "";
+                try
+                {
+                    List<string> allLabels = new List<string>();
+                    int theZone = pdbData.getAddrInfoForAddr(m_registerSet.GetPC()).mZone;
+                    while (theZone >= 0)
+                    {
+                        List<LabelInfo> theLabels = pdbData.getLabelsForZone(theZone); //mLabelInfoByZone[theZone];
 
-							labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X") + getMicroDump(aLabel.mAddr);
-							allLabels.Add(labelText);
-						}
-					}
-					// MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
-					if (theZone > 0)
-					{
-						theZone = 0;	// For now just display the global zone
-					}
-					else
-					{
-						break;
-					}
-				}
-				allLabels.Sort();
+                        foreach (LabelInfo aLabel in theLabels)
+                        {
+                            if ((mUsedLabels == false) || ((mUsedLabels == true) && (aLabel.mUsed == true)))
+                            {
+                                string labelText = "";
+                                int count;
+                                if (mExecUsed && mExecutedCount.TryGetValue(aLabel.mAddr, out count))
+                                {
+                                    labelText += "E" + count + ":";
+                                }
+                                if (mAccessUsed && mAccessedCount.TryGetValue(aLabel.mAddr, out count))
+                                {
+                                    labelText += "A" + count + ":";
+                                }
+                                if (theZone != 0)
+                                {
+                                    labelText = ".";
+                                }
 
-				foreach (string line in allLabels)
-				{
-					labels += line + "\n";
-				}
-			}
-			catch (System.Exception)
-			{
-				
-			}
-			
+                                labelText += aLabel.mLabel + " $" + aLabel.mAddr.ToString("X") + getMicroDump(aLabel.mAddr);
+                                allLabels.Add(labelText);
+                            }
+                        }
+                        // MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
+                        if (theZone > 0)
+                        {
+                            theZone = 0;    // For now just display the global zone
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    allLabels.Sort();
+
+                    foreach (string line in allLabels)
+                    {
+                        labels += line + "\n";
+                    }
+                }
+                catch (System.Exception)
+                {
+
+                }
+            }*/
+
 			this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateLabelView), labels);
 		}
 
@@ -676,7 +533,7 @@ namespace VICEPDBMonitor
             }
             else if (command.IndexOf("!domem") == 0)
             {
-                vcom.addBinaryMemCommand(0, 0xFFFF, full_mem_dump, null, this.Dispatcher);
+                //vcom.addBinaryMemCommand(0, 0xFFFF, full_mem_dump, null, this.Dispatcher);
             }
             else if (command.IndexOf("!sm") == 0)
             {
@@ -705,11 +562,11 @@ namespace VICEPDBMonitor
             else
             {
                 // Any other commands get here
-                bool silent = false;
+                //bool silent = false;
                 if (command.IndexOf('!') == 0)
                 {
                     command = command.Substring(1);
-                    silent = true;
+                    //silent = true;
                 }
  
                 if (command.IndexOf("x") != 0)
@@ -747,58 +604,62 @@ namespace VICEPDBMonitor
             }
         }
 
-        private class ShowSrcDissStruct
+      /*  private class ShowSrcDissStruct
         {
             public int startPrev;
             public int endNext;
             public string disassemblyBefore;
             public string disassemblyAfter;
             public CommandStruct.CS_TextDelegate displayDissCallback;
-        }
+        }*/
 
         private ShowSrcDissStruct show_diss_common()
         {
-            try
-            {
-                // MPi: TODO: Tweak the 10 range based on the display height?
-                int range = 15;
-                int startPrev = mPC;
-                // Step backwards trying to find a good starting point to disassemble
-                while (range-- > 0)
+            /*
+                try
                 {
-                    AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
-                    if (addrInfo2.mPrevAddr < 0)
+                    // MPi: TODO: Tweak the 10 range based on the display height?
+                    int range = 15;
+                    int startPrev = m_registerSet.GetPC();
+                    // Step backwards trying to find a good starting point to disassemble
+                    while (range-- > 0)
                     {
-                        break;
+                        AddrInfo addrInfo2 = pdbData.getAddrInfoForAddr(startPrev); //mAddrInfoByAddr[startPrev];
+                        if (addrInfo2.mPrevAddr < 0)
+                        {
+                            break;
+                        }
+                        startPrev = addrInfo2.mPrevAddr;
                     }
-                    startPrev = addrInfo2.mPrevAddr;
-                }
-                // MPi: TODO: Tweak the 10 range based on the display height?
-                range = 20;
-                // Step forwards trying to find a good ending point to disassemble
-                int endNext = mPC;
-                while (range-- > 0)
-                {
-                    AddrInfo addrInfo2 = mAddrInfoByAddr[endNext];
-                    if (addrInfo2.mNextAddr < 0)
+                    // MPi: TODO: Tweak the 10 range based on the display height?
+                    range = 20;
+                    // Step forwards trying to find a good ending point to disassemble
+                    int endNext = m_registerSet.GetPC();
+                    while (range-- > 0)
                     {
-                        break;
+                        AddrInfo addrInfo2 = pdbData.getAddrInfoForAddr(endNext); //mAddrInfoByAddr[endNext];
+                        if (addrInfo2.mNextAddr < 0)
+                        {
+                            break;
+                        }
+                        endNext = addrInfo2.mNextAddr;
                     }
-                    endNext = addrInfo2.mNextAddr;
-                }
-                
-                ShowSrcDissStruct sms = new ShowSrcDissStruct()
-                {
-                    endNext = endNext
-                    ,startPrev = startPrev
-                };
-                return sms;
-            }
-            catch (Exception ex)
-            {
 
-            }
-            return null;
+                    ShowSrcDissStruct sms = new ShowSrcDissStruct()
+                    {
+                        endNext = endNext
+                        ,
+                        startPrev = startPrev
+                    };
+                    return sms;
+                }
+                catch (Exception ex)
+                {
+
+                }
+                return null;
+            }*/
+            return m_readerAndDispaly.show_diss_common();
         }
 
         private void show_src_diss_post_registers()
@@ -807,7 +668,7 @@ namespace VICEPDBMonitor
             if(sms == null) { SetSourceView("Source not found for this address "); return; }
 
             sms.displayDissCallback = show_src_diss_get_post_dissasem;
-            string command = "d " + sms.startPrev.ToString("X") + " " + mPC.ToString("X");
+            string command = "d " + sms.startPrev.ToString("X") + " " + m_registerSet.GetPC().ToString("X");
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             CommandStruct.CS_TextDelegate callback = new CommandStruct.CS_TextDelegate(show_src_diss_get_pre_dissasem);
             vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, callback, sms, this.Dispatcher);
@@ -817,14 +678,14 @@ namespace VICEPDBMonitor
         {
             ShowSrcDissStruct sms = userData as ShowSrcDissStruct;
             sms.disassemblyBefore = reply;
-            string command = "d " + mPC.ToString("X") + " " + sms.endNext.ToString("X");
+            string command = "d " + m_registerSet.GetPC().ToString("X") + " " + sms.endNext.ToString("X");
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, sms.displayDissCallback, sms, this.Dispatcher);
         }
 
         private void show_src_diss_get_post_dissasem(string reply, object userData)
         {
-            ShowSrcDissStruct sms = userData as ShowSrcDissStruct;
+            /*ShowSrcDissStruct sms = userData as ShowSrcDissStruct;
             sms.disassemblyAfter = reply;
             string displayText = String.Empty;
             try
@@ -833,119 +694,121 @@ namespace VICEPDBMonitor
                 int lastSourceIndexDisplayed = -1;
                 int lastSourceLineDisplayed = -1;
 
-                int[] lastDisplayedLine = new int[mSourceFileNamesLength];
+                int[] lastDisplayedLine = new int[pdbData.getNumFiles()]; //mSourceFileNamesLength
                 int i;
-                for (i = 0; i < mSourceFileNamesLength; i++)
+                for (i = 0; i < pdbData.getNumFiles(); i++) //mSourceFileNamesLength
                 {
                     lastDisplayedLine[i] = 0;
                 }
-
-                //							gotText += disassemblyBefore;
-                //							gotText += ">>>\n";
-                //							gotText += disassemblyAfter;
-                // Get something like:
-                /*
-                    .C:0427  AD 00 04    LDA $0400
-                    .C:042a  AD 27 04    LDA $0427
-                    ...
-                    .C:0439  60          RTS
-                    .C:043a  AD 3A 04    LDA $043A
                 */
-                string[] split = sms.disassemblyBefore.Split('\r');
-                bool doingBefore = true;
-                int index = 0;
-                String lastSourceLine = "";
-                while (index < split.Length)
+            //							gotText += disassemblyBefore;
+            //							gotText += ">>>\n";
+            //							gotText += disassemblyAfter;
+            // Get something like:
+            /*
+                .C:0427  AD 00 04    LDA $0400
+                .C:042a  AD 27 04    LDA $0427
+                ...
+                .C:0439  60          RTS
+                .C:043a  AD 3A 04    LDA $043A
+            */
+            /*
+            string[] split = sms.disassemblyBefore.Split('\r');
+            bool doingBefore = true;
+            int index = 0;
+            String lastSourceLine = "";
+            while (index < split.Length)
+            {
+                string line = split[index++];
+                if (line.Length < 7)
                 {
-                    string line = split[index++];
-                    if (line.Length < 7)
-                    {
-                        continue;
-                    }
-                    if (!line.StartsWith(".C:"))
-                    {
-                        continue;
-                    }
-                    string tAddr = line.Substring(3);
-                    tAddr = tAddr.Substring(0, 4);
-                    int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
-                    if (doingBefore && theAddr >= mPC)
-                    {
-                        split = sms.disassemblyAfter.Split('\r');
-                        index = 0;
-                        doingBefore = false;
-                        continue;
-                    }
+                    continue;
+                }
+                if (!line.StartsWith(".C:"))
+                {
+                    continue;
+                }
+                string tAddr = line.Substring(3);
+                tAddr = tAddr.Substring(0, 4);
+                int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
+                if (doingBefore && theAddr >= m_registerSet.GetPC())
+                {
+                    split = sms.disassemblyAfter.Split('\r');
+                    index = 0;
+                    doingBefore = false;
+                    continue;
+                }
 
-                    try
+                try
+                {
+                    AddrInfo addrInfo = pdbData.getAddrInfoForAddr(theAddr); //mAddrInfoByAddr[theAddr];
+                    if (lastSourceDisplayed != pdbData.getSourceFileName(addrInfo.mFile)) //mSourceFileNames[addrInfo.mFile])
                     {
-                        AddrInfo addrInfo = mAddrInfoByAddr[theAddr];
-                        if (lastSourceDisplayed != mSourceFileNames[addrInfo.mFile])
+                        lastSourceDisplayed = pdbData.getSourceFileName(addrInfo.mFile); // mSourceFileNames[addrInfo.mFile];
+                        displayText += "--- " + lastSourceDisplayed + " ---\r";
+                    }
+                    if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
+                    {
+                        lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine - 5;
+                        if (lastDisplayedLine[addrInfo.mFile] < 0)
                         {
-                            lastSourceDisplayed = mSourceFileNames[addrInfo.mFile];
-                            displayText += "--- " + lastSourceDisplayed + " ---\r";
+                            lastDisplayedLine[addrInfo.mFile] = 0;
                         }
-                        if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
+                    }
+                    if (lastDisplayedLine[addrInfo.mFile] > addrInfo.mLine)
+                    {
+                        lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine;
+                    }
+                    for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
+                    {
+                        if (lastSourceLine.Length > 0)
                         {
-                            lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine - 5;
-                            if (lastDisplayedLine[addrInfo.mFile] < 0)
-                            {
-                                lastDisplayedLine[addrInfo.mFile] = 0;
-                            }
+                            //gotText += "     " + "                                  " + lastSourceLine + "\n";
+                            displayText += "     " + lastSourceLine + "\r";
+                            lastSourceLine = "";
                         }
-                        if (lastDisplayedLine[addrInfo.mFile] > addrInfo.mLine)
-                        {
-                            lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine;
-                        }
-                        for (i = lastDisplayedLine[addrInfo.mFile]; i <= addrInfo.mLine; i++)
-                        {
-                            if (lastSourceLine.Length > 0)
-                            {
-                                //gotText += "     " + "                                  " + lastSourceLine + "\n";
-                                displayText += "     " + lastSourceLine + "\r";
-                                lastSourceLine = "";
-                            }
 
-                            if ((lastSourceIndexDisplayed == addrInfo.mFile) && (lastSourceLineDisplayed == i))
-                            {
-                                // Stop displaying the same source and line multiple times in a row
-                                continue;
-                            }
-                            lastSourceLine = string.Format("{0,5:###}", i) + ": " + mSourceFiles[addrInfo.mFile][i];
-                            lastSourceIndexDisplayed = addrInfo.mFile;
-                            lastSourceLineDisplayed = i;
+                        if ((lastSourceIndexDisplayed == addrInfo.mFile) && (lastSourceLineDisplayed == i))
+                        {
+                            // Stop displaying the same source and line multiple times in a row
+                            continue;
                         }
-                        lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine + 1;
+                        lastSourceLine = string.Format("{0,5:###}", i) + ": " + pdbData.getLineFromSourceFile(addrInfo.mFile, i); // mSourceFiles[addrInfo.mFile][i];
+                        lastSourceIndexDisplayed = addrInfo.mFile;
+                        lastSourceLineDisplayed = i;
                     }
-                    catch (System.Exception)
-                    {
+                    lastDisplayedLine[addrInfo.mFile] = addrInfo.mLine + 1;
+                }
+                catch (System.Exception)
+                {
 
-                    }
+                }
 
-                    if (theAddr == mPC)
-                    {
-                        displayText += ">>>> ";
-                    }
-                    else
-                    {
-                        displayText += "     ";
-                    }
-                    if (lastSourceLine.Length > 0)
-                    {
-                        line = line.PadRight(34, ' ');
-                        displayText += line + lastSourceLine + "\r";
-                        lastSourceLine = "";
-                    }
-                    else
-                    {
-                        displayText += line + "\r";
-                    }
+                if (theAddr == m_registerSet.GetPC())
+                {
+                    displayText += ">>>> ";
+                }
+                else
+                {
+                    displayText += "     ";
+                }
+                if (lastSourceLine.Length > 0)
+                {
+                    line = line.PadRight(34, ' ');
+                    displayText += line + lastSourceLine + "\r";
+                    lastSourceLine = "";
+                }
+                else
+                {
+                    displayText += line + "\r";
                 }
             }
-            catch (System.Exception)
-            {
-            }
+        }
+        catch (System.Exception)
+        {
+        }*/
 
+            string displayText = m_readerAndDispaly.ShowSrcDissGetPostDissaem(reply, userData);
             SetSourceView(displayText);
         }
 
@@ -956,12 +819,12 @@ namespace VICEPDBMonitor
                 SetSourceView("Source not found for this address ");
                 sms = new ShowSrcDissStruct()
                 {
-                     endNext = mPC+0x20
-                    ,startPrev = mPC
+                     endNext = m_registerSet.GetPC() + 0x20
+                    ,startPrev = m_registerSet.GetPC()
                 };
             }
             sms.displayDissCallback = new CommandStruct.CS_TextDelegate(show_diss_get_post_dissasem);
-            string command = "d " + sms.startPrev.ToString("X") + " " + mPC.ToString("X");
+            string command = "d " + sms.startPrev.ToString("X") + " " + m_registerSet.GetPC().ToString("X");
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(show_src_diss_get_pre_dissasem), sms, this.Dispatcher);
         }
@@ -985,7 +848,7 @@ namespace VICEPDBMonitor
                     string tAddr = line.Substring(3);
                     tAddr = tAddr.Substring(0, 4);
                     int theAddr = int.Parse(tAddr, NumberStyles.HexNumber);
-                    if (doingBefore && theAddr >= mPC)
+                    if (doingBefore && theAddr >= m_registerSet.GetPC())
                     {
                         split = reply.Split('\r');
                         index = 0;
@@ -994,7 +857,7 @@ namespace VICEPDBMonitor
                     }
 
                     Brush brush = null;
-                    if (theAddr == mPC)
+                    if (theAddr == m_registerSet.GetPC())
                     {
                         line = ">>>> " + line;
                         brush = Brushes.LightBlue;
@@ -1017,17 +880,17 @@ namespace VICEPDBMonitor
 
         private void show_src_post_registers()
         {
-            string displayText = string.Empty;
+            /*string displayText = string.Empty;
             try
             {
-                AddrInfo addrInfo = mAddrInfoByAddr[mPC];
+                AddrInfo addrInfo = pdbData.getAddrInfoForAddr(m_registerSet.GetPC()); // mAddrInfoByAddr[mPC];
                 // MPi: TODO: Tweak the 20 range based on the display height?
                 int range = 20;
-                int startPrev = mPC;
+                int startPrev = m_registerSet.GetPC();
                 // Step backwards trying to find a good starting point to disassemble
                 while (range-- > 0)
                 {
-                    AddrInfo addrInfo2 = mAddrInfoByAddr[startPrev];
+                    AddrInfo addrInfo2 = pdbData.getAddrInfoForAddr(startPrev); // mAddrInfoByAddr[startPrev];
                     if (addrInfo2.mPrevAddr < 0)
                     {
                         break;
@@ -1035,7 +898,7 @@ namespace VICEPDBMonitor
                     startPrev = addrInfo2.mPrevAddr;
                 }
 
-                displayText += "File:" + mSourceFileNames[addrInfo.mFile] + "\n";
+                displayText += "File:" + pdbData.getSourceFileName(addrInfo.mFile) + "\n"; // mSourceFileNames[addrInfo.mFile] + "\n";
                 displayText += "Line:" + (addrInfo.mLine + 1) + "\n";
                 int theLine = addrInfo.mLine - 10;  // MPi: TODO: Tweak the - 10 based on the display height?
                 if (theLine < 0)
@@ -1054,7 +917,7 @@ namespace VICEPDBMonitor
                     {
                         displayText += "  ";
                     }
-                    string source = mSourceFiles[addrInfo.mFile][theLine++];
+                    string source = pdbData.getLineFromSourceFile(addrInfo.mFile, theLine++);  //mSourceFiles[addrInfo.mFile][theLine++];
                     source = source.Replace('\n', '\r');
                     source.TrimEnd();
 
@@ -1063,17 +926,18 @@ namespace VICEPDBMonitor
                 }
             }
             catch (System.Exception)
-            {
-                /*SendCommand("m 0000 ffff");
-                theReply = GetReply();
-                // No source info, so just dump memory
-                gotText += theReply;
-                //>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
-                //>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
-                //...
-                //>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....*/					
-            }
+            {*/
+            /*SendCommand("m 0000 ffff");
+            theReply = GetReply();
+            // No source info, so just dump memory
+            gotText += theReply;
+            //>C:0000  2f 37 00 aa  b1 91 b3 22  00 00 00 4c  00 00 00 04   /7....."...L....
+            //>C:0010  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....
+            //...
+            //>C:ff00  00 00 00 00  00 04 19 16  00 0a 76 a3  00 00 00 00   ..........v.....*/
+            //}
 
+            string displayText = m_readerAndDispaly.ShowSrcPostRegisters();
             SetSourceView(displayText);
         }
 
@@ -1135,16 +999,16 @@ namespace VICEPDBMonitor
                 {
                     command = "!" + command;
                 }
-               
+                /*               
                 // Produce a list of variable names and values relevant to the current PC and its zone
                 List<LabelInfo> allLabels = new List<LabelInfo>();
 
 				try
 				{
-					int theZone = mAddrInfoByAddr[mPC].mZone;
+                    int theZone = pdbData.getAddrInfoForAddr(m_registerSet.GetPC()).mZone; //mAddrInfoByAddr[mPC].mZone;
 					while (theZone >= 0)
 					{
-						List<LabelInfo> theLabels = mLabelInfoByZone[theZone];
+                        List<LabelInfo> theLabels = pdbData.getLabelsForZone(theZone); //mLabelInfoByZone[theZone];
 						allLabels.AddRange(theLabels);
 
 						// MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
@@ -1164,8 +1028,8 @@ namespace VICEPDBMonitor
 
 				}
 
-				// Now add all other labels to the end of the list
-				allLabels.AddRange(mAllLabels);
+                // Now add all other labels to the end of the list
+                allLabels.AddRange(pdbData.getAllLabels()); // mAllLabels);
 
 				// Look for labels after each whitespace
 				int pos = 0;
@@ -1215,16 +1079,19 @@ namespace VICEPDBMonitor
 						pos++;
 					}
 				}
+                */
+
+                command = m_readerAndDispaly.PostEnterKeyForCommand(command);
 
                 dispatchCommand(command);
 				mCommandBox.Clear();
 			}
 		}
 
-        private void full_mem_dump(byte[] reply, object userData)
+        /*private void full_mem_dump(byte[] reply, object userData)
         {
             Buffer.BlockCopy(reply, 0, mMemoryC64, 0, reply.Length);
-        }
+        }*/
 
         private void HandleCheckBoxes()
 		{
@@ -1419,6 +1286,12 @@ namespace VICEPDBMonitor
         {
             ScriptPanel SP = new ScriptPanel();
             SP.Show();
+        }
+
+        private void Button_Click_WatchWindow(object sender, RoutedEventArgs e)
+        {
+            LiveWatch LW = new LiveWatch();
+            LW.Show();
         }
     }
 }
