@@ -29,7 +29,7 @@ namespace VICEPDBMonitor
             {
                 AddressNumber = Int32.Parse(match.Groups[(int)RegexMan.eBreakPointResult.first_address].Value, System.Globalization.NumberStyles.HexNumber);
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 AddressNumber = -1;
             }
@@ -39,7 +39,7 @@ namespace VICEPDBMonitor
                 {
                     EndAddressNumber = Int32.Parse(match.Groups[(int)RegexMan.eBreakPointResult.second_address].Value, System.Globalization.NumberStyles.HexNumber);
                 }
-                catch (Exception ex)
+                catch (Exception /*ex*/)
                 {
                     EndAddressNumber = -1;
                 }

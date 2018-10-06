@@ -74,14 +74,20 @@ namespace VICEPDBMonitor
 
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.addTextCommand("bank ram", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
-            vcom.addBinaryMemCommand(m_startAddress, m_startAddress + 0x3fff, new CommandStruct.CS_BinaryDelegate(got_ram), null, this.Dispatcher);
+            vcom.addBinaryMemCommand(m_startAddress,         m_startAddress + 0x2fff, new CommandStruct.CS_BinaryDelegate(got_ramLo), null, this.Dispatcher);
+            vcom.addBinaryMemCommand(m_startAddress+ 0x2000, m_startAddress + 0x4fff, new CommandStruct.CS_BinaryDelegate(got_ram), null, this.Dispatcher);
             vcom.addTextCommand("bank cpu", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, null);
         }
 
-        private void got_ram(byte[] data, object none)
+        private void got_ramLo(byte[] data, object none)
         {
             C64RAM ram = C64RAM.getInstace();
             ram.injectBinaryData(m_startAddress, data);
+        }
+        private void got_ram(byte[] data, object none)
+        {
+            C64RAM ram = C64RAM.getInstace();
+            ram.injectBinaryData(m_startAddress+0x2000, data);
             renderSprites();
         }
         /*m_mainWindow.SendCommand("bank ram\n");
