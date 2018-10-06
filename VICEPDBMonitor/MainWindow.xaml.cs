@@ -56,7 +56,8 @@ namespace VICEPDBMonitor
             m_memDump = new C64MemDump();
             m_memDump.SetRegisterSet(m_registerSet);
 
-            m_readerAndDispaly = new AcmePDBRandD();
+            //m_readerAndDispaly = new AcmePDBRandD();
+            m_readerAndDispaly = new FunctionJSONRAndD();
             m_readerAndDispaly.SetCodeWindowControl(mTextBox);
             m_readerAndDispaly.SetLabelsWindowControl(mLabelsBox);
             m_readerAndDispaly.SetRegisterSet(m_registerSet);

@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -66,6 +69,7 @@
       <DependentUpon>ChisViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="EnumMatchToBooleanConverter.cs" />
+    <Compile Include="FunctionJSONRAndD.cs" />
     <Compile Include="IMemDump.cs" />
     <Compile Include="IPDBReaderAndDisplay.cs" />
     <Compile Include="IRegisterSet.cs" />
@@ -167,6 +171,7 @@
     <None Include="charsets\hexcharset3.prg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
