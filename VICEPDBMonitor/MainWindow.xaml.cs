@@ -56,8 +56,15 @@ namespace VICEPDBMonitor
             m_memDump = new C64MemDump();
             m_memDump.SetRegisterSet(m_registerSet);
 
-            //m_readerAndDispaly = new AcmePDBRandD();
-            m_readerAndDispaly = new FunctionJSONRAndD();
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+            if(commandLineArgs[1].EndsWith(".json"))
+            {
+                m_readerAndDispaly = new FunctionJSONRAndD();
+            }
+            else
+            {
+                m_readerAndDispaly = new AcmePDBRandD();
+            }
             m_readerAndDispaly.SetCodeWindowControl(mTextBox);
             m_readerAndDispaly.SetLabelsWindowControl(mLabelsBox);
             m_readerAndDispaly.SetRegisterSet(m_registerSet);
@@ -68,7 +75,7 @@ namespace VICEPDBMonitor
 
             VICIIRenderer.initRenderer(); //load charsets
                 
-			string[] commandLineArgs = Environment.GetCommandLineArgs();
+			
 
             m_readerAndDispaly.CreatePDBFromARGS(commandLineArgs);
 
