@@ -1,0 +1,34 @@
+﻿<Window x:Class="VICEPDBMonitor.VDCBitmap"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VICEPDBMonitor"
+        mc:Ignorable="d"
+        Title="VDCBitmap" Height="600" Width="800">
+    <Grid >
+        <Label Content="StartAddress$" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" />
+        <TextBox x:Name="startBox" HorizontalAlignment="Left" Height="23" Margin="92,14,0,0" TextWrapping="Wrap" Text="FFFF" VerticalAlignment="Top" Width="48"/>
+        <Label Content="Width" HorizontalAlignment="Left" Margin="139,10,0,0" VerticalAlignment="Top" />
+        <TextBox x:Name="widthBox" HorizontalAlignment="Left" Height="23" Margin="186,14,0,0" TextWrapping="Wrap" Text="40" VerticalAlignment="Top" Width="24"/>
+        <Label Content="Height" HorizontalAlignment="Left" Margin="215,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="heightBox" HorizontalAlignment="Left" Height="23" Margin="266,14,0,0" TextWrapping="Wrap" Text="25" VerticalAlignment="Top" Width="24"/>
+        <CheckBox x:Name="doubleCheck" Content="DoubleWidth" HorizontalAlignment="Left" Margin="295,16,0,0" VerticalAlignment="Top"/>
+        <Image x:Name="canvas" Height="400" Margin="10,41,142,0" VerticalAlignment="Top" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="1" ScaleY="2"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <Label Content="Stride" HorizontalAlignment="Left" Margin="391,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="strideBox" HorizontalAlignment="Left" Height="23" Margin="436,14,0,0" TextWrapping="Wrap" Text="0" VerticalAlignment="Top" Width="24"/>
+        <Button x:Name="updateButton" Content="Update" HorizontalAlignment="Left" Margin="570,13,0,0" VerticalAlignment="Top" Width="75" Click="updateButton_Click"/>
+        <RadioButton x:Name="ram0Rad" Content="RAM0" HorizontalAlignment="Left" Margin="697,38,0,0" VerticalAlignment="Top" IsChecked="True" GroupName="gram"/>
+        <RadioButton x:Name="ram1Rad" Content="RAM1" HorizontalAlignment="Left" Margin="697,58,0,0" VerticalAlignment="Top" GroupName="gram"/>
+        <RadioButton x:Name="vdcRad" Content="VDC" HorizontalAlignment="Left" Margin="697,78,0,0" VerticalAlignment="Top" GroupName="gram"/>
+    </Grid>
+</Window>
