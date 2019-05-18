@@ -6,24 +6,23 @@
         xmlns:local="clr-namespace:VICEPDBMonitor"
         mc:Ignorable="d"
         Title="ScriptPanel" Height="800" Width="800">
-    <Grid>
-        <StackPanel Margin="10">
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="mScriptText" HorizontalAlignment="Left" Height="130" Margin="0,0,0,0" TextWrapping="Wrap" Text="Script" VerticalAlignment="Top" Width="680" MaxLines="100" AcceptsReturn="True" FontFamily="Courier New" FontSize="14"/>
-                <Button x:Name="mRunButton" Content="Run" Width="70" HorizontalAlignment="Right" Click="mRunButton_Click"></Button>
-            </StackPanel>
-            <TextBlock x:Name="mResults" TextWrapping="Wrap" VerticalAlignment="Stretch" ScrollViewer.CanContentScroll="True" FontFamily="Courier New" FontSize="14">
-                <Run Text="Results"></Run>
-                <LineBreak/>
-                <Run Text="Commands can be vice: or host:, vice: will send the command to vice and capture the results. host commands will run a program on the host machine, via the cmd system. It is best to use aboslute paths at all times."/>
-                <LineBreak/>
-                <Run Text="vice:m 400 9ff >> D:\myproject\dump.text"/><LineBreak/>
-                <Run Text="host:python D:\mystuff\script.py D:\myproject\dump.text"/><LineBreak/>
-                <Run Text="del D:\myproject\dump.text"/>
-                <LineBreak/>
-                <Run Text="The vice command can have a >> filename at the end of it, this will put the reply(complete) into a file for passing to a host command"/>
+    <Grid Margin="0,0,0,0">
+        <TextBox x:Name="mScriptText" Height="130" TextWrapping="Wrap" Text="Script" VerticalAlignment="Top" MaxLines="100" AcceptsReturn="True" FontFamily="Courier New" FontSize="14" Margin="0,0,112,0"/>
+        <Button x:Name="mRunButton" Content="Run" Click="mRunButton_Click" Height="39" VerticalAlignment="Top" HorizontalAlignment="Right" Width="112"/>
+        <Button x:Name="mCopyButton" Content="Copy Results" Click="mCopyButton_Click" Margin="0,100,0,0" HorizontalAlignment="Right" Width="112" Height="30" VerticalAlignment="Top"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,130,0,0">
+            <TextBlock x:Name="mResults" TextWrapping="Wrap" VerticalAlignment="Stretch" ScrollViewer.CanContentScroll="True" FontFamily="Courier New" FontSize="14" >
+                    <Run Text="Results"></Run>
+                    <LineBreak/>
+                    <Run Text="Commands can be vice: or host:, vice: will send the command to vice and capture the results. host commands will run a program on the host machine, via the cmd system. It is best to use aboslute paths at all times."/>
+                    <LineBreak/>
+                    <Run Text="vice:m 400 9ff >> D:\myproject\dump.text"/><LineBreak/>
+                    <Run Text="host:python D:\mystuff\script.py D:\myproject\dump.text"/><LineBreak/>
+                    <Run Text="del D:\myproject\dump.text"/>
+                    <LineBreak/>
+                    <Run Text="The vice command can have a >> filename at the end of it, this will put the reply(complete) into a file for passing to a host command"/>
             </TextBlock>
-        </StackPanel>
-        
+        </ScrollViewer>
+
     </Grid>
 </Window>
