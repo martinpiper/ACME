@@ -1,0 +1,25 @@
+﻿<Window x:Class="VICEPDBMonitor.VICBitmap"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VICEPDBMonitor"
+        mc:Ignorable="d"
+        Title="VICBitmap" Height="500" Width="800">
+    <Grid Margin="0,0,-326,-379">
+        <Image x:Name="canvas" Margin="10,36,0,0" HorizontalAlignment="Left" Width="320" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" OpacityMask="Black" Height="200" VerticalAlignment="Top" >
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="2" ScaleY="2"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+            <ToolTipService.ToolTip>
+                <ToolTip x:Name="hoverTip" Content="test"/>
+            </ToolTipService.ToolTip>
+        </Image>
+        <ComboBox x:Name="address" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ComboBox_SelectionChanged"/>
+    </Grid>
+</Window>
