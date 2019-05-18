@@ -16,6 +16,8 @@ using System.Net.Sockets;
 using System.Globalization;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace VICEPDBMonitor
 {
@@ -34,9 +36,10 @@ namespace VICEPDBMonitor
         bool mAccessUsed = false;
         bool mExecUsed = false;
 
-        Regex mBreakPointResultRegex;
-        Regex mBreakPointHitRegex;
+        //Regex mBreakPointResultRegex;
+        //Regex mBreakPointHitRegex;
         List<BreakPointDataSource> mBreakPoints;
+        ObservableCollection<AssertDataSource> mAssertList;
 
 
         private delegate void NoArgDelegate();
@@ -50,14 +53,19 @@ namespace VICEPDBMonitor
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.setErrorCallback(new VICECOMManager.OneArgDelegate(SetSourceView), this.Dispatcher);
             vcom.setVICEmsgCallback(new VICECOMManager.OneArgDelegate(GotMsgFromVice));
-
             m_registerSet = new RegisterSet6510();
-
             m_memDump = new C64MemDump();
             m_memDump.SetRegisterSet(m_registerSet);
 
+            //this must be BEFORE we parse the PDB Data
+            mAssertList = new ObservableCollection<AssertDataSource>();
             string[] commandLineArgs = Environment.GetCommandLineArgs();
-            if (commandLineArgs[1].EndsWith(".json"))
+            if(commandLineArgs.Length == 1)
+            {
+                m_readerAndDispaly = new AcmePDBRandD();
+                //System.Environment.Exit(1);
+            }
+            else if (commandLineArgs[1].EndsWith(".json"))
             {
                 m_readerAndDispaly = new FunctionJSONRAndD();
             }
@@ -76,8 +84,7 @@ namespace VICEPDBMonitor
             VICIIRenderer.initRenderer(); //load charsets
 
 
-
-            m_readerAndDispaly.CreatePDBFromARGS(commandLineArgs);
+            m_readerAndDispaly.CreatePDBFromARGS(commandLineArgs, this);
 
             //			mCommands.Add("r");
             //			mCommands.Add("m 0000 ffff");
@@ -89,6 +96,16 @@ namespace VICEPDBMonitor
 
             HandleCodeView();
 
+            /*AssertDataSource AD = new AssertDataSource();
+            AD.Enable = true;
+            AD.Address = 0x810;
+            AD.Label = "Test";
+            AD.Condition = "@io:$d020 != $00";
+            AD.Msg = "This is a test";
+            AD.Number = 1;
+            mAssertList.Add(AD);*/
+
+            AssertDataGrid.ItemsSource = mAssertList;
         }
 
         public void canStep(object sender, CanExecuteRoutedEventArgs e)
@@ -282,21 +299,6 @@ namespace VICEPDBMonitor
         private void AppendTextSourceView(String text, Brush brush)
         {
             m_readerAndDispaly.AppendTextSouceView(text, brush);
-            if (false)
-            {
-                if (null == text || text.Length == 0)
-                {
-                    return;
-                }
-
-                Run r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-                r.Background = brush;
-
-                mTextBox.AppendText(text);
-
-                r = new Run("", mTextBox.CaretPosition.DocumentEnd);
-                r.Background = null;
-            }
         }
 
         private void UpdateLabelView(String text)
@@ -327,6 +329,11 @@ namespace VICEPDBMonitor
                 //dispatchCommand("!domem");
                 m_memDump.RefreshDump(Dispatcher);
             }
+        }
+
+        public void AddAssert(AssertDataSource ads)
+        {
+            mAssertList.Add(ads);
         }
 
         private void ParseProfileInformation(string theReply)
@@ -427,6 +434,10 @@ namespace VICEPDBMonitor
             else if (command.IndexOf("break") == 0 || command.IndexOf("watch") == 0)
             {
                 vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(break_callback), null, this.Dispatcher);
+            }
+            else if (command.StartsWith("quit"))
+            {
+                vcom.addTextCommand("quit", CommandStruct.eMode.DoCommandFireCallback, new CommandStruct.CS_TextDelegate(quit_callback), null, this.Dispatcher);
             }
             else
             {
@@ -582,6 +593,11 @@ namespace VICEPDBMonitor
             SetSourceView(reply);
         }
 
+        private void quit_callback(string reply, object userData)
+        {
+            Close();
+        }
+
         private void breaklist_callback(string reply, object userData)
         {
             mBreakPoints.Clear();
@@ -601,9 +617,14 @@ namespace VICEPDBMonitor
                     Match match = RegexMan.BreakPointResult.Match(line);
                     if (match.Success)
                     {
-                        BreakPointDataSource test = new BreakPointDataSource();
-                        test.setFromMatch(match);
-                        mBreakPoints.Add(test);
+                        int Number = Int32.Parse(match.Groups[(int)RegexMan.eBreakPointResult.number].Value);
+                        //we don't want to have Asserts mixed in with breakpoints so make sure the number is high enough
+                        if (Number > mAssertList.Count)
+                        {
+                            BreakPointDataSource test = new BreakPointDataSource();
+                            test.setFromMatch(match);
+                            mBreakPoints.Add(test);
+                        }
                     }
 
                     mBreakPointDisplay.ItemsSource = mBreakPoints;
@@ -775,6 +796,18 @@ namespace VICEPDBMonitor
             CV.Show();
         }
 
+        private void viewVICBitmap_Click(object sender, RoutedEventArgs e)
+        {
+            VICBitmap VBV = new VICBitmap(this);
+            VBV.Show();
+        }
+
+        private void viewVDCBitmap_Click(object sender, RoutedEventArgs e)
+        {
+            VDCBitmap vdcb = new VDCBitmap(this);
+            vdcb.Show();
+        }
+
         private void mDoDump_Checked(object sender, RoutedEventArgs e)
         {
             HandleCheckBoxes();
@@ -800,6 +833,22 @@ namespace VICEPDBMonitor
             CheckBox cb = sender as CheckBox;
             BreakPointDataSource ds = cb.DataContext as BreakPointDataSource;
             int breakNum = ds.Number;
+            dispatchCommand("disable " + breakNum);
+        }
+
+        private void OnAssertChecked(object sender, RoutedEventArgs e)
+        {
+            DataGridCell dgc = sender as DataGridCell;
+            AssertDataSource ADS = dgc.DataContext as AssertDataSource;
+            int breakNum = ADS.Number;
+            dispatchCommand("enable " + breakNum);
+        }
+
+        private void OnAssertUnchecked(object sender, RoutedEventArgs e)
+        {
+            DataGridCell dgc = sender as DataGridCell;
+            AssertDataSource ADS = dgc.DataContext as AssertDataSource;
+            int breakNum = ADS.Number;
             dispatchCommand("disable " + breakNum);
         }
 

@@ -20,7 +20,7 @@ namespace VICEPDBMonitor
     interface IPDBReaderAndDisplay
     {
         //Init functions
-        void CreatePDBFromARGS(string[] commandLineArgs);
+        void CreatePDBFromARGS(string[] commandLineArgs,MainWindow window);
         void SetRegisterSet(IRegisterSet registerSet);
         void SetCodeWindowControl(Control textControl);
         void SetLabelsWindowControl(Control textControl);

@@ -34,7 +34,7 @@ namespace VICEPDBMonitor
             r.Background = null;
         }
 
-        public void CreatePDBFromARGS(string[] commandLineArgs)
+        public void CreatePDBFromARGS(string[] commandLineArgs, MainWindow window)
         {
             m_PDBData = PDBData.create(commandLineArgs);
         }

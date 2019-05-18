@@ -20,12 +20,24 @@ namespace VICEPDBMonitor
         public List<int> ReadFrom { get; set; }
         public List<int> WriteTo { get; set; }
         public List<int> ReadWrite { get; set; }
+        public Dictionary<string, string> LocalToFullCodeLabels { get; set; }
+    }
+
+    class AssertData
+    {
+        public int Num { get; set; }
+        public int Address { get; set; }
+        public string Label { get; set; }
+        public string Condition { get; set; }
+        public string Msg { get; set; }
     }
 
     class JsonPDB
     {
         public List<FunctionData> funcData;
         public Dictionary<int, string> VariableLabels;
+        public Dictionary<int, string> CodeLabels;
+        public List<AssertData> AssertInfo;
     }
 
     class FunctionJSONRAndD : IPDBReaderAndDisplay
@@ -35,6 +47,8 @@ namespace VICEPDBMonitor
         RichTextBox m_textBox;
         TextBox m_labelsBox;
         JsonPDB m_pDBData;
+        Dictionary<string, int> m_allLabelsToAddr;
+
         FunctionData m_lastFunction;
         string m_srcString;
 
@@ -54,15 +68,139 @@ namespace VICEPDBMonitor
             r.Background = null;
         }
 
-        public void CreatePDBFromARGS(string[] commandLineArgs)
+        public void CreatePDBFromARGS(string[] commandLineArgs, MainWindow window)
         {
             m_pDBData = JsonConvert.DeserializeObject<JsonPDB>(File.ReadAllText(commandLineArgs[1]));
             m_lastFunction = null;
             m_srcString = String.Empty;
+            m_allLabelsToAddr = new Dictionary<string, int>(m_pDBData.VariableLabels.Count + m_pDBData.CodeLabels.Count);
+            foreach(int addr in m_pDBData.VariableLabels.Keys)
+            {
+                string label = m_pDBData.VariableLabels[addr];
+                m_allLabelsToAddr[label] = addr;
+            }
+            foreach (int addr in m_pDBData.CodeLabels.Keys)
+            {
+                string label = m_pDBData.CodeLabels[addr];
+                m_allLabelsToAddr[label] = addr;
+            }
+            int num = 1;
+            foreach(AssertData AD in m_pDBData.AssertInfo)
+            {
+                AssertDataSource ADS = new AssertDataSource();
+                ADS.Enable = true;
+                ADS.Address = AD.Address;
+                ADS.Label = AD.Label;
+                ADS.Condition = AD.Condition;
+                ADS.Msg = AD.Msg;
+                ADS.Number = num++;
+                window.AddAssert(ADS);
+            }
         }
 
         public string PostEnterKeyForCommand(string command)
         {
+            string[] parts = command.Split(' ');
+            int i = 1; //the first part is the command so don't look it up
+            command = parts[0];
+            while(i < parts.Length)
+            {
+                if(parts[i].StartsWith("_"))
+                {
+                    if(m_lastFunction != null)
+                    {
+                        if(m_lastFunction.LocalToFullCodeLabels.ContainsKey(parts[i]))
+                        {
+                            parts[i] = m_lastFunction.LocalToFullCodeLabels[parts[i]];
+                        }
+                    }
+                }
+                if(m_allLabelsToAddr.ContainsKey(parts[i]))
+                {
+                    parts[i] = "$" + m_allLabelsToAddr[parts[i]].ToString("X");
+                }
+                command += " " + parts[i];
+                ++i;                
+            }
+            
+            /*
+            // Look for labels after each whitespace
+            int pos = 0;
+            while (pos < command.Length)
+            {
+                int testPos = command.IndexOf(' ', pos);
+                if (testPos < 0)
+                {
+                    testPos = command.IndexOf('~', pos);
+                }
+                if (testPos < 0)
+                {
+                    break;
+                }
+                pos = testPos + 1;
+
+                string remaining = command.Substring(pos);
+                if (remaining[0] == '.')
+                {
+                    remaining = remaining.Substring(1);
+                }
+
+                // Note the length order gets the most precise match
+                int found = -1;
+                string label = null;
+                if (remaining.Length > 0)
+                {
+                    foreach (int addr in m_pDBData.VariableLabels.Keys)
+                    {
+                        label = m_pDBData.VariableLabels[addr];
+                        if (label.Length >= remaining.Length && remaining.StartsWith(label))
+                        {
+                            found = addr;
+                            break;
+                        }
+                    }
+                    if(found < 0)
+                    {
+                        if (remaining.StartsWith("_"))
+                        {
+                            foreach (string full in m_lastFunction.LocalToFullCodeLabels.Keys)
+                            {
+                                label = m_pDBData.CodeLabels[addr];
+                                if (label.Length >= remaining.Length && remaining.StartsWith(label))
+                                {
+                                    found = addr;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (int addr in m_pDBData.CodeLabels.Keys)
+                            {
+                                label = m_pDBData.CodeLabels[addr];
+                                if (label.Length >= remaining.Length && remaining.StartsWith(label))
+                                {
+                                    found = addr;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If it's found then reconstruct the command with the label replaced as a hex number
+                if (-1 != found)
+                {
+                    string theHex = "$" + found.ToString("X");
+                    command = command.Substring(0, pos) + theHex + remaining.Substring(m_pDBData.VariableLabels[found].Length);
+                    pos += theHex.Length;
+                }
+                else
+                {
+                    pos++;
+                }
+            }*/
+
             return command;
         }
 

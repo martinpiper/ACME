@@ -57,6 +57,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AcmePDBRandD.cs" />
+    <Compile Include="AssertDataSource.cs" />
     <Compile Include="BreakPointDataSource.cs" />
     <Compile Include="BreakPointDispatcher.cs" />
     <Compile Include="C128ViewModel.cs" />
@@ -92,6 +93,12 @@
     <Compile Include="SpriteView.xaml.cs" />
     <Compile Include="TweakPanel.xaml.cs">
       <DependentUpon>TweakPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VDCBitmap.xaml.cs">
+      <DependentUpon>VDCBitmap.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="VICBitmap.xaml.cs">
+      <DependentUpon>VICBitmap.xaml</DependentUpon>
     </Compile>
     <Compile Include="VICECOMManager.cs" />
     <Compile Include="VICIIRenderer.cs" />
@@ -137,6 +144,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="TweakPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="VDCBitmap.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="VICBitmap.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
