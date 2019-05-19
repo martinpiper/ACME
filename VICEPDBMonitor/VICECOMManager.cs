@@ -20,6 +20,7 @@ namespace VICEPDBMonitor
             ,DoCommandReturnResults = 1
             ,DoCommandThenExit = 2
             ,DoCommandOnly = 3
+            ,DoCommandFireCallback = 4
         }
         public delegate void CS_TextDelegate(string reply, object userData);
         public delegate void CS_BinaryDelegate(byte[] reply, object userData);
@@ -173,6 +174,12 @@ namespace VICEPDBMonitor
                                     case CommandStruct.eMode.DoCommandOnly:
                                         ConsumeData(); 
                                         break; //don't a single thing
+                                    case CommandStruct.eMode.DoCommandFireCallback:
+                                        if (lastCommand.textDelegate != null)
+                                        {
+                                            lastCommand.dispatch.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, lastCommand.textDelegate, null, lastCommand.userData);
+                                        }
+                                        break;
                                 }
                             }
 

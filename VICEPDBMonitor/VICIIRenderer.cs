@@ -37,7 +37,7 @@ namespace VICEPDBMonitor
 
         public enum eExtraCharsets
         {
-            extraCharsetStart = 0x2000
+            extraCharsetStart = 0x20000
             ,hexCharset1 = 0x20000
             ,hexCharset2 = 0x20800
             ,hexCharset3 = 0x21000

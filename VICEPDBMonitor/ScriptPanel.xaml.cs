@@ -119,5 +119,10 @@ namespace VICEPDBMonitor
             }
             DispatchNextCommand();
         }
+
+        private void mCopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(mResults.Text);
+        }
     }
 }
