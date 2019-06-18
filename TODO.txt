@@ -5,6 +5,31 @@
 
 ACME TODO file.
 
+* Code re-ordering and register optimisation
+	Especially the case where we have code like this:
+	!macro FOO {
+		lda #$ff
+		sta address
+	}
+	!macro BAR {
+		lda #$ff
+		sta address2
+	}
+		+FOO
+		+BAR
+	This would typically result in output code:
+		lda #$ff
+		sta address
+		lda #$ff
+		sta address2
+	Instead optimise this so that it results in:
+		lda #$ff
+		sta address
+		sta address2
+	This can be done if there are no references to branch/jump/indrect/store in-between the two stores.
+
+	
+
 * Dead strip code in zones where labels (their memory addresses) are not referenced at all by anything outside that zone.
 
 
