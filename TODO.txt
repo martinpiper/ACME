@@ -5,6 +5,11 @@
 
 ACME TODO file.
 
+* Look into VS to Vice debugging with ACME
+	https://blog.3d-logic.com/2012/05/12/introducing-vintage-studio/
+
+	
+
 * Code re-ordering and register optimisation
 	Especially the case where we have code like this:
 	!macro FOO {
