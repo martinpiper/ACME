@@ -55,7 +55,7 @@ extern "C" void PDBSave( FILE *fp )
 	int i;
 	for ( i = 0 ; i < gNumLibraryIncludes ; i++ )
 	{
-		fprintf( fp , "%s\n" , gLibraryIncludes );
+		fprintf( fp , "%s\n" , gLibraryIncludes[i] );
 	}
 
 	fprintf( fp , "FILES:%d\n" , (int) filenameIndex.size() );
