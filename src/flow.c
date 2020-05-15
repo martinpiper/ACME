@@ -189,7 +189,26 @@ static enum eos_t PO_for(void) {// Now GotByte = illegal char
 		Throw_error(exception_syntax);
 		return(SKIP_REMAINDER);
 	}
-	maximum = ALU_defined_int();
+	maximum = ALU_any_int();
+	if (gALU_any_int_flags & MVALUE_DEFINED) {
+		// All good, do nothing
+	} else {
+		int age = 0;
+		if (pass_count > 0 && (gALU_any_int_flags & MVALUE_UNSURE)) {
+			age = GetLabelAge(pass_count, GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number);
+			if (age < 1) {
+				gLabel_set_value_changed_allowed = 3;	// Allow unsure values that have been unsure for a while to be resolved for extra passes. See Label_set_value() and "change_allowed = TRUE;"
+			}
+		} else if ((gALU_any_int_flags & MVALUE_DEFINED) == 0) {
+			age = GetLabelAge(pass_count, GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number);
+			if (age < 1) {
+				gLabel_set_value_changed_allowed = 3;	// Allow undefined values for extra passes. See Label_set_value() and "change_allowed = TRUE;"
+			}
+		}
+		if (age > 3) {
+			Throw_serious_error("Value not defined. Even after several attempts.");
+		}
+	}
 	if(maximum < 0)
 		Throw_serious_error("Loop count is negative.");
 	if(GotByte != CHAR_SOB)

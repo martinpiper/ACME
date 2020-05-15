@@ -12,6 +12,14 @@ platform used. There should be another help file in this archive
 outlining the platform specific changes.
 
 ----------------------------------------------------------------------
+Section:   New in release 0.98
+----------------------------------------------------------------------
+
+Improved PO: "!for" now supports forward references for labels, meaning that if a label is undefined or "not sure" then extra passes will be used to try to resolve the value.
+To help give a hint where the new forward reference attempts were used, a new serious error was created "Value not defined. Even after several attempts."
+
+
+----------------------------------------------------------------------
 Section:   New in release 0.96
 ----------------------------------------------------------------------
 

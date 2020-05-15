@@ -16,10 +16,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#define RELEASE		"0.97"		// update before release (FIXME)
+#define RELEASE		"0.98"		// update before release (FIXME)
 #define CODENAME	"Delta"		// update before release
-#define CHANGE_DATE	"9 Sep"		// update before release
-#define CHANGE_YEAR	"2017"		// update before release
+#define CHANGE_DATE	"15 May"	// update before release
+#define CHANGE_YEAR	"2020"		// update before release
 #define HOME_PAGE	"http://www.wellytop.com/C64.html\nhttps://github.com/martinpiper/ACME/"
 
 #include <stdio.h>
@@ -223,6 +223,11 @@ static int perform_pass(void) {
 	FILE*	fd;
 	int	i;
 
+	if (gLabel_set_value_changed_allowed > 0) {
+		gLabel_set_value_changed_allowed--;
+	}
+
+
 	// call modules' "pass init" functions
 	CPU_passinit(default_cpu);// set default cpu values (PC undefined)
 	Output_passinit(start_addr);// call after CPU_passinit(), to define PC
@@ -260,7 +265,7 @@ static bool do_actual_work(void) {
 	undefined_prev = undefined_curr + 1;
 	// As long as the number of "NeedValue" errors is decreasing but
 	// non-zero, keep doing passes.
-	while(undefined_curr && (undefined_curr < undefined_prev)) {
+	while(gLabel_set_value_changed_allowed || undefined_curr && (undefined_curr < undefined_prev)) {
 		pass_count++;
 		undefined_prev = undefined_curr;
 		if(Process_verbosity > 1)

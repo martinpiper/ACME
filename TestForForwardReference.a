@@ -1,0 +1,26 @@
+!cpu 6510
+!ct pet
+!to "TestForForwardReference.prg", cbm
+
+* = $0700
+.length = .textEnd - .textStart
+start
+	ldx #.length-1
+.l1
+	lda .textStart,x
+	sta $0400,x
+	dex
+	bpl .l1
+
+; Note forward reference with a for loop
+!for .t , .length {
+;!for .t , 1 {
+	lda .textStart + .t - 1
+	sta $0500 + .t - 1
+	}
+
+	rts
+
+.textStart
+	!tx "This is ugly code"
+.textEnd

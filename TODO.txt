@@ -102,6 +102,5 @@ ACME TODO file.
 
 
 
-* When assembling, if a variable is forward referenced (unknown) for !for or other macros, then assume it is 1 on the first pass, then if the value changes in later passes, re-visit the code with the new values.
-	If the value is unchanged during a pass and still unknown then report it cannot be resolved.
-	Or if the variable changes too many times during passes, report it cannot converge to a stable value.
+* !range <label> , <start> , <end> , <step>
+	Like !for but has more options for start and step values

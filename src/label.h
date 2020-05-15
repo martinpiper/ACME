@@ -20,7 +20,7 @@ struct label_t {
 
 // Variables
 extern node_ra_t*	Label_forest[];	// trees (because of 8-bit hash)
-
+extern int gLabel_set_value_changed_allowed;
 
 // Prototypes
 

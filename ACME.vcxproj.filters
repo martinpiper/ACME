@@ -176,6 +176,9 @@
     <None Include="docs\COPYING">
       <Filter>Docs</Filter>
     </None>
+    <None Include="TestForForwardReference.a">
+      <Filter>Asm</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Done.txt">

@@ -1337,11 +1337,15 @@ static int parse_expression(result_t* result) {
 // It the result's "exists" flag is clear (=empty expression), it throws an
 // error.
 // If the result's "defined" flag is clear, result_is_undefined() is called.
+int gALU_any_int_flags = 0;
 intval_t ALU_any_int(void) {
 	result_t	result;
 
+	gALU_any_int_flags = 0;
+
 	if(parse_expression(&result))
 		Throw_error(exception_paren_open);
+	gALU_any_int_flags = result.flags;
 	if((result.flags & MVALUE_EXISTS) == 0)
 		Throw_error(exception_no_value);
 	else if((result.flags & MVALUE_DEFINED) == 0)

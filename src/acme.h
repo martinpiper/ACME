@@ -34,5 +34,6 @@ extern int	ACME_finalize(int exit_code);
 extern void PDBInit( void );
 extern void PDBAddFileLineToAddr( const int address , const char *filename , const int lineNumber , const int zone );
 extern void PDBSave( FILE *fp );
+extern int GetLabelAge(const int currentPass, const char *label, const char *filename, int linenumber);
 
 #endif
