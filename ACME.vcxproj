@@ -134,6 +134,7 @@
     <None Include="src\Makefile.riscos" />
     <None Include="Test.a" />
     <None Include="TestACME.a" />
+    <None Include="TestForForwardReference.a" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ACME_Lib\6502\Help.txt" />

@@ -193,8 +193,14 @@ label_t* Label_find(zone_t zone, int flags) {
 
 // Assign value to label. The function acts upon the label's flag bits and
 // produces an error if needed.
+int gLabel_set_value_changed_allowed = 0;
 void Label_set_value(label_t* label, result_t* new, bool change_allowed) {
 	int	oldflags	= label->result.flags;
+
+	// This means the last pass with this mode enabled will not allow redefinition, and will flag any remaining errors
+	if (gLabel_set_value_changed_allowed > 1) {
+		change_allowed = TRUE;
+	}
 
 	// value stuff
 	if((oldflags & MVALUE_DEFINED) && (change_allowed == FALSE)) {

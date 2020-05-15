@@ -53,6 +53,7 @@ extern void	ALU_init(void);
 extern void	ALU_throw_errors(void);
 // returns int value (0 if result was undefined)
 extern intval_t	ALU_any_int(void);
+extern int ALU_any_int_flags(void);
 // returns int value (if result was undefined, serious error is thrown)
 extern intval_t	ALU_defined_int(void);
 // stores int value if given. Returns whether stored. Throws error if undefined.

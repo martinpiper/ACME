@@ -5,8 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-v3 --lib ../ --lib ../../ --lib ../../../ --msvc asm/main.a</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-v3 TestForForwardReference.a</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerWorkingDirectory>C:\Work\C64\VideoHardware</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

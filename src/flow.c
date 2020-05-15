@@ -189,7 +189,11 @@ static enum eos_t PO_for(void) {// Now GotByte = illegal char
 		Throw_error(exception_syntax);
 		return(SKIP_REMAINDER);
 	}
-	maximum = ALU_defined_int();
+	maximum = ALU_any_int();
+	if ((ALU_any_int_flags() & MVALUE_DEFINED) == 0) {
+		gLabel_set_value_changed_allowed = 3;	// Allow undefined values for two extra passes. See Label_set_value() and "change_allowed = TRUE;"
+	}
+	
 	if(maximum < 0)
 		Throw_serious_error("Loop count is negative.");
 	if(GotByte != CHAR_SOB)
