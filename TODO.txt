@@ -43,13 +43,15 @@ ACME TODO file.
 	!entry	- Document entry status/register/memory locations
 	!return	- Document returned status/register/memory locations
 	!trashed	- Document trashed status/register/memory locations. Like !return but makes the unknown/trashed state explicit.
+	!preserve	- Make status/register/memory explicitly preserved
+	!irq		- Flag this as IRQ code
 	When any of the above are used then also track all status/register/memory usage for the zone
 
 	
 
 
 * Use the assembler zone documentation and static analysis to warn when conflicting status/register/memory locations are used in code.
-	If the calling zone uses status/register/memory that the called zone does then output a warning.
+	If the calling zone uses status/register/memory that the called zone does then output an error.
 	For example:
 	!zn {
 	!return A
@@ -64,6 +66,11 @@ ACME TODO file.
 	doThing
 		lda #0
 		rts
+
+
+
+* When !irq is used, analyse the code to ensure that !preserve registers/locations are restored
+
 	
 
 
@@ -74,7 +81,7 @@ ACME TODO file.
 	!optimise speed
 	!entry Y
 	!return X
-	!trash Y
+	!trash A,Y
 	foo
 		iny
 		iny
@@ -91,3 +98,10 @@ ACME TODO file.
 		adc #4
 		tax
 		rts
+
+
+
+
+* When assembling, if a variable is forward referenced (unknown) for !for or other macros, then assume it is 1 on the first pass, then if the value changes in later passes, re-visit the code with the new values.
+	If the value is unchanged during a pass and still unknown then report it cannot be resolved.
+	Or if the variable changes too many times during passes, report it cannot converge to a stable value.
