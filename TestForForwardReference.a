@@ -14,6 +14,7 @@ start
 
 ; Note forward reference with a for loop
 !for .t , .length {
+;!for .t , 1 {
 	lda .textStart + .t - 1
 	sta $0500 + .t - 1
 	}

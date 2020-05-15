@@ -76,3 +76,27 @@ extern "C" void PDBSave( FILE *fp )
 		st++;
 	}
 }
+
+static std::string buildLabelIdentifier(const char *label, const char *filename, int linenumber)
+{
+	std::string theLabel = label;
+	theLabel += ":";
+	theLabel += filename;
+	theLabel += ":";
+	theLabel += std::to_string(linenumber);
+	return theLabel;
+}
+
+std::map<std::string , int> sLabelToPass;
+extern "C" int GetLabelAge(const int currentPass, const char *label, const char *filename, int linenumber)
+{
+	// Make a unique reference for this occurrence so it can be tracked precisely
+	std::string theLabel = buildLabelIdentifier(label,filename,linenumber);
+	std::map<std::string , int>::iterator found = sLabelToPass.find(theLabel);
+	if (found != sLabelToPass.end())
+	{
+		return currentPass - found->second;
+	}
+	sLabelToPass.insert(std::pair<std::string,int>(theLabel,currentPass));
+	return 0;
+}

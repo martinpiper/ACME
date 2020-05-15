@@ -102,15 +102,5 @@ ACME TODO file.
 
 
 
-* When assembling, if a variable is forward referenced (unknown) for !for or other macros, then assume it is 1 on the first pass, then if the value changes in later passes, re-visit the code with the new values.
-	If the value is unchanged during a pass and still unknown then report it cannot be resolved.
-	Or if the variable changes too many times during passes, report it cannot converge to a stable value.
-	* See "TestForForwardReference.a" for an example
-	* ALU_defined_int() could try to use ALU_any_int() and note the expression used with the zone+file+line and if the expression is unknown too many times then give up.
-		Increment pass_undefined_count when the expression is unknown or changes from previous value
-		Label_set_value() will need an override that ignores any redefinition when an undefined label used by !for is encountered
-
-
-
 * !range <label> , <start> , <end> , <step>
 	Like !for but has more options for start and step values
