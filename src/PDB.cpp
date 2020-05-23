@@ -6,6 +6,7 @@
 extern "C" {
 #include "acme.h"
 #include "input.h"
+#include "global.h"
 }
 
 struct DebugInfo
@@ -77,21 +78,23 @@ extern "C" void PDBSave( FILE *fp )
 	}
 }
 
-static std::string buildLabelIdentifier(const char *label, const char *filename, int linenumber)
+static std::string buildLabelIdentifier(const char *label, const char *filename, int linenumber, int zone)
 {
 	std::string theLabel = label;
 	theLabel += ":";
 	theLabel += filename;
 	theLabel += ":";
 	theLabel += std::to_string(linenumber);
+	theLabel += ":";
+	theLabel += std::to_string(zone);
 	return theLabel;
 }
 
 std::map<std::string , int> sLabelToPass;
-extern "C" int GetLabelAge(const int currentPass, const char *label, const char *filename, int linenumber)
+extern "C" int GetLabelAge(const int currentPass, const char *label, const char *filename, int linenumber, int zone)
 {
 	// Make a unique reference for this occurrence so it can be tracked precisely
-	std::string theLabel = buildLabelIdentifier(label,filename,linenumber);
+	std::string theLabel = buildLabelIdentifier(label,filename,linenumber,zone);
 	std::map<std::string , int>::iterator found = sLabelToPass.find(theLabel);
 	if (found != sLabelToPass.end())
 	{
@@ -99,4 +102,40 @@ extern "C" int GetLabelAge(const int currentPass, const char *label, const char 
 	}
 	sLabelToPass.insert(std::pair<std::string,int>(theLabel,currentPass));
 	return 0;
+}
+
+std::map<std::string , int> sLabelLastValue;
+std::map<std::string , int> sLabelDifferentCount;
+extern "C" int IsLabelSameAsLastValue(const int theValue, const char *label, const char *filename, int linenumber, int zone)
+{
+	// Make a unique reference for this occurrence so it can be tracked precisely
+	std::string theLabel = buildLabelIdentifier(label,filename,linenumber,zone);
+	std::map<std::string , int>::iterator found = sLabelLastValue.find(theLabel);
+	if (found != sLabelLastValue.end())
+	{
+		bool same = (found->second == theValue);
+		if (!same)
+		{
+			sLabelDifferentCount[theLabel] = sLabelDifferentCount[theLabel] + 1;
+			if(Process_verbosity > 3)
+			{
+				char message[1024];
+				sprintf(message, "Detected result change: %d: %s : From %d to %d\n" , sLabelDifferentCount[theLabel] , theLabel.c_str() , found->second , theValue);
+				Throw_warning(message);
+			}
+			// And update it after the comparison
+			found->second = theValue;
+			return FALSE;
+		}
+		return TRUE;
+	}
+	sLabelLastValue.insert(std::pair<std::string,int>(theLabel,theValue));
+	sLabelDifferentCount[theLabel] = 0;
+	return TRUE;
+}
+
+extern "C" int GetLabelNumberDifferences(const char *label, const char *filename, int linenumber, int zone)
+{
+	std::string theLabel = buildLabelIdentifier(label,filename,linenumber,zone);
+	return sLabelDifferentCount[theLabel];
 }

@@ -195,12 +195,12 @@ static enum eos_t PO_for(void) {// Now GotByte = illegal char
 	} else {
 		int age = 0;
 		if (pass_count > 0 && (gALU_any_int_flags & MVALUE_UNSURE)) {
-			age = GetLabelAge(pass_count, GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number);
+			age = GetLabelAge(pass_count, GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number,zone);
 			if (age < 1) {
 				gLabel_set_value_changed_allowed = 3;	// Allow unsure values that have been unsure for a while to be resolved for extra passes. See Label_set_value() and "change_allowed = TRUE;"
 			}
 		} else if ((gALU_any_int_flags & MVALUE_DEFINED) == 0) {
-			age = GetLabelAge(pass_count, GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number);
+			age = GetLabelAge(pass_count, GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number,zone);
 			if (age < 1) {
 				gLabel_set_value_changed_allowed = 3;	// Allow undefined values for extra passes. See Label_set_value() and "change_allowed = TRUE;"
 			}
@@ -213,6 +213,16 @@ static enum eos_t PO_for(void) {// Now GotByte = illegal char
 		Throw_serious_error("Loop count is negative.");
 	if(GotByte != CHAR_SOB)
 		Throw_serious_error(exception_no_left_brace);
+
+	if (!IsLabelSameAsLastValue(maximum, GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number,zone))
+	{
+		int changes = GetLabelNumberDifferences(GlobalDynaBuf->buffer, Input_now->original_filename, Input_now->line_number,zone);
+		if (changes < 5)
+		{
+			gLabel_set_value_changed_allowed = 3;
+		}
+	}
+
 	// remember line number of loop pseudo opcode
 	loop_start = Input_now->line_number;
 	// read loop body into DynaBuf and get copy

@@ -55,3 +55,11 @@ It's possible to break into the execution by sending a character. For example to
 		Increment pass_undefined_count when the expression is unknown or changes from previous value
 		Label_set_value() will need an override that ignores any redefinition when an undefined label used by !for is encountered
 	* To help give a hint where the new forward reference attempts were used, a new serious error was created "Value not defined. Even after several attempts."
+	* -v4 will output full debug for detection of changing calculation values to allow these to be efficiently traced
+
+
+
+* Might need a !PO to stack and set the verbosity level, then pop the vebosity level:
+	To mitigate reporting of this where !for is inside a macro and the values legitimately change: asm/RoadObject_Macro.a(27) : Warning (Macro RoadObject): Detected result change: 143: height:asm/RoadObject_Macro.a:27 : From 17 to 19
+	Maybe it's to do with the macro usage not being in a separate zone?
+	* Mitigated without verbosity push, but instead added the zone to the calculation history test

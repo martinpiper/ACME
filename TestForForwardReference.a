@@ -14,13 +14,23 @@ start
 
 ; Note forward reference with a for loop
 !for .t , .length {
-;!for .t , 1 {
 	lda .textStart + .t - 1
 	sta $0500 + .t - 1
+	}
+; This heavily contrived example then causes further updates in the next pass based on the changing value of length
+!for .t , .length / 3 {
+	lda .textStart + .t - 1
+	sta $0600 + .t - 1
 	}
 
 	rts
 
 .textStart
-	!tx "This is ugly code"
+	!tx "This is *very* ugly code"
+
+	; This is also heavily contrived, but pushes the convergance tests further by changing the length of the text based on previous changed length
+	; See: IsLabelSameAsLastValue() and GetLabelNumberDifferences()
+	!for .t , .length / 15 {
+		!tx "."
+		}
 .textEnd
