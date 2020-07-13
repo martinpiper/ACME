@@ -69,7 +69,7 @@ static enum eos_t PO_binary(void) {
 	int skipByte;
 
 	// if file name is missing, don't bother continuing
-	if(Input_read_filename(TRUE))
+	if(Input_read_filename(TRUE,TRUE))
 		return(SKIP_REMAINDER);
 	// try to open file
 	fd = fopen(GLOBALDYNABUF_CURRENT, FILE_READBINARY);

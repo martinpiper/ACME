@@ -5,7 +5,8 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-v4 TestForForwardReference.a</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-v4 --msvc --lib ../Scroller/ ScrollEntry.a ScrollEntry_Tusari.a ScrollEntryAfter.a</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>C:\Work\C64\Tusari2</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

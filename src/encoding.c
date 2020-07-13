@@ -148,7 +148,7 @@ static enum eos_t user_defined_encoding(void) {
 	encoder_t	buffered_encoder	= Encoding_encode_char;
 
 	// if file name is missing, don't bother continuing
-	if(Input_read_filename(TRUE))
+	if(Input_read_filename(TRUE,TRUE))
 		return(SKIP_REMAINDER);
 	fd = fopen(GLOBALDYNABUF_CURRENT, FILE_READBINARY);
 	if(fd) {

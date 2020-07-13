@@ -241,7 +241,7 @@ static enum eos_t PO_to(void) {
 	}
 	// read filename to global dynamic buffer
 	// if no file name given, exit (complaining will have been done)
-	if(Input_read_filename(FALSE))
+	if(Input_read_filename(FALSE, FALSE))
 		return(SKIP_REMAINDER);
 	// get malloc'd copy of filename
 	output_filename = DynaBuf_get_copy(GlobalDynaBuf);

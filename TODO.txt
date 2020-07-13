@@ -1,9 +1,19 @@
+// Various build options to test with:
+
 // $(ProjectDir)
 // -v9 Test.a
+
 // C:\work\C64\Scroller
 // -v3 --msvc ScrollEntry.a
 
+// C:\work\c64\Tusari2
+// -v4 --msvc --lib ../Scroller/ ScrollEntry.a ScrollEntry_Tusari.a ScrollEntryAfter.a
+
 ACME TODO file.
+
+* Look into VSCode remote debugging into Vice with PDB parsing to enhance the source view
+
+
 
 * Look into VS to Vice debugging with ACME
 	https://blog.3d-logic.com/2012/05/12/introducing-vintage-studio/

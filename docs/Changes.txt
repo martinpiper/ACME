@@ -13,6 +13,15 @@ platform used. There should be another help file in this archive
 outlining the platform specific changes.
 
 ----------------------------------------------------------------------
+Section:   New in release 1.00mp
+----------------------------------------------------------------------
+
+Any extra --lib paths will now be used when searching for top level source files from the command line.
+
+!to !sl !svl !pdb and other POs that write files will not use the --lib paths and will only write relative to the current directory.
+
+
+----------------------------------------------------------------------
 Section:   New in release 0.99mp
 ----------------------------------------------------------------------
 

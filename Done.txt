@@ -63,3 +63,12 @@ It's possible to break into the execution by sending a character. For example to
 	To mitigate reporting of this where !for is inside a macro and the values legitimately change: asm/RoadObject_Macro.a(27) : Warning (Macro RoadObject): Detected result change: 143: height:asm/RoadObject_Macro.a:27 : From 17 to 19
 	Maybe it's to do with the macro usage not being in a separate zone?
 	* Mitigated without verbosity push, but instead added the zone to the calculation history test
+
+
+
+
+* --lib will not allow command line files to be found, expand the file search to use any --lib paths
+
+
+
+* !to seems to be outputting the file to the wrong directory (Scroller not Tusari2) when building Tusari2?

@@ -276,7 +276,7 @@ static enum eos_t PO_sl(void) {
 	}
 	// read filename to global dynamic buffer
 	// if no file name given, exit (complaining will have been done)
-	if(Input_read_filename(FALSE))
+	if(Input_read_filename(FALSE,FALSE))
 		return(SKIP_REMAINDER);
 	// get malloc'd copy of filename
 	labeldump_filename = DynaBuf_get_copy(GlobalDynaBuf);
@@ -296,7 +296,7 @@ static enum eos_t PO_svl(void) {
 	}
 	// read filename to global dynamic buffer
 	// if no file name given, exit (complaining will have been done)
-	if(Input_read_filename(FALSE))
+	if(Input_read_filename(FALSE,FALSE))
 		return(SKIP_REMAINDER);
 	// get malloc'd copy of filename
 	vicelabeldump_filename = DynaBuf_get_copy(GlobalDynaBuf);
@@ -315,7 +315,7 @@ static enum eos_t PO_pdb(void) {
 	}
 	// read filename to global dynamic buffer
 	// if no file name given, exit (complaining will have been done)
-	if(Input_read_filename(FALSE))
+	if(Input_read_filename(FALSE,FALSE))
 		return(SKIP_REMAINDER);
 	// get malloc'd copy of filename
 	PDB_filename = DynaBuf_get_copy(GlobalDynaBuf);

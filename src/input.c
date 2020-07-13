@@ -432,7 +432,7 @@ int Input_read_and_lower_keyword(void) {
 // Returns whether error occurred (TRUE on error). Filename in GlobalDynaBuf.
 // Errors are handled and reported, but caller should call
 // Input_skip_remainder() then.
-bool Input_read_filename(bool allow_library) {
+bool Input_read_filename(bool allow_library , bool enableLibSearch) {
 	char	*lib_prefix,
 		end_quote;
 	int i;
@@ -486,29 +486,32 @@ bool Input_read_filename(bool allow_library) {
 	// terminate string
 	DynaBuf_append(GlobalDynaBuf, '\0');	// add terminator
 
-	fp = fopen(GLOBALDYNABUF_CURRENT,"rb");
-	// If it cannot be opened then search library includes
-	if (!fp)
+	if (enableLibSearch)
 	{
-		for (i=0;i<gNumLibraryIncludes;i++)
+		fp = fopen(GLOBALDYNABUF_CURRENT,"rb");
+		// If it cannot be opened then search library includes
+		if (!fp)
 		{
-			char newPath[1024];
-			sprintf(newPath,"%s%s",gLibraryIncludes[i],GLOBALDYNABUF_CURRENT);
-			fp = fopen(newPath,"rb");
-			if (fp)
+			for (i=0;i<gNumLibraryIncludes;i++)
 			{
-				fclose(fp);
-				DYNABUF_CLEAR(GlobalDynaBuf);
-				DynaBuf_add_string(GlobalDynaBuf, newPath);
-				DynaBuf_append(GlobalDynaBuf, '\0');	// add terminator
-				return (FALSE);
+				char newPath[1024];
+				sprintf(newPath,"%s%s",gLibraryIncludes[i],GLOBALDYNABUF_CURRENT);
+				fp = fopen(newPath,"rb");
+				if (fp)
+				{
+					fclose(fp);
+					DYNABUF_CLEAR(GlobalDynaBuf);
+					DynaBuf_add_string(GlobalDynaBuf, newPath);
+					DynaBuf_append(GlobalDynaBuf, '\0');	// add terminator
+					return (FALSE);
+				}
 			}
-		}
 
-	}
-	else
-	{
-		fclose(fp);
+		}
+		else
+		{
+			fclose(fp);
+		}
 	}
 
 	return(FALSE);	// no error

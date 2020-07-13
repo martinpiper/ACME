@@ -398,7 +398,7 @@ static enum eos_t PO_source(void) {// Now GotByte = illegal char
 	if(--source_recursions_left < 0)
 		Throw_serious_error("Too deeply nested. Recursive \"!source\"?");
 	// Read file name. Quit function on error.
-	if(Input_read_filename(TRUE))
+	if(Input_read_filename(TRUE,TRUE))
 		return(SKIP_REMAINDER);
 	// If file could be opened, parse it. Otherwise, complain.
 	if((fd = fopen(GLOBALDYNABUF_CURRENT, FILE_READBINARY))) {

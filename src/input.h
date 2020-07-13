@@ -105,7 +105,7 @@ extern int	Input_read_and_lower_keyword(void);
 // Returns whether error occurred (TRUE on error). Filename in GlobalDynaBuf.
 // Errors are handled and reported, but caller should call
 // Input_skip_remainder() then.
-extern bool	Input_read_filename(bool library_allowed);
+extern bool	Input_read_filename(bool library_allowed , bool enableLibSearch);
 // Try to read a comma, skipping spaces before and after. Return TRUE if comma
 // found, otherwise FALSE.
 extern bool	Input_accept_comma(void);

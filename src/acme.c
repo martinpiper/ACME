@@ -16,10 +16,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#define RELEASE		"0.99mp"	// update before release (FIXME)
+#define RELEASE		"1.00mp"	// update before release (FIXME)
 #define CODENAME	"Echo"		// update before release
 #define CHANGE_DATE	"13 July"	// update before release
 #define CHANGE_YEAR	"2020"		// update before release
+// http://sourceforge.net/projects/acme-crossass/
 #define HOME_PAGE	"http://www.wellytop.com/C64.html\nhttps://github.com/martinpiper/ACME/"
 
 #include <stdio.h>
@@ -238,9 +239,31 @@ static int perform_pass(void) {
 	pass_real_errors = 0;	// no real errors yet
 	// Process toplevel files
 	for(i = 0; i<toplevel_src_count; i++) {
-		if((fd = fopen(toplevel_sources[i], FILE_READBINARY)))
+		fd = fopen(toplevel_sources[i], FILE_READBINARY);
+		// If it cannot be opened then search library includes
+		if(fd != 0)
+		{
 			Parse_and_close_file(fd, toplevel_sources[i]);
-		else {
+		}
+		else
+		{
+			int t;
+			for (t=0;t<gNumLibraryIncludes;t++)
+			{
+				char newPath[1024];
+				sprintf(newPath,"%s%s",gLibraryIncludes[t],toplevel_sources[i]);
+				fd = fopen(newPath,"rb");
+				if (fd)
+				{
+					Parse_and_close_file(fd, newPath);
+					break;
+				}
+			}
+
+		}
+
+		if(fd == 0)
+		{
 			fprintf(stderr, "Error: Cannot open toplevel file \"%s\".\n", toplevel_sources[i]);
 			pass_real_errors++;
 		}
