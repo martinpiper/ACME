@@ -6,13 +6,14 @@
 
                           --- change log ---
 
+NOTE: This is a fork of the original code ( https://sourceforge.net/projects/acme-crossass/ ) and forked versions are suffixed with "mp".
 
 This text only contains descriptions of changes independent of the
 platform used. There should be another help file in this archive
 outlining the platform specific changes.
 
 ----------------------------------------------------------------------
-Section:   New in release 0.99
+Section:   New in release 0.99mp
 ----------------------------------------------------------------------
 
 Improved PO: "!for" now supports forward references for labels, meaning that if a label is undefined or "not sure" then extra passes will be used to try to resolve the value.
@@ -21,27 +22,27 @@ To help give a hint where the new forward reference attempts were used, a new se
 
 
 ----------------------------------------------------------------------
-Section:   New in release 0.96
+Section:   New in release 0.96mp
 ----------------------------------------------------------------------
 
 Improved PO: "!binary" now has "interleave" parameter.
 
 ----------------------------------------------------------------------
-Section:   New in release 0.95
+Section:   New in release 0.95mp
 ----------------------------------------------------------------------
 
 Added !pdb "filename.pdb"
 Save program debug information file. Useful for source level debugging.
 
 ----------------------------------------------------------------------
-Section:   New in release 0.94
+Section:   New in release 0.94mp
 ----------------------------------------------------------------------
 
 New CLI switch: "--lib <path>" Adds a path to search for library
 	includes.
 
 ----------------------------------------------------------------------
-Section:   New in release 0.93
+Section:   New in release 0.93mp
 ----------------------------------------------------------------------
 
 New CLI switch: "--vicelabeldump" 
