@@ -1,5 +1,15 @@
 ﻿TODO File for VICE PDB Monitor
 
+* Profiling data can be shown in the disassembly and source views. Basically show the accumulated count for that particular memory location.
+	This expands the display outside the labels view
+
+
+
+* Profiling: For locations somewhere inside storage areas e.g. ".label !fill 64,0" find the near previous label and use that for reporting
+	This expands the display in the labels view
+
+	
+
 * Nice arrow showing loops https://forums.nesdev.com/viewtopic.php?f=12&t=16625&hilit=debugger
 
 
