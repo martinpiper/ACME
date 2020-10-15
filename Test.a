@@ -70,7 +70,7 @@ UnusedCode
 	inc $d021
 	rts
 
-!bin ".gitIgnore",,,4
+;!bin ".gitIgnore",,,4
 
 foo = 1
 !ifndef foo {
