@@ -58,6 +58,6 @@ Code profiling
 * Now press "Profile clear" and the code should continue to run.
 * When you want to get one profile snapshot press "Profile add". The execution will quickly pause, then continue.
   * The labels view will update using data gathered for that current profile snapshot
-  * Where the label name is prefixed with "A<number>" to indicate that data at the label has been accessed <number> times.
-  * Where the label name is prefixed with "E<number>" to indicate that code at the label has been executed <number> times.
+  * Where the label name is prefixed with "A*number*" to indicate that data at the label has been accessed *number* times.
+  * Where the label name is prefixed with "E*number*" to indicate that code at the label has been executed *number* times.
   * For example this indicates the label "test" at location $42e has has its code executed 13 times and memory accessed (read/write) 2 times and : E13:A2:test $42E
