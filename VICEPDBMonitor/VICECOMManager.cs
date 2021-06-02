@@ -325,18 +325,18 @@ namespace VICEPDBMonitor
             sendCommand[0] = 0x2;
             sendCommand[1] = (byte)binaryParams.Length;
             int j = 0;
-            for (; j < binaryParams.Length; ++j)
+            for (; j < binaryParams.Length; j++)
             {
-                sendCommand[2 + j] = binaryParams[j]; // this will be a handful of bytes mostly, actuall eventually it won't be but for now ;)
+                sendCommand[2 + j] = binaryParams[j]; // this will be a handful of bytes mostly, actually eventually it won't be but for now ;)
                 //well it can't be over 254 for starters ;)
             }
-            sendCommand[j] = 0;
+            sendCommand[2 + j] = 0;
 
             SendBytes(sendCommand);
         
 
             Thread.Sleep(10);  //wait for response
-            const int kBufferSize = 64 * 1024;
+            const int kBufferSize = (64 * 1024) + 16; // Some padding
             byte[] buffer = new byte[kBufferSize];
 
             int actual = 0;

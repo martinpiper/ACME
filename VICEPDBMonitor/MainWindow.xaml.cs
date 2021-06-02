@@ -423,10 +423,6 @@ namespace VICEPDBMonitor
             {
                 get_registers_callmeback(new NoArgDelegate(show_diss_post_registers));
             }
-            else if (command.IndexOf("!d") == 0)
-            {
-                get_registers_callmeback(new NoArgDelegate(show_diss_post_registers));
-            }
             else if (command.IndexOf("!breaklist") == 0)
             {
                 vcom.addTextCommand("break", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(breaklist_callback), null, this.Dispatcher);

@@ -68,6 +68,7 @@ namespace VICEPDBMonitor
                         {
                             int lines = int.Parse(line.Substring(9));
                             mSourceIncludes.Clear();
+                            mSourceIncludes.Add(".\\");
                             while (lines-- > 0)
                             {
                                 line = file.ReadLine();
@@ -164,7 +165,7 @@ namespace VICEPDBMonitor
                 }
                 int l;
                 // Only process new names this iteration
-                // MPi: TODO: Use mSourceIncludes
+                // Use mSourceIncludes
                 for (l = localFileIndex; l < mSourceFileNamesLength; l++)
                 {
                     string name = mSourceFileNames[l];
@@ -174,10 +175,31 @@ namespace VICEPDBMonitor
                         string newPath = name;
                         if (!System.IO.File.Exists(newPath))
                         {
-                            newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), name);
-                            if (!System.IO.File.Exists(newPath))
+                            foreach (string prefix in mSourceIncludes)
                             {
-                                newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), System.IO.Path.GetFileName(name));
+                                string newName = System.IO.Path.Combine(prefix, name);
+                                newPath = newName;
+                                if (!System.IO.File.Exists(newPath))
+                                {
+                                    newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), newName);
+                                    if (!System.IO.File.Exists(newPath))
+                                    {
+                                        newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), newName);
+                                        if (!System.IO.File.Exists(newPath))
+                                        {
+                                            newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]), System.IO.Path.GetFileName(newName));
+                                            if (!System.IO.File.Exists(newPath))
+                                            {
+                                                newPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(commandLineArgs[i]) + "..\\", System.IO.Path.GetFileName(newName));
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (System.IO.File.Exists(newPath))
+                                {
+                                    break;
+                                }
                             }
                         }
                         using (System.IO.StreamReader file = new System.IO.StreamReader(newPath))

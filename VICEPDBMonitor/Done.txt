@@ -113,3 +113,13 @@ Mixed asm and source mode, all on one line?
 	* Replace "!domem" with binary dump
 		SendCommand("m 0 ffff");
 		ParseMemory(theReply); gets a lot simpler
+
+
+
+* Fixed a small bug in the binary transfer code
+
+
+
+* Added better source file searching
+	// MPi: TODO: Use mSourceIncludes
+	mSourceIncludes is initialised with suitable data, but not used during filename searches yet...
