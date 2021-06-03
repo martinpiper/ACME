@@ -469,14 +469,23 @@ namespace VICEPDBMonitor
             vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), callme, this.Dispatcher);
         }
 
+        private void get_registers()
+        {
+            VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), null, this.Dispatcher);
+        }
+
         private void get_registers_callback(string reply, object userData)
         {
             if (reply.Length > 0)
             {
                 ParseRegisters(reply);
                 UpdateLabels();
-                NoArgDelegate del = userData as NoArgDelegate;
-                del(); //call back
+                if (userData != null)
+                {
+                    NoArgDelegate del = userData as NoArgDelegate;
+                    del(); //call back
+                }
             }
         }
 
@@ -639,7 +648,7 @@ namespace VICEPDBMonitor
             {
                 string command = mCommandBox.Text.Trim();
 
-                //trap and evelvate commands 
+                // Trap and elevate commands 
                 if (command.StartsWith("z"))
                 {
                     command = "!" + command;
@@ -704,6 +713,7 @@ namespace VICEPDBMonitor
             {
                 //mCommands.Add("!cls");
                 SetSourceView(String.Empty);
+                get_registers();
             }
         }
 

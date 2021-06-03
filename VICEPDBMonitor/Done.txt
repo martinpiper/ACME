@@ -123,3 +123,7 @@ Mixed asm and source mode, all on one line?
 * Added better source file searching
 	// MPi: TODO: Use mSourceIncludes
 	mSourceIncludes is initialised with suitable data, but not used during filename searches yet...
+
+
+
+* Register display larger to accomodate any APU debug view
