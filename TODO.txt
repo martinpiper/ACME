@@ -11,6 +11,29 @@
 
 ACME TODO file.
 
+* Look into structure storage and label generation. A '.' is an undefined value, no default value when being used
+	!struct SomeData {
+		a	!by .
+		b	!by .
+		c	!word .
+	}
+	Will create the labels with offsets to the named members:
+		SomeData_a = 0
+		SomeData_b = 1
+		SomeData_c = 2
+	Then using it with:
+	* = $100
+	someLabel +SomeData 4 , 5 , 1234
+	Will automatically create data in memory according to the structure with these variables:
+		someLabel_a = $100
+		someLabel_b = $101
+		someLabel_c = $102
+		someLabel_SomeData_a = 0
+		someLabel_SomeData_b = 1
+		someLabel_SomeData_c = 2
+
+
+
 * Look into VSCode remote debugging into Vice with PDB parsing to enhance the source view
 
 
