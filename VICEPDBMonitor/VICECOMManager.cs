@@ -111,7 +111,6 @@ namespace VICEPDBMonitor
             {
                 try
                 {
-                    String gotText = "";
                     bool wasConnected = false;
 
                     if (mSocket == null)
@@ -346,7 +345,7 @@ namespace VICEPDBMonitor
                 {
                     actual += mSocket.Receive(buffer, actual, kBufferSize - actual, SocketFlags.None);
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
                     //this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
                     Thread.Sleep(100);

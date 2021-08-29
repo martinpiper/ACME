@@ -423,31 +423,40 @@ namespace VICEPDBMonitor
         {
             try
             {
-                // MPi: TODO: Tweak the 10 range based on the display height?
-                int range = 15;
                 int startPrev = m_registerSet.GetPC();
-                // Step backwards trying to find a good starting point to disassemble
-                while (range-- > 0)
-                {
-                    AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(startPrev); //mAddrInfoByAddr[startPrev];
-                    if (addrInfo2.mPrevAddr < 0)
-                    {
-                        break;
-                    }
-                    startPrev = addrInfo2.mPrevAddr;
-                }
-                // MPi: TODO: Tweak the 10 range based on the display height?
-                range = 20;
-                // Step forwards trying to find a good ending point to disassemble
                 int endNext = m_registerSet.GetPC();
-                while (range-- > 0)
+                if (MainWindow.mIsAPUMode)
                 {
-                    AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(endNext); //mAddrInfoByAddr[endNext];
-                    if (addrInfo2.mNextAddr < 0)
+                    startPrev -= 16;
+                    endNext += 16;
+                }
+                else
+                {
+                    // MPi: TODO: Tweak the 10 range based on the display height?
+                    int range = 15;
+                    // Step backwards trying to find a good starting point to disassemble
+                    while (range-- > 0)
                     {
-                        break;
+                        AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(startPrev); //mAddrInfoByAddr[startPrev];
+                        if (addrInfo2.mPrevAddr < 0)
+                        {
+                            break;
+                        }
+                        startPrev = addrInfo2.mPrevAddr;
                     }
-                    endNext = addrInfo2.mNextAddr;
+
+                    // MPi: TODO: Tweak the 10 range based on the display height?
+                    range = 20;
+                    // Step forwards trying to find a good ending point to disassemble
+                    while (range-- > 0)
+                    {
+                        AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(endNext); //mAddrInfoByAddr[endNext];
+                        if (addrInfo2.mNextAddr < 0)
+                        {
+                            break;
+                        }
+                        endNext = addrInfo2.mNextAddr;
+                    }
                 }
 
                 ShowSrcDissStruct sms = new ShowSrcDissStruct()
@@ -458,7 +467,7 @@ namespace VICEPDBMonitor
                 };
                 return sms;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }

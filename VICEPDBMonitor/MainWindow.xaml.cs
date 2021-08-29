@@ -526,11 +526,24 @@ namespace VICEPDBMonitor
             ShowSrcDissStruct sms = show_diss_common();
             if (sms == null) {
                 SetSourceView("Source not found for this address ");
-                sms = new ShowSrcDissStruct()
+                if (mIsAPUMode)
                 {
-                    endNext = m_registerSet.GetPC() + 0x20
-                    , startPrev = m_registerSet.GetPC()
-                };
+                    sms = new ShowSrcDissStruct()
+                    {
+                        endNext = m_registerSet.GetPC() + 0x10
+                        ,
+                        startPrev = m_registerSet.GetPC()
+                    };
+                }
+                else
+                {
+                    sms = new ShowSrcDissStruct()
+                    {
+                        endNext = m_registerSet.GetPC() + 0x20
+                        ,
+                        startPrev = m_registerSet.GetPC()
+                    };
+                }
             }
             sms.displayDissCallback = new CommandStruct.CS_TextDelegate(show_diss_get_post_dissasem);
             string command = "d " + sms.startPrev.ToString("X") + " " + m_registerSet.GetPC().ToString("X");
@@ -897,6 +910,23 @@ namespace VICEPDBMonitor
         {
             LiveWatch LW = new LiveWatch();
             LW.Show();
+        }
+
+        public static bool mIsAPUMode = false;
+        private void onAPUorCPU(object sender, RoutedEventArgs e)
+        {
+            mIsAPUMode = !mIsAPUMode;
+            if (mIsAPUMode)
+            {
+                dispatchCommand("cpu apu");
+                mAPUorCPU.Content = "*APU*/6502";
+            }
+            else
+            {
+                dispatchCommand("cpu 6502");
+                mAPUorCPU.Content = "APU/*6502*";
+            }
+            HandleCodeView();
         }
     }
 

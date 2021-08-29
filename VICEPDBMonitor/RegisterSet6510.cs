@@ -24,7 +24,8 @@ namespace VICEPDBMonitor
         r01,
         Line,
         Cycle,
-        StopWatch
+        StopWatch,
+        APUPC
     }
 
     class RegisterSet6510 : IRegisterSet
@@ -46,9 +47,14 @@ namespace VICEPDBMonitor
         int m_Line; //VIC
         int m_Cycle; //VIC
         int m_Stopwatch;
+        int m_APUPC;
 
         public int GetPC()
         {
+            if (MainWindow.mIsAPUMode)
+            {
+                return m_APUPC;
+            }
             return m_PC;
         }
 
@@ -93,12 +99,15 @@ namespace VICEPDBMonitor
                     return m_Cycle;
                 case e6510Registers.StopWatch:
                     return m_Stopwatch;
+                case e6510Registers.APUPC:
+                    return m_APUPC;
             }
             return -1;
         }
 
         public bool SetFromString(string emulator)
         {
+            bool returnValue = false;
             //  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
             //.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
             int index = emulator.IndexOf(".;"); //seems when you have break point this can get messed up
@@ -123,9 +132,16 @@ namespace VICEPDBMonitor
                 m_Line = int.Parse(parse2[8], NumberStyles.HexNumber);
                 m_Cycle = int.Parse(parse2[9], NumberStyles.HexNumber);
                 m_Stopwatch = int.Parse(parse2[10], NumberStyles.Integer);
-                return true;
+                returnValue = true;
             }
-            return false;
+            index = emulator.IndexOf("APUDebug: >> PC:");
+            if (index >= 0)
+            {
+                string parse = emulator.Substring(index);
+                string[] parse2 = parse.Split(new char[2] { ' ', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                m_APUPC = int.Parse(parse2[3], NumberStyles.HexNumber);
+            }
+            return returnValue;
         }
 
         public void SetRegister(Enum registerID, int value)
@@ -184,6 +200,9 @@ namespace VICEPDBMonitor
                     break;
                 case e6510Registers.StopWatch:
                     m_Stopwatch = value;
+                    break;
+                case e6510Registers.APUPC:
+                    m_APUPC = value;
                     break;
             }
         }

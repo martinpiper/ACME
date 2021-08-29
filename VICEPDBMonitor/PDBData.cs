@@ -42,6 +42,8 @@ namespace VICEPDBMonitor
         MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
         MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
 
+        int mAPUCode_Start = 0;
+
         public static PDBData getInstance() { return g_PDBData; }
 
         public static PDBData create(string[] commandLineArgs)
@@ -151,6 +153,10 @@ namespace VICEPDBMonitor
                                 labelInfo.mLabel = tokens[2];
                                 labelInfo.mUsed = int.Parse(tokens[3]) == 1;
                                 labelInfo.mMemory = int.Parse(tokens[4]) == 1;
+                                if (labelInfo.mLabel.Equals("APUCode_Start"))
+                                {
+                                    mAPUCode_Start = labelInfo.mAddr;
+                                }
                                 mAllLabels.Add(labelInfo);
                                 mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
                                 mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
@@ -238,6 +244,19 @@ namespace VICEPDBMonitor
 
         public AddrInfo getAddrInfoForAddr(int PC)
         {
+            if (MainWindow.mIsAPUMode)
+            {
+                AddrInfo tweakedInfo = mAddrInfoByAddr[(PC*4) + mAPUCode_Start];
+                tweakedInfo.mAddr -= mAPUCode_Start;
+                tweakedInfo.mAddr /= 4;
+                tweakedInfo.mNextAddr = tweakedInfo.mAddr + 1;
+                tweakedInfo.mPrevAddr = tweakedInfo.mAddr - 1;
+                if (tweakedInfo.mPrevAddr < 0)
+                {
+                    tweakedInfo.mPrevAddr = 0;
+                }
+                return tweakedInfo;
+            }
             return mAddrInfoByAddr[PC];
         }
 

@@ -18,6 +18,7 @@
 localLabel = 1234
 
 *=$400
++inc16 $700
 main
 GlobalLabel
 	sei
