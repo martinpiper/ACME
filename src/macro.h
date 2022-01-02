@@ -20,4 +20,9 @@ extern void	Macro_parse_definition(void);
 extern void	Macro_parse_call(void);
 
 
+extern const char*	macroBackup_original_filename;
+extern int		macroBackup_line_number;
+extern zone_t		macroBackup_zone;
+
+
 #endif

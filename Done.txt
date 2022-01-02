@@ -72,3 +72,14 @@ It's possible to break into the execution by sending a character. For example to
 
 
 * !to seems to be outputting the file to the wrong directory (Scroller not Tusari2) when building Tusari2?
+
+
+
+
+* Add "!previouscontext" which will output debug for the previous context level not the current source file/line
+	Probably add it near: PREDEFNODE("sal",	PO_sal),	// MPi: Added
+	Altering how PDBAddFileLineToAddr is called
+	Might be a good place to store nested file/line/zone information:	void Macro_parse_call(void)
+	Perhpas "Macro_parse_call" can backup these: Input_now->original_filename , Input_now->line_number , Section_now->zone
+	Then if there is a "!previouscontext" then the call to PDBAddFileLineToAddr will use the most recent backups
+	Added int previouscontext_enable

@@ -79,6 +79,7 @@ const char*	vicelabeldump_filename	= NULL;
 const char*	PDB_filename	= NULL;
 const char*	output_filename		= NULL;
 int	labeldump_allSections	= 0;
+int previouscontext_enable = 0;
 // maximum recursion depth for macro calls and "!source"
 signed long	macro_recursions_left	= MAX_NESTING;
 signed long	source_recursions_left	= MAX_NESTING;

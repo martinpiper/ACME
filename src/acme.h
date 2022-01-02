@@ -17,6 +17,7 @@ extern const char*	vicelabeldump_filename;
 extern const char*	PDB_filename;
 extern const char*	output_filename;
 extern int	labeldump_allSections;
+extern int previouscontext_enable;
 // maximum recursion depth for macro calls and "!source"
 extern signed long	macro_recursions_left;
 extern signed long	source_recursions_left;

@@ -9,6 +9,7 @@
 
 
 !macro MFOO {
+!previouscontext
 	lda #0
 	sta $500
 }

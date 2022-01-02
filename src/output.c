@@ -19,7 +19,7 @@
 #include "platform.h"
 #include "tree.h"
 #include "section.h"
-
+#include "macro.h"
 
 // Structure for linked list of segment data
 struct segment_t {
@@ -122,8 +122,19 @@ static void set_mem_ptr(signed long index) {
 // Send low byte to output buffer, automatically increasing program counter
 static void real_output(intval_t byte) {
 	if(write_idx > segment_max)
+	{
 		border_crossed(write_idx);
-	PDBAddFileLineToAddr( write_idx , Input_now->original_filename , Input_now->line_number , Section_now->zone );
+	}
+
+	if (previouscontext_enable > 0)
+	{
+		PDBAddFileLineToAddr( write_idx , macroBackup_original_filename , macroBackup_line_number , macroBackup_zone );
+	}
+	else
+	{
+		PDBAddFileLineToAddr( write_idx , Input_now->original_filename , Input_now->line_number , Section_now->zone );
+	}
+
 	*write_ptr++ = byte & 0xff;
 	write_idx++;
 	CPU_2add++;

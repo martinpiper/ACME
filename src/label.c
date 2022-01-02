@@ -264,6 +264,16 @@ static enum eos_t PO_sal(void) {
 	return(ENSURE_EOS);
 }
 
+static enum eos_t PO_previouscontext(void) {
+	if (previouscontext_enable == 0)
+	{
+		previouscontext_enable++;
+	}
+	// ensure there's no garbage at end of line
+	return(ENSURE_EOS);
+}
+
+
 // Select dump file
 static enum eos_t PO_sl(void) {
 	// only process this pseudo opcode in the first pass
@@ -329,7 +339,8 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("sal",	PO_sal),	// MPi: Added
 	PREDEFNODE("sl",	PO_sl),
 	PREDEFNODE("svl",	PO_svl),	// MPi: Added
-	PREDEFLAST("pdb",	PO_pdb)		// MPi: Added
+	PREDEFNODE("pdb",	PO_pdb),		// MPi: Added
+	PREDEFLAST("previouscontext",	PO_previouscontext)		// MPi: Added
 	//    ^^^^ this marks the last element
 };
 

@@ -216,6 +216,12 @@ void Macro_parse_definition(void) {// Now GotByte = illegal char after "!macro"
 	// and that about sums it up
 }
 
+
+const char*	macroBackup_original_filename;
+int		macroBackup_line_number;
+zone_t		macroBackup_zone;
+
+
 // Parse macro call ("+MACROTITLE"). Has to be re-entrant.
 void Macro_parse_call(void) {	// Now GotByte = dot or first char of macro name
 	char		local_gotbyte;
@@ -266,6 +272,19 @@ void Macro_parse_call(void) {	// Now GotByte = dot or first char of macro name
 			}
 			arg_count++;
 		} while(Input_accept_comma());
+	}
+
+	// Only use the top most context for the debug output
+	if (previouscontext_enable == 0)
+	{
+		macroBackup_original_filename = Input_now->original_filename;
+		macroBackup_line_number = Input_now->line_number;
+		macroBackup_zone = Section_now->zone;
+	}
+	// Handle nested macros and its count
+	if (previouscontext_enable > 0)
+	{
+		previouscontext_enable++;
 	}
 	// now arg_table contains the arguments
 	// now GlobalDynaBuf = unused
@@ -341,4 +360,8 @@ void Macro_parse_call(void) {	// Now GotByte = dot or first char of macro name
 		Input_ensure_EOS();
 	}
 	macro_recursions_left++;	// leave this nesting level
+	if (previouscontext_enable > 0)
+	{
+		previouscontext_enable--;
+	}
 }
