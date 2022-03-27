@@ -11,6 +11,10 @@
 
 ACME TODO file.
 
+* Sorted by address labels output
+
+
+
 * Look into structure storage and label generation. A '.' is an undefined value, no default value when being used
 	!struct SomeData {
 		a	!by .
