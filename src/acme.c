@@ -159,6 +159,7 @@ int ACME_finalize(int exit_code) {
 		if(fd) {
 			Label_dump_all_vice(fd);
 			fclose(fd);
+			SortFile(vicelabeldump_filename);
 		} else {
 			fprintf(stderr,
 				"Error: Cannot open label dump file \"%s\".\n",

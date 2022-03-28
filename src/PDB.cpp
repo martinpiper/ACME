@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <map>
+#include <set>
 #include <string>
+#include <fstream>
 
 extern "C" {
 #include "acme.h"
@@ -138,4 +140,38 @@ extern "C" int GetLabelNumberDifferences(const char *label, const char *filename
 {
 	std::string theLabel = buildLabelIdentifier(label,filename,linenumber,zone);
 	return sLabelDifferentCount[theLabel];
+}
+
+
+
+extern "C" void SortFile( const char *filename )
+{
+	std::set<std::string> textLines;
+
+	std::ifstream file(filename);
+	if (file.is_open())
+	{
+		std::string line;
+		while (std::getline(file , line))
+		{
+			textLines.insert(line);
+		}
+		
+		file.close();
+	}
+
+
+	std::ofstream fileOut(filename);
+
+	if (fileOut.is_open())
+	{
+		std::set<std::string>::iterator st = textLines.begin();
+		while (st != textLines.end())
+		{
+			std::string line = *st++;
+			fileOut << line << std::endl;
+		}
+
+		fileOut.close();
+	}
 }

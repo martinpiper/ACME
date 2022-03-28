@@ -83,3 +83,8 @@ It's possible to break into the execution by sending a character. For example to
 	Perhpas "Macro_parse_call" can backup these: Input_now->original_filename , Input_now->line_number , Section_now->zone
 	Then if there is a "!previouscontext" then the call to PDBAddFileLineToAddr will use the most recent backups
 	Added int previouscontext_enable
+
+
+
+* Sorted by address labels output
+	void SortFile( const char *filename )

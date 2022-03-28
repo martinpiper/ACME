@@ -38,5 +38,6 @@ extern void PDBSave( FILE *fp );
 extern int GetLabelAge(const int currentPass, const char *label, const char *filename, int linenumber, int zone);
 extern int IsLabelSameAsLastValue(const int theValue, const char *label, const char *filename, int linenumber, int zone);
 extern int GetLabelNumberDifferences(const char *label, const char *filename, int linenumber, int zone);
+extern void SortFile( const char *filename );
 
 #endif
