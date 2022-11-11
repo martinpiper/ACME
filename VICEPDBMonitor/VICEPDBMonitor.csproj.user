@@ -6,7 +6,6 @@
     </StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartArguments>
-    </StartArguments>
+    <StartArguments>C:\work\C64\VideoHardware\tmp\main.pdb</StartArguments>
   </PropertyGroup>
 </Project>

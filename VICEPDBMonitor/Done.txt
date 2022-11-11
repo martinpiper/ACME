@@ -136,3 +136,7 @@ Mixed asm and source mode, all on one line?
 
 
 * APU mixed source and disassembly view doesn't work when the PC is < $10
+
+
+
+* Memory view. Simple dump for now.

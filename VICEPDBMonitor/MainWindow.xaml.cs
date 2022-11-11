@@ -30,6 +30,7 @@ namespace VICEPDBMonitor
         IRegisterSet m_registerSet;
         IPDBReaderAndDisplay m_readerAndDispaly;
         IMemDump m_memDump;
+        MemoryView mMemoryView;
 
         bool mDump = false;
         bool mUsedLabels = false;
@@ -960,6 +961,13 @@ namespace VICEPDBMonitor
             mButtonDisplayAhead.Content = "*Display ahead*";
 
             HandleCodeView();
+        }
+
+        private void Memory_view_Click(object sender, RoutedEventArgs e)
+        {
+            MemoryView MV = new MemoryView();
+            MV.Show();
+            mMemoryView = MV;
         }
     }
 

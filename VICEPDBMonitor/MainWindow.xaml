@@ -110,9 +110,6 @@
                     </DataGrid>
                 </TabItem>
             </TabControl>
-            <Button x:Name="mButtonDisplayClear" Content="Display clear" Grid.Column="2" Margin="0,0,185,183" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Button_Display_Clear"/>
-            <Button x:Name="mButtonDisplayFull" Content="Display full" Grid.Column="2" Margin="0,0,102,183" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Button_Display_Full"/>
-            <Button x:Name="mButtonDisplayAhead" Content="Display ahead" Grid.Column="2" Margin="0,0,10,183" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="87" Click="Button_Display_Ahead"/>
         </Grid>
         <Button Content="Step over" HorizontalAlignment="Right" Margin="0,0,184,116" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepOver" Height="20"/>
         <Button x:Name="mAPUorCPU" Content="APU/*6502*" Margin="0,0,10,194" HorizontalAlignment="Right" Width="75" Click="onAPUorCPU" Height="20" VerticalAlignment="Bottom"/>
@@ -128,5 +125,9 @@
         <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,167" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
         <Button x:Name="mCalculator" Content="Calculator" Margin="0,0,10,65" Click="calculator_Click" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom"/>
         <Button x:Name="mDoChis" Content="CHIS" Margin="0,0,10,37" Click="mDoChis_Click" HorizontalAlignment="Right" Width="75" Height="23" VerticalAlignment="Bottom"/>
+        <Button x:Name="mButtonDisplayClear" Content="Display clear" Margin="0,0,184,220" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Button_Display_Clear" RenderTransformOrigin="0.693,0.45"/>
+        <Button x:Name="mButtonDisplayFull" Content="Display full" Margin="0,0,104,220" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Button_Display_Full"/>
+        <Button x:Name="mButtonDisplayAhead" Content="Display ahead" Margin="0,0,10,220" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="87" Click="Button_Display_Ahead"/>
+        <Button x:Name="Memory_view" Content="Memory view" Margin="0,0,104,65" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Memory_view_Click"/>
     </Grid>
 </Window>

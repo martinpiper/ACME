@@ -80,6 +80,9 @@
     <Compile Include="MemCalc.xaml.cs">
       <DependentUpon>MemCalc.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MemoryView.xaml.cs">
+      <DependentUpon>MemoryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MultiMap.cs" />
     <Compile Include="PDBData.cs" />
     <Compile Include="RegexMan.cs" />
@@ -128,6 +131,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="MemCalc.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MemoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
