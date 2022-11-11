@@ -928,6 +928,39 @@ namespace VICEPDBMonitor
             }
             HandleCodeView();
         }
+
+        private void Button_Display_Clear(object sender, RoutedEventArgs e)
+        {
+            dispatchCommand("display cls");
+
+            mButtonDisplayClear.Content = "*Display clear*";
+            mButtonDisplayFull.Content = "Display full";
+            mButtonDisplayAhead.Content = "Display ahead";
+
+            HandleCodeView();
+        }
+
+        private void Button_Display_Full(object sender, RoutedEventArgs e)
+        {
+            dispatchCommand("display full");
+
+            mButtonDisplayClear.Content = "Display clear";
+            mButtonDisplayFull.Content = "*Display full*";
+            mButtonDisplayAhead.Content = "Display ahead";
+            
+            HandleCodeView();
+        }
+
+        private void Button_Display_Ahead(object sender, RoutedEventArgs e)
+        {
+            dispatchCommand("display ahead");
+
+            mButtonDisplayClear.Content = "Display clear";
+            mButtonDisplayFull.Content = "Display full";
+            mButtonDisplayAhead.Content = "*Display ahead*";
+
+            HandleCodeView();
+        }
     }
 
     public static class CustomCommands

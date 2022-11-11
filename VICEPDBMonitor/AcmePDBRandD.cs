@@ -428,7 +428,9 @@ namespace VICEPDBMonitor
                 if (MainWindow.mIsAPUMode)
                 {
                     startPrev -= 16;
+                    startPrev = Math.Max(0,startPrev);
                     endNext += 16;
+                    endNext = Math.Min(8192, endNext);
                 }
                 else
                 {

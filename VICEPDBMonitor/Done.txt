@@ -127,3 +127,12 @@ Mixed asm and source mode, all on one line?
 
 
 * Register display larger to accomodate any APU debug view
+
+
+
+* Add buttons for target display rendering: cls, full, ahead
+	Useful for the BDD6502 hardware emulation, not used by Vice
+
+
+
+* APU mixed source and disassembly view doesn't work when the PC is < $10
