@@ -43,7 +43,11 @@ namespace VICEPDBMonitor
                 {
                     if (i + c < data.Length)
                     {
-                        result.Append(" " + data[i+c].ToString("X2"));
+                        if (0x08 == c)
+                        {
+                            result.Append("  ");
+                        }
+                        result.Append(" " + data[i + c].ToString("X2"));
                     }
                 }
                 result.Append("\r");
