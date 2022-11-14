@@ -140,3 +140,7 @@ Mixed asm and source mode, all on one line?
 
 
 * Memory view. Simple dump for now.
+
+
+
+* Need "delete breakpoints" button

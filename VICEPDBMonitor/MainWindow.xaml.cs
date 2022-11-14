@@ -428,7 +428,7 @@ namespace VICEPDBMonitor
             {
                 vcom.addTextCommand("break", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(breaklist_callback), null, this.Dispatcher);
             }
-            else if (command.IndexOf("break") == 0 || command.IndexOf("watch") == 0)
+            else if (command.IndexOf("bk") == 0 || command.IndexOf("break") == 0 || command.IndexOf("watch") == 0 || command.IndexOf("w") == 0)
             {
                 vcom.addTextCommand(command, CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(break_callback), null, this.Dispatcher);
             }
@@ -968,6 +968,13 @@ namespace VICEPDBMonitor
             MemoryView MV = new MemoryView();
             MV.Show();
             mMemoryView = MV;
+        }
+
+        private void OnDeleteBreaks(object sender, RoutedEventArgs e)
+        {
+            dispatchCommand("delete");
+            mBreakPoints.Clear();
+            mBreakPointDisplay.Items.Refresh();
         }
     }
 

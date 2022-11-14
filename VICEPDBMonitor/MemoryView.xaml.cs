@@ -33,7 +33,7 @@ namespace VICEPDBMonitor
 
         private void gotMemory(byte[] data, object none)
         {
-            StringBuilder result = new StringBuilder((7 + (16 * 3) + 1) * 4096);
+            StringBuilder result = new StringBuilder((4 + 3 + (16 * 3) + 2 + 1) * 4096);
 
             for (int i = 0; i < data.Length; i += 0x10)
             {
