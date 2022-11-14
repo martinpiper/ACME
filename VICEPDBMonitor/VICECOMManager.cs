@@ -263,6 +263,7 @@ namespace VICEPDBMonitor
 
         public string GetReply(bool canBeEmptyReply = false)
         {
+            int numCommandsAtStart = mCommands.Count;
 			mGotTextWorking = "";
             string theReply = "";
 
@@ -281,6 +282,12 @@ namespace VICEPDBMonitor
                 {
                     //					this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateUserInterface), "Connected exception: " + ex.ToString());
                     Thread.Sleep(10);
+                }
+
+                // If someone is requesting more commands and we don't have a reply from the previous command then break out...
+                if (mCommands.Count > numCommandsAtStart && mGotTextWorking.Length <= 0)
+                {
+                    break;
                 }
 
                 int foundFirstPos = mGotTextWorking.IndexOf("(C:$");

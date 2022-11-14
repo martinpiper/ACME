@@ -144,3 +144,7 @@ Mixed asm and source mode, all on one line?
 
 
 * Need "delete breakpoints" button
+
+
+
+* Fixed the annoying bug where the remote monitor sometimes locks up
