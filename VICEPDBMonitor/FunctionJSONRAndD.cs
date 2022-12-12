@@ -517,5 +517,14 @@ namespace VICEPDBMonitor
             FunctionData currFunc = m_pDBData.funcData.Find(match => PC >= match.StartAddr && PC < match.EndAddr);
             return currFunc;
         }
+
+        public List<int> getAllBPHAddresses()
+        {
+            List<int> ret = new List<int>();
+
+            // MPi: TODO: Implement the same as AcmePDBRandD
+
+            return ret;
+        }
     }
 }

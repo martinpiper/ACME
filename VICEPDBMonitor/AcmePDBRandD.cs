@@ -533,5 +533,22 @@ namespace VICEPDBMonitor
             }
             return labels;
         }
+
+        public List<int> getAllBPHAddresses()
+        {
+            List<int> ret = new List<int>();
+
+            List<LabelInfo> labels = m_PDBData.getAllLabels();
+
+            foreach(LabelInfo label in labels)
+            {
+                if (label.mLabel.ToLower().Contains("bph"))
+                {
+                    ret.Add(label.mAddr);
+                }
+            }
+
+            return ret;
+        }
     }
 }

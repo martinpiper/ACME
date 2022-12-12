@@ -148,3 +148,8 @@ Mixed asm and source mode, all on one line?
 
 
 * Fixed the annoying bug where the remote monitor sometimes locks up
+
+
+
+* Any label that contains the string "bph" will add an automatic breakpoint when the debugger first connections to the session
+	Useful for adding the label to source code when debugging

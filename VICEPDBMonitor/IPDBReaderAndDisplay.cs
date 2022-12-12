@@ -39,5 +39,8 @@ namespace VICEPDBMonitor
 
         //Child Update Functions
         ShowSrcDissStruct show_diss_common();
+
+        // Label access
+        List<int> getAllBPHAddresses();
     }
 }

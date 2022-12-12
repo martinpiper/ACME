@@ -92,6 +92,11 @@ namespace VICEPDBMonitor
             //			mCommands.Add("x");
             //			mCommands.Add("!s");
             //			mCommands.Add("!sm");
+            List<int> bphAddresses = m_readerAndDispaly.getAllBPHAddresses();
+            foreach (int address in bphAddresses)
+            {
+                dispatchCommand("break $" + address.ToString("X"));
+            }
 
             dispatchCommand("!breaklist");
 
