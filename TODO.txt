@@ -11,6 +11,11 @@
 
 ACME TODO file.
 
+* Command line option to define labels
+
+
+
+
 * Look into structure storage and label generation. A '.' is an undefined value, no default value when being used
 	!struct SomeData {
 		a	!by .
