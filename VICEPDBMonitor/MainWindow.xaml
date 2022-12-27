@@ -104,7 +104,6 @@
                     </DataGrid>
                 </TabItem>
             </TabControl>
-            <Button Content="Delete breaks" Grid.Column="2" HorizontalAlignment="Left" Margin="93,440,0,0" Grid.Row="2" VerticalAlignment="Top" Width="75" Click="OnDeleteBreaks"/>
         </Grid>
         <Button Content="Break" Margin="0,0,184,151" VerticalAlignment="Bottom" Click="Button_Click_Break" Height="20" HorizontalAlignment="Right" Width="75"/>
         <CheckBox x:Name="mDoSource" Content="Source" HorizontalAlignment="Right" Margin="0,0,203,197" IsChecked="True" Click="mDoSource_Click" Height="15" VerticalAlignment="Bottom" Width="56"/>
@@ -119,6 +118,7 @@
         <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,192,55" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
         <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,177" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
         <Button x:Name="Memory_view" Content="Memory view" Margin="0,0,104,75" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Memory_view_Click"/>
+        <Button Content="Delete breaks" Margin="0,0,104,40" VerticalAlignment="Bottom" Click="OnDeleteBreaks" HorizontalAlignment="Right" Width="75"/>
         <Button x:Name="mShowScriptPanel" Content="Script Panel" Margin="0,0,10,167" HorizontalAlignment="Right" Width="75" Height="22" VerticalAlignment="Bottom" Click="mShowScriptPanel_Click" />
         <Button x:Name="mAPUorCPU" Content="APU/*6502*" Margin="0,0,10,194" HorizontalAlignment="Right" Width="75" Click="onAPUorCPU" Height="20" VerticalAlignment="Bottom"/>
         <Button x:Name="viewSprites" Content="Sprites" Margin="0,0,10,142" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewSprites_Click"/>
