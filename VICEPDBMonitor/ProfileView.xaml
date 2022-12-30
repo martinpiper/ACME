@@ -4,10 +4,19 @@
         Title="ProfileView" Height="405" Width="749" ResizeMode="CanResizeWithGrip">
     <Grid>
         <Button x:Name="mRefresh" Content="Refresh" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Click="Refresh_Click"/>
-        <TextBox x:Name="mTextBox" Margin="10,35,10,10" TextWrapping="Wrap" Text="TextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
-        <Button Content="Start" HorizontalAlignment="Left" Margin="271,10,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.053,0.4" Click="Start_Click"/>
-        <Button Content="Stop" HorizontalAlignment="Left" Margin="351,10,0,0" VerticalAlignment="Top" Width="75" Click="Stop_Click"/>
+        <TextBox x:Name="mTextBox" Margin="10,35,10,0" TextWrapping="Wrap" Text="TextBox" FontFamily="Consolas" VerticalScrollBarVisibility="Auto" Height="59" VerticalAlignment="Top"/>
+        <Button Content="Start" Margin="271,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.053,0.4" Click="Start_Click" HorizontalAlignment="Left" Width="75"/>
+        <Button Content="Stop" Margin="351,10,0,0" VerticalAlignment="Top" Click="Stop_Click" HorizontalAlignment="Left" Width="75"/>
         <Button Content="Clear" HorizontalAlignment="Left" Margin="90,10,0,0" VerticalAlignment="Top" Width="75" Click="Clear_Click"/>
+        <DataGrid x:Name="mProfileGrid" ItemsSource="{Binding Source=mProfileData}" Margin="10,99,10,10" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Address}" ClipboardContentBinding="{x:Null}" Header="Address"/>
+                <DataGridTextColumn Binding="{Binding Label}" ClipboardContentBinding="{x:Null}" Header="Label"/>
+                <DataGridTextColumn Binding="{Binding Calls}" ClipboardContentBinding="{x:Null}" Header="Calls"/>
+                <DataGridTextColumn Binding="{Binding Cycles}" ClipboardContentBinding="{x:Null}" Header="Cycles"/>
+                <DataGridTextColumn Binding="{Binding CyclesPerCall}" ClipboardContentBinding="{x:Null}" Header="Cycles per call"/>
+            </DataGrid.Columns>
+        </DataGrid>
 
     </Grid>
 </Window>

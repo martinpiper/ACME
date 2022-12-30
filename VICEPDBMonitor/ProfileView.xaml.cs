@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,9 +20,13 @@ namespace VICEPDBMonitor
     /// </summary>
     public partial class ProfileView : Window
     {
+        ObservableCollection<ProfileDataSource> mProfileData;
+        
         public ProfileView()
         {
             InitializeComponent();
+            mProfileData = new ObservableCollection<ProfileDataSource>();
+            mProfileGrid.ItemsSource = mProfileData;
         }
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
@@ -34,6 +39,26 @@ namespace VICEPDBMonitor
         private void chis_gotData(string reply, object userData)
         {
             mTextBox.Text = reply;
+
+            mProfileData.Clear();
+
+            string[] rows = reply.Split('\r');
+            foreach (string line in rows)
+            {
+                string[] columns = line.Split(':');
+                if (columns.Length >= 4)
+                {
+                    ProfileDataSource pd = new ProfileDataSource();
+
+                    pd.Address = columns[0].Trim();
+                    pd.Label = columns[1].Trim();
+                    pd.Calls = Convert.ToInt32(columns[2].Trim().Substring(5).Trim());
+                    pd.Cycles = Convert.ToInt32(columns[3].Trim().Substring(6).Trim());
+                    pd.CyclesPerCall = Convert.ToDouble(columns[4].Trim().Substring(15).Trim());
+
+                    mProfileData.Add(pd);
+                }
+            }
 
             mRefresh.IsEnabled = true;
         }

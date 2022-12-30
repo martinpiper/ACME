@@ -69,6 +69,7 @@
     <Compile Include="ChisViewer.xaml.cs">
       <DependentUpon>ChisViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProfileDataSource.cs" />
     <Compile Include="ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
     </Compile>
