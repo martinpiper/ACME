@@ -31,6 +31,7 @@ namespace VICEPDBMonitor
         IPDBReaderAndDisplay m_readerAndDispaly;
         IMemDump m_memDump;
         MemoryView mMemoryView;
+        ProfileView mProfileView;
 
         bool mDump = false;
         bool mUsedLabels = false;
@@ -980,6 +981,13 @@ namespace VICEPDBMonitor
             dispatchCommand("delete");
             mBreakPoints.Clear();
             mBreakPointDisplay.Items.Refresh();
+        }
+
+        private void Profile_view_Click(object sender, RoutedEventArgs e)
+        {
+            ProfileView view = new ProfileView();
+            view.Show();
+            mProfileView = view;
         }
     }
 

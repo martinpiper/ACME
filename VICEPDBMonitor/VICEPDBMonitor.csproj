@@ -69,6 +69,9 @@
     <Compile Include="ChisViewer.xaml.cs">
       <DependentUpon>ChisViewer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ProfileView.xaml.cs">
+      <DependentUpon>ProfileView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnumMatchToBooleanConverter.cs" />
     <Compile Include="FunctionJSONRAndD.cs" />
     <Compile Include="IMemDump.cs" />
@@ -113,6 +116,10 @@
     <Page Include="ChisViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProfileView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="LiveWatch.xaml">
       <SubType>Designer</SubType>
