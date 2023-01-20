@@ -80,6 +80,49 @@ extern "C" void PDBSave( FILE *fp )
 	}
 }
 
+extern "C" void PDBSave2( FILE *fp )
+{
+	int previousUsed = -1;
+	int countBlocks = 0;
+	std::map<int , DebugInfo>::iterator st = sAddrMap.begin();
+	while ( st != sAddrMap.end() )
+	{
+		DebugInfo &debug = st->second;
+		if (st->first > 0 && st->first > (previousUsed+1))
+		{
+			countBlocks++;
+		}
+
+		previousUsed = st->first;
+
+		st++;
+	}
+	if (previousUsed + 1 < 0xffff)
+	{
+		countBlocks++;
+	}
+	// Now write the blocks
+	previousUsed = -1;
+	fprintf( fp , "FREEMAP:%d\n" , countBlocks);
+	st = sAddrMap.begin();
+	while ( st != sAddrMap.end() )
+	{
+		DebugInfo &debug = st->second;
+		if (st->first > 0 && st->first > (previousUsed+1))
+		{
+			fprintf( fp , "$%x-$%x:$%x\n" , previousUsed + 1 , (st->first)-1 , ((st->first)-1) - previousUsed );
+		}
+
+		previousUsed = st->first;
+
+		st++;
+	}
+	if (previousUsed + 1 < 0xffff)
+	{
+		fprintf( fp , "$%x-$ffff:$%x\n" , previousUsed + 1 , 65535 - previousUsed);
+	}
+}
+
 static std::string buildLabelIdentifier(const char *label, const char *filename, int linenumber, int zone)
 {
 	std::string theLabel = label;

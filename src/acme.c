@@ -189,6 +189,8 @@ int ACME_finalize(int exit_code) {
 				Tree_dump_forest(Label_forest, i, DumpLabelForPDB, fd);
 			}
 
+			PDBSave2(fd);
+
 			fclose( fd );
 
 		} else {

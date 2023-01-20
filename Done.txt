@@ -88,3 +88,14 @@ It's possible to break into the execution by sending a character. For example to
 
 * Sorted by address labels output
 	void SortFile( const char *filename )
+
+
+
+* Produce concise ranges of free memory in the PDB file
+	e.g. <start>-<end>:<size>
+		FREEMAP:4
+		$0-$3ff:$400
+		$452-$45e:$d
+		$504-$fff:$afc
+		$1004-$ffff:$effc
+

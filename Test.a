@@ -78,3 +78,16 @@ foo = 1
 !ifndef foo {
 !error "foo not defined!"
 }
+
+SomeAlignedSpace
+
+!align 255 , 0
+SomeUsedSpace
+	lda $1234
+	rts
+
+
+* = $1000
+SomeFreeSpace
+	lda $4321
+	rts
