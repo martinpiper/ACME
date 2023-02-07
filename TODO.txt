@@ -118,15 +118,17 @@ ACME TODO file.
 	!zn {
 	!optimise speed
 	!entry Y
-	!return X
-	!trash A,Y
+	!return X , EQ	; Returns X and one of the EQ/NE status
+	!trash A , Y , CC , VS , MI	; Can trash registers and CC/CS VC/VS MI/PL status
 	foo
 		iny
 		iny
 		iny
 		iny
 		tya
-		tax
+		; Flags that this is the instruction that will return the destination in X
+		!return	tax
+		; If any code alters X after this !return, in this scope, then an assembler error is generated
 		rts
 	}
 	Would optimise to:
