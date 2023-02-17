@@ -139,6 +139,35 @@ ACME TODO file.
 		tax
 		rts
 
+	>> Or:
+		lda #0
+		sta workLen
+		sta workLen+1
+		jsr GetNextBitIntoCarryKillA
+		rol workLen
+		jsr GetNextBitIntoCarryKillA
+		rol workLen
+		lda workLen
+		ora workLen+1
+		bne not0
+		lda #1
+		sta .workLen
+	>> Optimises to:
+		lda #0
+		sta .workLen
+		sta .workLen+1
+
+		jsr .GetNextBitIntoCarryKillA
+		rol .workLen
+		jsr .GetNextBitIntoCarryKillA
+		rol .workLen
+
+		; Note: Status from above
+		bne .not0
+
+		; Equivalent since .workLen = 0
+		inc .workLen
+
 
 
 
