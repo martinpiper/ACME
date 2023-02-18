@@ -1,8 +1,9 @@
 !cpu 6510
-!ct pet
+!ct scr
 !to "TestForForwardReference.prg", cbm
 
-* = $0700
+; sys 1700
+* = 1700
 .length = .textEnd - .textStart
 start
 	ldx #.length-1
@@ -28,9 +29,9 @@ start
 .textStart
 	!tx "This is *very* ugly code"
 
-	; This is also heavily contrived, but pushes the convergance tests further by changing the length of the text based on previous changed length
+	; This is also heavily contrived, but pushes the convergence tests (Displays "Detected result change:" in the output) further by changing the length of the text based on previous changed length
 	; See: IsLabelSameAsLastValue() and GetLabelNumberDifferences()
-	!for .t , .length / 15 {
+	!for .t , .length / 5 {
 		!tx "."
 		}
 .textEnd
