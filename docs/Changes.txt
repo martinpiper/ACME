@@ -29,6 +29,27 @@ peekbyte(address)
 !enablesegmentcheck
 	Enables the segment overwrite warning
 
+!swizzle address , columns , rows
+	This will take the rows+columns bytes of data at address and apply a swizzle, which converts row oriented data into columns, or vice versa.
+	For example:
+		swizzleMemory
+			; 4 objects of 3 bytes
+			!word $0123
+			!by $04
+			!word $5678
+			!by $09
+			!word $abcd
+			!by $0e
+			!word $1122
+			!by $33
+		!swizzle swizzleMemory , 4 , 3
+	Will result in a final memory layout of swizzleMemory with bytes in the following order:
+		; Low bytes of the !word
+		$23 , $78 , $cd , $22
+		; High bytes of the !word
+		$01 , $56 , $ab , $11
+		; The remaining byte values
+		$04 , $09 , $0e , $33
 
 
 ----------------------------------------------------------------------

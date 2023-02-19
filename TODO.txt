@@ -15,50 +15,6 @@ ACME TODO file.
 
 
 
-* !swizzle 64 , 3
-	This will take the previous 256*3 bytes of data (from the current PC) and apply a swizzle, which converts row oriented data into columns, or vice versa.
-	For example if there was data compresed of 256 repeating patterns of: !word value !by value : so 256 x 3 bytes
-	It will convert the data into:
-		256 bytes of < bytes (lo !word)
-		256 bytes of > bytes (hi !word)
-		256 bytes of byte values
-
-
-
-
-* Implement these extensions to the formula value parser
-	* [d LABEL or any formula]
-	* [f "filename" , LABEL or any formula]
-	* !set LABEL = [d LABEL or hex value for ADDRESS]
-		Will set label equal to the unsigned byte value of the assembled data
-		This is useful for importing binart data with !bin and then processing the data to produce label offsets into it.
-	* !set LABEL = [f "filename" , offset]
-		Will set label equal to the unsigned byte value at file offset for filename.
-		This is useful for processing the file structure of a binary file to produce label values.
-	> PO_set
-	> ALU_any_result
-	> parse_expression
-	>> Add test to TestForForwardReference.a
-	> Can treat these like: case '(':// left parenthesis
-	// Done: Need to read byte at memory
-		real_output?
-		write_ptr?
-		Might need something to get a byte, like real_output but gets not stores
-			>>getByteAtAddr
-	* Surely this would have been easier with peek()/poke()/filebyte() etc?
-		Like: PREDEFNODE(s_sin,	&ops_sin),
-		Or: PREDEFNODE("int",	&ops_int),
-	* I think it's going to be easier to enhance this to add string function parameter parsing:
-			if(Tree_easy_scan(function_tree, &node_body, function_dyna_buf))
-			PUSH_OPERATOR((op_t*) node_body);
-			Use Input_read_filename() like for PO_binary()?
-		filebyte() works
-		peekbyte() works
-		!disablesegmentcheck
-		!enablesegmentcheck
-
-
-
 * Look into structure storage and label generation. A '.' is an undefined value, no default value when being used
 	!struct SomeData {
 		a	!by .

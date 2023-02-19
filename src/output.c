@@ -145,6 +145,11 @@ unsigned char getByteAtAddr(int address)
 	return (unsigned char) output_buffer[address];
 }
 
+void setByteAtAddr(int address , char byte)
+{
+	output_buffer[address] = byte;
+}
+
 // fail to write to output buffer
 static void no_output(intval_t byte) {
 	Throw_error(exception_pc_undefined);

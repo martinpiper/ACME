@@ -45,6 +45,7 @@ extern void	Output_start_segment(void);
 extern void	Output_end_segment(void);
 
 extern unsigned char getByteAtAddr(int address);
+extern void setByteAtAddr(int address , char byte);
 
 extern bool gPO_disablesegmentcheck;
 

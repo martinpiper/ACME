@@ -44,7 +44,7 @@ start
 !error "oops"
 }
 
-!set .t = peekbyte(.textStart);
+!set .t = peekbyte(.textStart)
 !if .t != 'T' {
 !error "oops2"
 }
@@ -59,3 +59,77 @@ start
 !by 4 , 5 , 6 , 7
 	sta $02
 !enablesegmentcheck
+
+swizzleMemory
+	!word $0123
+	!by $04
+	!word $5678
+	!by $09
+	!word $abcd
+	!by $0e
+	!word $1122
+	!by $33
+!swizzle swizzleMemory , 4 , 3
+
+; First should be 4 low bytes of the !word
+!set .t = peekbyte(swizzleMemory)
+!if .t != $23 {
+!error "oops31"
+}
+
+!set .t = peekbyte(swizzleMemory+1)
+!if .t != $78 {
+!error "oops32"
+}
+
+!set .t = peekbyte(swizzleMemory+2)
+!if .t != $cd {
+!error "oops33"
+}
+
+!set .t = peekbyte(swizzleMemory+3)
+!if .t != $22 {
+!error "oops34"
+}
+
+; Next row, the high bytes of each !word
+!set .t = peekbyte(swizzleMemory+4)
+!if .t != $01 {
+!error "oops41"
+}
+
+!set .t = peekbyte(swizzleMemory+5)
+!if .t != $56 {
+!error "oops42"
+}
+
+!set .t = peekbyte(swizzleMemory+6)
+!if .t != $ab {
+!error "oops43"
+}
+
+!set .t = peekbyte(swizzleMemory+7)
+!if .t != $11 {
+!error "oops44"
+}
+
+; Next row, the bytes
+!set .t = peekbyte(swizzleMemory+8)
+!if .t != $04 {
+!error "oops51"
+}
+
+!set .t = peekbyte(swizzleMemory+9)
+!if .t != $09 {
+!error "oops52"
+}
+
+!set .t = peekbyte(swizzleMemory+10)
+!if .t != $0e {
+!error "oops53"
+}
+
+!set .t = peekbyte(swizzleMemory+11)
+!if .t != $33 {
+!error "oops54"
+}

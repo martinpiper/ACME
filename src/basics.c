@@ -59,6 +59,42 @@ static enum eos_t PO_32(void) {
 	return(output_objects(Output_32b));
 }
 
+
+static enum eos_t PO_swizzle(void) {
+	int address;
+	int rows;
+	int columns;
+	int i;
+	char *temp;
+	int x , y;
+
+	address = ALU_any_int();
+	Input_accept_comma();
+	rows = ALU_any_int();
+	Input_accept_comma();
+	columns = ALU_any_int();
+
+	temp = (char *) malloc(rows * columns);
+
+	for (i = 0 ; i < (rows*columns) ; i++)
+	{
+		temp[i] = getByteAtAddr(address + i);
+	}
+
+	i = 0;
+	for (x = 0 ; x < columns ; x++)
+	{
+		for (y = 0 ; y < rows ; y++)
+		{
+			char byte = temp[x + (y*columns)];
+			setByteAtAddr(address + i , byte);
+			i++;
+		}
+	}
+	free(temp);
+}
+
+
 // Include binary file
 static enum eos_t PO_binary(void) {
 	FILE*		fd;
@@ -233,6 +269,7 @@ static node_t	pseudo_opcodes[]	= {
 //	PREDEFNODE("print",	PO_print),
 	PREDEFNODE("warn",	PO_warn),
 	PREDEFNODE(s_error,	PO_error),
+	PREDEFNODE("swizzle",	PO_swizzle),
 	PREDEFLAST("serious",	PO_serious),
 	//    ^^^^ this marks the last element
 };
