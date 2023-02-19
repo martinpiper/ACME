@@ -39,6 +39,20 @@ ACME TODO file.
 	> ALU_any_result
 	> parse_expression
 	>> Add test to TestForForwardReference.a
+	> Can treat these like: case '(':// left parenthesis
+	// Done: Need to read byte at memory
+		real_output?
+		write_ptr?
+		Might need something to get a byte, like real_output but gets not stores
+			>>getByteAtAddr
+	* Surely this would have been easier with peek()/poke()/filebyte() etc?
+		Like: PREDEFNODE(s_sin,	&ops_sin),
+		Or: PREDEFNODE("int",	&ops_int),
+	* I think it's going to be easier to enhance this to add string function parameter parsing:
+			if(Tree_easy_scan(function_tree, &node_body, function_dyna_buf))
+			PUSH_OPERATOR((op_t*) node_body);
+			Use Input_read_filename() like for PO_binary()?
+		filebyte() works
 
 
 

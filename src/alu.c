@@ -80,58 +80,61 @@ enum op_handle_t {
 	OPHANDLE_OR,		//	v|w		v OR w
 	OPHANDLE_EOR,		//	v EOR w		v XOR w		(remove)
 	OPHANDLE_XOR,		//	v XOR w
+	OPHANDLE_FILEBYTE,	// filebyte("filename" , offset)
 };
 struct operator_t {
 	enum op_handle_t	handle;
 	int			priority;
+	int wantExtraParams;
 };
 typedef struct operator_t op_t;
 
 // operator structs (only hold handle and priority value)
-static op_t ops_end		= {OPHANDLE_END,	 0};	// special
-static op_t ops_return		= {OPHANDLE_RETURN,	 1};	// special
-static op_t ops_closing		= {OPHANDLE_CLOSING,	 2};	// dyadic
-static op_t ops_opening		= {OPHANDLE_OPENING,	 3};	// monadic
-static op_t ops_or		= {OPHANDLE_OR,		 4};	// dyadic
-static op_t ops_eor		= {OPHANDLE_EOR,	 5};	//	(remove)
-static op_t ops_xor		= {OPHANDLE_XOR,	 5};	// dyadic
-static op_t ops_and		= {OPHANDLE_AND,	 6};	// dyadic
-static op_t ops_equals		= {OPHANDLE_EQUALS,	 7};	// dyadic
-static op_t ops_notequal	= {OPHANDLE_NOTEQUAL,	 8};	// dyadic
+static op_t ops_end		= {OPHANDLE_END,	 0 , 0};	// special
+static op_t ops_return		= {OPHANDLE_RETURN,	 1 , 0};	// special
+static op_t ops_closing		= {OPHANDLE_CLOSING,	 2 , 0};	// dyadic
+static op_t ops_opening		= {OPHANDLE_OPENING,	 3 , 0};	// monadic
+static op_t ops_or		= {OPHANDLE_OR,		 4 , 0};	// dyadic
+static op_t ops_eor		= {OPHANDLE_EOR,	 5 , 0};	//	(remove)
+static op_t ops_xor		= {OPHANDLE_XOR,	 5 , 0};	// dyadic
+static op_t ops_and		= {OPHANDLE_AND,	 6 , 0};	// dyadic
+static op_t ops_equals		= {OPHANDLE_EQUALS,	 7 , 0};	// dyadic
+static op_t ops_notequal	= {OPHANDLE_NOTEQUAL,	 8 , 0};	// dyadic
 	// same priority for all comparison operators
-static op_t ops_le		= {OPHANDLE_LE,		 9};	// dyadic
-static op_t ops_lessthan	= {OPHANDLE_LESSTHAN,	 9};	// dyadic
-static op_t ops_ge		= {OPHANDLE_GE,		 9};	// dyadic
-static op_t ops_greaterthan	= {OPHANDLE_GREATERTHAN, 9};	// dyadic
+static op_t ops_le		= {OPHANDLE_LE,		 9 , 0};	// dyadic
+static op_t ops_lessthan	= {OPHANDLE_LESSTHAN,	 9 , 0};	// dyadic
+static op_t ops_ge		= {OPHANDLE_GE,		 9 , 0};	// dyadic
+static op_t ops_greaterthan	= {OPHANDLE_GREATERTHAN, 9 , 0};	// dyadic
 	// same priority for all byte extraction operators
-static op_t ops_lowbyteof	= {OPHANDLE_LOWBYTEOF,	10};	// monadic
-static op_t ops_highbyteof	= {OPHANDLE_HIGHBYTEOF,	10};	// monadic
-static op_t ops_bankbyteof	= {OPHANDLE_BANKBYTEOF,	10};	// monadic
+static op_t ops_lowbyteof	= {OPHANDLE_LOWBYTEOF,	10 , 0};	// monadic
+static op_t ops_highbyteof	= {OPHANDLE_HIGHBYTEOF,	10 , 0};	// monadic
+static op_t ops_bankbyteof	= {OPHANDLE_BANKBYTEOF,	10 , 0};	// monadic
 	// same priority for all shift operators
-static op_t ops_sl		= {OPHANDLE_SL,		11};	// dyadic
-static op_t ops_asr		= {OPHANDLE_ASR,	11};	// dyadic
-static op_t ops_lsr		= {OPHANDLE_LSR,	11};	// dyadic
+static op_t ops_sl		= {OPHANDLE_SL,		11 , 0};	// dyadic
+static op_t ops_asr		= {OPHANDLE_ASR,	11 , 0};	// dyadic
+static op_t ops_lsr		= {OPHANDLE_LSR,	11 , 0};	// dyadic
 	// same priority for "+" and "-"
-static op_t ops_add		= {OPHANDLE_ADD,	12};	// dyadic
-static op_t ops_subtract	= {OPHANDLE_SUBTRACT,	12};	// dyadic
+static op_t ops_add		= {OPHANDLE_ADD,	12 , 0};	// dyadic
+static op_t ops_subtract	= {OPHANDLE_SUBTRACT,	12 , 0};	// dyadic
 	// same priority for "*", "/" and "%"
-static op_t ops_multiply	= {OPHANDLE_MULTIPLY,	13};	// dyadic
-static op_t ops_divide		= {OPHANDLE_DIVIDE,	13};	// dyadic
-static op_t ops_intdiv		= {OPHANDLE_INTDIV,	13};	// dyadic
-static op_t ops_modulo		= {OPHANDLE_MODULO,	13};	// dyadic
+static op_t ops_multiply	= {OPHANDLE_MULTIPLY,	13 , 0};	// dyadic
+static op_t ops_divide		= {OPHANDLE_DIVIDE,	13 , 0};	// dyadic
+static op_t ops_intdiv		= {OPHANDLE_INTDIV,	13 , 0};	// dyadic
+static op_t ops_modulo		= {OPHANDLE_MODULO,	13 , 0};	// dyadic
 	// highest "real" priorities
-static op_t ops_negate		= {OPHANDLE_NEGATE,	14};	// monadic
-static op_t ops_powerof		= {OPHANDLE_POWEROF,	15};	// dyadic
-static op_t ops_not		= {OPHANDLE_NOT,	16};	// monadic
+static op_t ops_negate		= {OPHANDLE_NEGATE,	14 , 0};	// monadic
+static op_t ops_powerof		= {OPHANDLE_POWEROF,	15 , 0};	// dyadic
+static op_t ops_not		= {OPHANDLE_NOT,	16 , 0};	// monadic
 	// function calls act as if they were monadic operators
-static op_t ops_int		= {OPHANDLE_INT,	17};	// function
-static op_t ops_float		= {OPHANDLE_FLOAT,	17};	// function
-static op_t ops_sin		= {OPHANDLE_SIN,	17};	// function
-static op_t ops_cos		= {OPHANDLE_COS,	17};	// function
-static op_t ops_tan		= {OPHANDLE_TAN,	17};	// function
-static op_t ops_arcsin		= {OPHANDLE_ARCSIN,	17};	// function
-static op_t ops_arccos		= {OPHANDLE_ARCCOS,	17};	// function
-static op_t ops_arctan		= {OPHANDLE_ARCTAN,	17};	// function
+static op_t ops_int		= {OPHANDLE_INT,	17 , 0};	// function
+static op_t ops_float		= {OPHANDLE_FLOAT,	17 , 0};	// function
+static op_t ops_sin		= {OPHANDLE_SIN,	17 , 0};	// function
+static op_t ops_cos		= {OPHANDLE_COS,	17 , 0};	// function
+static op_t ops_tan		= {OPHANDLE_TAN,	17 , 0};	// function
+static op_t ops_arcsin		= {OPHANDLE_ARCSIN,	17 , 0};	// function
+static op_t ops_arccos		= {OPHANDLE_ARCCOS,	17 , 0};	// function
+static op_t ops_arctan		= {OPHANDLE_ARCTAN,	17 , 0};	// function
+static op_t ops_filebyte	= {OPHANDLE_FILEBYTE,	17 , 1};	// function
 
 
 // Variables
@@ -179,7 +182,8 @@ static node_t	function_list[]	= {
 	PREDEFNODE(s_arctan,	&ops_arctan),
 	PREDEFNODE(s_sin,	&ops_sin),
 	PREDEFNODE(s_cos,	&ops_cos),
-	PREDEFLAST(s_tan,	&ops_tan),
+	PREDEFNODE(s_tan,	&ops_tan),
+	PREDEFLAST("filebyte",	&ops_filebyte),
 	//    ^^^^ this marks the last element
 };
 
@@ -489,6 +493,7 @@ static inline void parse_binary_value(void) {// Now GotByte = "%"
 	// Now GotByte = non-binary char
 }
 
+static FILE *lastFile = 0;
 // Parse function call (sin(), cos(), arctan(), ...)
 static inline void parse_function_call(void) {
 	void*	node_body;
@@ -497,9 +502,35 @@ static inline void parse_function_call(void) {
 	DynaBuf_to_lower(function_dyna_buf, GlobalDynaBuf);
 	// search for tree item
 	if(Tree_easy_scan(function_tree, &node_body, function_dyna_buf))
-		PUSH_OPERATOR((op_t*) node_body);
+	{
+		op_t* real_node_body = (op_t*) node_body;
+
+		if (real_node_body->wantExtraParams > 0)
+		{
+			GetByte();
+			SKIPSPACE();
+			Input_read_filename(TRUE, TRUE);
+			lastFile = fopen(GLOBALDYNABUF_CURRENT, FILE_READBINARY);
+			if(lastFile == NULL) {
+				Throw_error(exception_cannot_open_input_file);
+				return;
+			}
+			SKIPSPACE();
+			if (GotByte != ',')
+			{
+				Throw_error("Expecting a comma for the next parameter");
+				return;
+			}
+			// This is needed to change the comma into an open bracket and stop a syntax error
+			GotByte = '(';
+		}
+
+		PUSH_OPERATOR(real_node_body);
+	}
 	else
+	{
 		Throw_error("Unknown function.");
+	}
 }
 
 // Expect operand or monadic operator (hopefully inlined)
@@ -859,6 +890,18 @@ static void both_ensure_int(bool warn) {
 	}
 	Throw_first_pass_warning("Converted to integer for binary logic operator.");
 }
+static void ensure_right_int()
+{
+	if(RIGHT_FLAGS & MVALUE_IS_FP)
+		right_fp_to_int();
+}
+
+static void ensure_right_byte()
+{
+	RIGHT_INTVAL = (RIGHT_INTVAL) & 255;
+	RIGHT_FLAGS |= MVALUE_ISBYTE;
+	RIGHT_FLAGS &= ~MVALUE_FORCEBITS;
+}
 
 // check both left-hand and right-hand values. if int, convert to float.
 static void both_ensure_fp() {
@@ -876,6 +919,20 @@ static void both_ensure_fp() {
 static void ensure_int_from_fp() {
 	both_ensure_fp();
 	LEFT_FLAGS &= ~MVALUE_IS_FP;
+}
+
+static void perform_filebyte()
+{
+	int filePos;
+	int gotByte = 0;
+	ensure_right_int();
+	filePos = RIGHT_INTVAL;
+	fseek(lastFile , filePos , SEEK_SET);
+	gotByte = (unsigned char) fgetc(lastFile);
+	fclose(lastFile);
+	lastFile = 0;
+	RIGHT_INTVAL = gotByte;
+	ensure_right_byte();
 }
 
 // Try to reduce stacks by performing high-priority operations
@@ -949,6 +1006,10 @@ static inline void try_to_reduce_stacks(int* open_parentheses) {
 
 		case OPHANDLE_ARCSIN:
 		perform_ranged_fp(asin);
+		goto remove_next_to_last_operator;
+
+		case OPHANDLE_FILEBYTE:
+		perform_filebyte();
 		goto remove_next_to_last_operator;
 
 		case OPHANDLE_ARCCOS:

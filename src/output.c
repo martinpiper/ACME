@@ -140,6 +140,11 @@ static void real_output(intval_t byte) {
 	CPU_2add++;
 }
 
+unsigned char getByteAtAddr(int address)
+{
+	return (unsigned char) output_buffer[address];
+}
+
 // fail to write to output buffer
 static void no_output(intval_t byte) {
 	Throw_error(exception_pc_undefined);

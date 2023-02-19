@@ -16,10 +16,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#define RELEASE		"1.00mp"	// update before release (FIXME)
+#define RELEASE		"1.01mp"	// update before release (FIXME)
 #define CODENAME	"Echo"		// update before release
-#define CHANGE_DATE	"13 July"	// update before release
-#define CHANGE_YEAR	"2020"		// update before release
+#define CHANGE_DATE	"19 February"	// update before release
+#define CHANGE_YEAR	"2023"		// update before release
 // http://sourceforge.net/projects/acme-crossass/
 #define HOME_PAGE	"http://www.wellytop.com/C64.html\nhttps://github.com/martinpiper/ACME/"
 

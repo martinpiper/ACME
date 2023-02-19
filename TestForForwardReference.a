@@ -2,6 +2,8 @@
 !ct scr
 !to "TestForForwardReference.prg", cbm
 
+.value = 0
+
 ; sys 1700
 * = 1700
 .length = .textEnd - .textStart
@@ -35,3 +37,9 @@ start
 		!tx "."
 		}
 .textEnd
+
+!set bar = filebyte("src/alu.c" , .value+1)
+!if bar != '/' {
+; Test for successfully reading the secobnd byte of the alu.c file, which should be "/"
+!error "oops"
+}

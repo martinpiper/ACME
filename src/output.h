@@ -44,5 +44,6 @@ extern void	Output_start_segment(void);
 // Show start and end of current segment
 extern void	Output_end_segment(void);
 
+extern unsigned char getByteAtAddr(int address);
 
 #endif

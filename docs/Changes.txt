@@ -13,6 +13,15 @@ platform used. There should be another help file in this archive
 outlining the platform specific changes.
 
 ----------------------------------------------------------------------
+Section:   New in release 1.01mp
+----------------------------------------------------------------------
+
+filebyte("filename" , offset)
+	Returns the byte value from the filename at an offset.
+
+
+
+----------------------------------------------------------------------
 Section:   New in release 1.00mp
 ----------------------------------------------------------------------
 
