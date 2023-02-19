@@ -19,6 +19,16 @@ Section:   New in release 1.01mp
 filebyte("filename" , offset)
 	Returns the byte value from the filename at an offset.
 
+peekbyte(address)
+	Returns the byte value from the current output memory at address.
+
+
+!disablesegmentcheck
+	Disables the segment overwrite warning
+
+!enablesegmentcheck
+	Enables the segment overwrite warning
+
 
 
 ----------------------------------------------------------------------

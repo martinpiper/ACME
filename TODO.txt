@@ -53,6 +53,9 @@ ACME TODO file.
 			PUSH_OPERATOR((op_t*) node_body);
 			Use Input_read_filename() like for PO_binary()?
 		filebyte() works
+		peekbyte() works
+		!disablesegmentcheck
+		!enablesegmentcheck
 
 
 

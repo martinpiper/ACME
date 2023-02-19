@@ -16,6 +16,7 @@
 #include "platform.h"
 #include "section.h"
 #include "tree.h"
+#include "output.h"
 
 
 // Constants
@@ -264,6 +265,15 @@ static enum eos_t PO_sal(void) {
 	return(ENSURE_EOS);
 }
 
+static enum eos_t PO_disablesegmentcheck(void) {
+	gPO_disablesegmentcheck = TRUE;
+	return(ENSURE_EOS);
+}
+static enum eos_t PO_enablesegmentcheck(void) {
+	gPO_disablesegmentcheck = FALSE;
+	return(ENSURE_EOS);
+}
+
 static enum eos_t PO_previouscontext(void) {
 	if (previouscontext_enable == 0)
 	{
@@ -340,6 +350,8 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("sl",	PO_sl),
 	PREDEFNODE("svl",	PO_svl),	// MPi: Added
 	PREDEFNODE("pdb",	PO_pdb),		// MPi: Added
+	PREDEFNODE("disablesegmentcheck",	PO_disablesegmentcheck),	// MPi: Added
+	PREDEFNODE("enablesegmentcheck",	PO_enablesegmentcheck),	// MPi: Added
 	PREDEFLAST("previouscontext",	PO_previouscontext)		// MPi: Added
 	//    ^^^^ this marks the last element
 };

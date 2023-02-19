@@ -18,6 +18,7 @@
 #include "label.h"
 #include "section.h"
 #include "tree.h"
+#include "output.h"
 
 
 // Constants
@@ -81,6 +82,7 @@ enum op_handle_t {
 	OPHANDLE_EOR,		//	v EOR w		v XOR w		(remove)
 	OPHANDLE_XOR,		//	v XOR w
 	OPHANDLE_FILEBYTE,	// filebyte("filename" , offset)
+	OPHANDLE_PEEKBYTE,	// peekbyte(offset)
 };
 struct operator_t {
 	enum op_handle_t	handle;
@@ -135,6 +137,7 @@ static op_t ops_arcsin		= {OPHANDLE_ARCSIN,	17 , 0};	// function
 static op_t ops_arccos		= {OPHANDLE_ARCCOS,	17 , 0};	// function
 static op_t ops_arctan		= {OPHANDLE_ARCTAN,	17 , 0};	// function
 static op_t ops_filebyte	= {OPHANDLE_FILEBYTE,	17 , 1};	// function
+static op_t ops_peekbyte	= {OPHANDLE_PEEKBYTE,	17 , 0};	// function
 
 
 // Variables
@@ -183,7 +186,8 @@ static node_t	function_list[]	= {
 	PREDEFNODE(s_sin,	&ops_sin),
 	PREDEFNODE(s_cos,	&ops_cos),
 	PREDEFNODE(s_tan,	&ops_tan),
-	PREDEFLAST("filebyte",	&ops_filebyte),
+	PREDEFNODE("filebyte",	&ops_filebyte),
+	PREDEFLAST("peekbyte",	&ops_peekbyte),
 	//    ^^^^ this marks the last element
 };
 
@@ -935,6 +939,15 @@ static void perform_filebyte()
 	ensure_right_byte();
 }
 
+static void perform_peekbyte()
+{
+	int gotByte = 0;
+	ensure_right_int();
+	gotByte = (unsigned char) getByteAtAddr(RIGHT_INTVAL);
+	RIGHT_INTVAL = gotByte;
+	ensure_right_byte();
+}
+
 // Try to reduce stacks by performing high-priority operations
 static inline void try_to_reduce_stacks(int* open_parentheses) {
 	if(operator_sp < 2) {
@@ -1010,6 +1023,10 @@ static inline void try_to_reduce_stacks(int* open_parentheses) {
 
 		case OPHANDLE_FILEBYTE:
 		perform_filebyte();
+		goto remove_next_to_last_operator;
+
+		case OPHANDLE_PEEKBYTE:
+		perform_peekbyte();
 		goto remove_next_to_last_operator;
 
 		case OPHANDLE_ARCCOS:

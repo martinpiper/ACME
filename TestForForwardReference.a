@@ -40,6 +40,22 @@ start
 
 !set bar = filebyte("src/alu.c" , .value+1)
 !if bar != '/' {
-; Test for successfully reading the secobnd byte of the alu.c file, which should be "/"
+; Test for successfully reading the second byte of the alu.c file, which should be "/"
 !error "oops"
 }
+
+!set .t = peekbyte(.textStart);
+!if .t != 'T' {
+!error "oops2"
+}
+
+!by filebyte("src/alu.c" , .value+1)
+
+!disablesegmentcheck
+!set .t = *
+!by 0 , 1 , 2 , 3
+	lda $02
+* = .t
+!by 4 , 5 , 6 , 7
+	sta $02
+!enablesegmentcheck

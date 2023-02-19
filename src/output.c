@@ -367,10 +367,16 @@ amount, amount, segment_start, write_idx);
 		highest_idx = write_idx;
 }
 
+bool gPO_disablesegmentcheck = FALSE;
+
 // Check whether given PC is inside segment.
 static void check_segment(intval_t new_pc) {
 	struct segment_t*	test_segment;
 
+	if (gPO_disablesegmentcheck)
+	{
+		return;
+	}
 	test_segment = segment_list;
 	while(test_segment) {
 		if((new_pc >= test_segment->start)
@@ -408,6 +414,7 @@ void Output_passinit(signed long start_addr) {
 	}
 	// other stuff
 	segment_max	= OUTBUFFERSIZE-1;
+	gPO_disablesegmentcheck = FALSE;
 }
 
 // Called when "*=EXPRESSION" is parsed
