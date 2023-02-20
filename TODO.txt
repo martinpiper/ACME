@@ -69,8 +69,31 @@ ACME TODO file.
 		sta address
 		sta address2
 	This can be done if there are no references to branch/jump/indrect/store in-between the two stores.
+	>> Shifted 16 bit values:
+		lda .workOffset
+		sec
+		sbc #3
+		sta .workOffset
+		bcs .noBorrow
+		dec .workOffset+1
+	.noBorrow
+	;workOffset = ((workOffset-3)<<8) + source[curLen];
+		lda .workOffset
+		sta .workOffset+1
+		jsr ReturnA...
+		sta .workOffset
+	Can become:
+		lda .workOffset
+		sec
+		sbc #3
+		; Note: The bottom byte is discarded due to the result <<8, the top byte is replaced...
+		sta .workOffset+1
+		jsr ReturnA...
+		sta .workOffset
 
-	
+
+
+
 
 * Dead strip code in zones where labels (their memory addresses) are not referenced at all by anything outside that zone.
 
