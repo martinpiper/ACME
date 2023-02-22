@@ -195,3 +195,30 @@ ACME TODO file.
 
 * !range <label> , <start> , <end> , <step>
 	Like !for but has more options for start and step values
+
+
+
+
+
+* !bank <bank number>
+	Creates or accesses new 64KB (up to) memory banks which allows code/data to be huge.
+	The corresponding PC is maintained for each bank.
+	Each bank is saved as a distinct file, new addition to the base filename.
+	The PDB would need bank information and the remote debugger would need some way of identifying the bank being executed, perhaps by noting the current cartridge bank select by reading any active cartridge IO space from Vice/BDD6502.
+
+
+
+
+
+* Scripting options?
+	* Using a PO ! like:
+		* !scriptsimple
+		* !scriptpython
+	* Key functionality would be:
+		* Read currently defined labels, and write new values
+		* Read and write assembled memory
+		* Inject new text assembly to be assembled outside of the script
+		* Execute scripts from external files would probably be the most common use case.
+			It might make sense to export the labels to a python format, ready to be imported?
+				It would be slow, but easier than relying on durect to Python memory injection.
+
