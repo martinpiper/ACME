@@ -214,6 +214,13 @@ ACME TODO file.
 	* Using a PO ! like:
 		* !scriptsimple
 		* !scriptpython
+			https://docs.python.org/3/extending/embedding.html
+			https://docs.python.org/3/extending/embedding.html#extending-embedded-python
+			https://docs.python.org/3/c-api/index.html#c-api-index
+			"%LOCALAPPDATA%\Programs\Python\Python39\include"
+				Python.h
+			"%LOCALAPPDATA%\Programs\Python\Python39\Libs"
+				python39.lib
 	* Key functionality would be:
 		* Read currently defined labels, and write new values
 		* Read and write assembled memory
