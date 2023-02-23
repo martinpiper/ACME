@@ -222,6 +222,8 @@ ACME TODO file.
 					acme.binary()
 					* The source added via this function can be processed like !source ?
 						>> PO_source
+							>> Parse_and_close_file
+								>> new_input.source_is_ram = TRUE;
 			"%LOCALAPPDATA%\Programs\Python\Python39\include"
 				Python.h
 			"%LOCALAPPDATA%\Programs\Python\Python39\Libs"
