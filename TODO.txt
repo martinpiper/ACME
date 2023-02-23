@@ -218,8 +218,16 @@ ACME TODO file.
 			https://docs.python.org/3/extending/embedding.html#extending-embedded-python
 			https://docs.python.org/3/c-api/index.html#c-api-index
 			Extension function example: https://docs.python.org/3/extending/extending.html#a-simple-example
-				Could create: acme.assembly("text")
-					acme.binary()
+				Could create: acme.source("text")
+					acme.binary(bytearray)
+						https://www.geeksforgeeks.org/python-bytearray-function/
+					acme.setPC(address)
+					acme.addLabel(text)
+					acme.newZone()
+						>> PO_zone
+							>> Parse_optional_block?
+					acme.startZone()
+					acme.endZone()
 					* The source added via this function can be processed like !source ?
 						>> PO_source
 							>> Parse_and_close_file
