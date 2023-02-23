@@ -217,6 +217,11 @@ ACME TODO file.
 			https://docs.python.org/3/extending/embedding.html
 			https://docs.python.org/3/extending/embedding.html#extending-embedded-python
 			https://docs.python.org/3/c-api/index.html#c-api-index
+			Extension function example: https://docs.python.org/3/extending/extending.html#a-simple-example
+				Could create: acme.assembly("text")
+					acme.binary()
+					* The source added via this function can be processed like !source ?
+						>> PO_source
 			"%LOCALAPPDATA%\Programs\Python\Python39\include"
 				Python.h
 			"%LOCALAPPDATA%\Programs\Python\Python39\Libs"
@@ -228,4 +233,21 @@ ACME TODO file.
 		* Execute scripts from external files would probably be the most common use case.
 			It might make sense to export the labels to a python format, ready to be imported?
 				It would be slow, but easier than relying on durect to Python memory injection.
+	poArgs = [0, 1234, "hello"]
+	# address = (bank, address)
+	addressToLabels = {
+		(0, 1234): [
+			{"name": ".aLabel",
+				"zone": 1,
+				"used": True
+				},
+			{"name": "global",
+				"zone": 0}
+		],
+		(0, 1235): {"just this one"}
+	}
 
+	labelToAddresses = {
+		".aLabel": [(0, 1234)],
+		".l1": [(1, 134), (0, 436)]
+	}
