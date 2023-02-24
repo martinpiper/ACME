@@ -236,6 +236,13 @@ ACME TODO file.
 				Python.h
 			"%LOCALAPPDATA%\Programs\Python\Python39\Libs"
 				python39.lib
+			>> Can also use some of the code in PO_for for define an inline pyton code block
+				loop_body = Input_skip_or_store_block(TRUE)
+			** Two options:
+				!scriptpython {
+				# Some python code inside braces
+				}
+				!scriptpython "filename.py"
 	* Key functionality would be:
 		* Read currently defined labels, and write new values
 		* Read and write assembled memory
