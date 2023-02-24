@@ -1,0 +1,11 @@
+!cpu 6510
+!ct scr
+!to "TestPython.prg", cbm
+
+.myzp = $02
+
+* = 1024
+start
+	nop
+
+!scriptpython "TestPython.py"

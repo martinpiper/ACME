@@ -38,7 +38,7 @@ static void resize(dynabuf_t* db, size_t new_size) {
 	new_buf = realloc(db->buffer, new_size);
 	if(new_buf == NULL)
 		Throw_serious_error(exception_no_memory_left);
-	db->reserved = new_size;
+	db->reserved = (int)new_size;
 	db->buffer = new_buf;
 }
 

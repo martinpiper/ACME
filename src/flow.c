@@ -22,6 +22,7 @@
 #include "macro.h"
 #include "mnemo.h"
 #include "tree.h"
+#include "WrapPython.h"
 
 
 // type definitions
@@ -50,7 +51,7 @@ static node_t	condkeys[]	= {
 // Helper functions for "!for" and "!do"
 
 // Parse a loop body (could also be used for macro body)
-static void parse_ram_block(int line_number, char* body) {
+void parse_ram_block(int line_number, char* body) {
 	Input_now->line_number = line_number;// set line number to loop start
 	Input_now->src.ram_ptr = body;// set RAM read pointer to loop
 	// Parse loop body
@@ -419,6 +420,66 @@ static enum eos_t PO_source(void) {// Now GotByte = illegal char
 	return(ENSURE_EOS);
 }
 
+
+
+static enum eos_t PO_scriptpython(void)
+{
+	if (GotByte == '{')
+	{
+		Throw_error("TODO:");
+	}
+	else if (GotByte == '"' || GotByte == '\'')
+	{
+		FILE *fd;
+		size_t fileSize;
+		input_t	new_input, *outer_input;
+
+		if(Input_read_filename(TRUE,TRUE))
+			return(SKIP_REMAINDER);
+
+		outer_input = Input_now;// remember old input
+
+		if((fd = fopen(GLOBALDYNABUF_CURRENT, FILE_READBINARY)))
+		{
+			char	*python;
+			char	*filename = (char *) safe_malloc(GlobalDynaBuf->size);	// MPi: Arrays must be a constant expression
+			strcpy(filename, GLOBALDYNABUF_CURRENT);
+
+			fseek(fd, 0, SEEK_END);
+			fileSize = ftell(fd);
+			rewind(fd);
+
+			python = (char *) safe_malloc(fileSize + 1);
+			fread(python , 1 , fileSize , fd);
+			fclose(fd);
+			python[fileSize] = '\0';
+
+			new_input = *Input_now;// copy current input structure into new
+			new_input.original_filename = filename;
+			new_input.source_is_ram = TRUE;
+			Input_now = &new_input;// activate new input
+
+			RunScript_Python(filename , python);
+			
+			free(python);
+		}
+		else
+		{
+			Throw_error(exception_cannot_open_input_file);
+		}
+
+		GLOBALDYNABUF_CURRENT;
+
+		Input_now = outer_input;
+		GotByte = CHAR_EOS;
+		return(AT_EOS_ANYWAY);
+	}
+
+	Throw_error(exception_syntax);
+	return(ENSURE_EOS);
+}
+
+
 // pseudo opcode table
 static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("do",	PO_do),
@@ -428,6 +489,7 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("ifndef",	PO_ifndef),
 	PREDEFNODE("macro",	PO_macro),
 	PREDEFNODE("source",	PO_source),
+	PREDEFNODE("scriptpython",	PO_scriptpython),
 	PREDEFLAST("src",	PO_source),
 	//    ^^^^ this marks the last element
 };

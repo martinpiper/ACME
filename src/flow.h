@@ -18,5 +18,6 @@ extern void	Flow_init(void);
 // Parse a whole source code file
 extern void	Parse_and_close_file(FILE* fd, const char* filename);
 
+extern void parse_ram_block(int line_number, char* body);
 
 #endif
