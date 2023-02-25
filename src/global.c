@@ -18,6 +18,8 @@
 #include "output.h"
 #include "section.h"
 #include "tree.h"
+#include "alu.h"
+#include <string.h>
 
 
 // Constants
@@ -336,6 +338,10 @@ static void throw_message(const char* message, const char* type) {
 	{
 		// MPi: Output messages in Microsoft Visual Studio format so that when users press F4 (GoToNextErrorTag / Edit.GoToNextLocation) in the IDE they will be taken to the correct source file and line number.
 		fprintf(msg_stream, "%s(%d) : %s (%s %s): %s\n",Input_now->original_filename,Input_now->line_number,type,Section_now->type, Section_now->title,message);
+	}
+	if (strlen(gLastParsedExpression) > 2)
+	{
+		fprintf(msg_stream, "Last parsed expression: %s\n",gLastParsedExpression);
 	}
 }
 

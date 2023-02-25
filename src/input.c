@@ -14,6 +14,7 @@
 #include "section.h"
 #include "tree.h"
 #include "acme.h"
+#include <string.h>
 
 
 // Constants
@@ -221,7 +222,22 @@ char GetByte(void) {
 //	} while(TRUE);
 		if(GotByte == CHAR_SOL)
 			Input_now->line_number++;
-		return(GotByte);
+
+	if (gLastParsedExpressionActive)
+	{
+		size_t len = strlen(gLastParsedExpression);
+		if (len < (sizeof(gLastParsedExpression) - 5))
+		{
+			gLastParsedExpression[len] = GotByte;
+			gLastParsedExpression[len+1] = '\0';
+		}
+		else
+		{
+			gLastParsedExpressionActive = FALSE;
+		}
+	}
+
+	return(GotByte);
 }
 
 // This function delivers the next byte from the currently active byte source

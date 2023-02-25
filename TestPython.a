@@ -4,8 +4,15 @@
 
 .myzp = $02
 
+!macro MTest .p1 , .p2 {
+;	lda #<.p1
+	lda #<.p2
+}
+
 * = 1024
 start
 	nop
 
 !scriptpython "TestPython.py"
+
+	+MTest .udef1 , start

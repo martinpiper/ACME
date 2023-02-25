@@ -65,5 +65,8 @@ extern int	ALU_liberal_int(result_int_t*);
 // stores value and flags (result may be either int or float)
 extern void	ALU_any_result(result_t*);
 
+extern char gLastParsedExpression[1024];
+extern bool gLastParsedExpressionActive;
+
 
 #endif

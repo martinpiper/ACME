@@ -1306,11 +1306,17 @@ RNTLObutDontTouchIndirectFlag:
 	}
 }
 
+char gLastParsedExpression[1024];
+bool gLastParsedExpressionActive = FALSE;
+
 // The core of it. Returns number of parentheses left open.
 // FIXME - make state machine using function pointers? or too slow?
 static int parse_expression(result_t* result) {
 	int	open_parentheses	= 0;
 
+	gLastParsedExpressionActive = TRUE;
+	gLastParsedExpression[0] = GotByte;
+	gLastParsedExpression[1] = '\0';
 	operator_sp = 0;	// operator stack pointer
 	operand_sp = 0;	// value stack pointer
 	// begin by reading value (or monadic operator)
@@ -1388,6 +1394,7 @@ static int parse_expression(result_t* result) {
 		// State is STATE_ERROR. But actually, nobody cares.
 		// ...errors have already been reported anyway. :)
 	}
+	gLastParsedExpressionActive = FALSE;
 	// return number of open (unmatched) parentheses
 	return(open_parentheses);
 }
