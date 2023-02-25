@@ -281,4 +281,8 @@ ACME TODO file.
 		These need to emit the problematic line which includes the label etc...
 			throw_message can output the information
 			However Parse_until_eob_or_eof will need to "save" the last processed line
+	* TODO: !scriptpython "TestPython.py" , <parameter 1> , <parameter n>
+	* TODO: !scriptpython <parameter 1> , <parameter n> {
+		For these can use the !for model
+	* TODO: Automatically include the "import acme", then parameters, then labels
 
