@@ -1,1 +1,1 @@
-int RunScript_Python(char *preamble , char *name , char *python);
+int RunScript_Python(char *parameters , char *name , char *python);

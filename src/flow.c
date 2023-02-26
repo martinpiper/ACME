@@ -445,8 +445,6 @@ static enum eos_t PO_scriptpythonfile(void)
 	strcpy(filename, GLOBALDYNABUF_CURRENT);
 
 	DYNABUF_CLEAR(userParameter);
-	DynaBuf_add_string(userParameter , "import acme\n");
-	DynaBuf_add_string(userParameter , "acmeParameters = [");
 
 	while (GotByte != CHAR_EOS)
 	{
@@ -490,7 +488,6 @@ static enum eos_t PO_scriptpythonfile(void)
 		}
 	}
 
-	DynaBuf_add_string(userParameter , "]\n");
 	DynaBuf_append(userParameter, '\0');
 
 	outer_input = Input_now;// remember old input
