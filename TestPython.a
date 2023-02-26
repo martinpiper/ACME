@@ -13,6 +13,12 @@
 start
 	nop
 
-!scriptpython "TestPython.py"
+!scriptpythonfile "TestPython.py"
+!scriptpythonfile "TestPython.py" , .myzp
+!scriptpythonfile "TestPython.py" , .myzp , start
+!scriptpythonfile "TestPython.py" , .myzp , "test string" , start
 
-	+MTest .udef1 , start
+;!scriptpythoninline .myzp {
+;}
+
+;	+MTest .udef1 , start

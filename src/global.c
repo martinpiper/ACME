@@ -37,6 +37,7 @@ const char	s_scrxor[]	= "scrxor";
 // Exception messages during assembly
 const char	exception_cannot_open_input_file[] = "Cannot open input file.";
 const char	exception_missing_string[]	= "No string given.";
+const char	exception_missing_filename[]	= "No filename given.";
 const char	exception_no_left_brace[]	= "Missing '{'.";
 const char	exception_no_memory_left[]	= "Out of memory.";
 const char	exception_no_right_brace[]= "Found end-of-file instead of '}'.";
@@ -343,6 +344,10 @@ static void throw_message(const char* message, const char* type) {
 	{
 		fprintf(msg_stream, "Last parsed expression: %s\n",gLastParsedExpression);
 	}
+//	if (strlen(GLOBALDYNABUF_CURRENT) > 2)
+//	{
+//		fprintf(msg_stream, "Current token: %s\n",GLOBALDYNABUF_CURRENT);
+//	}
 }
 
 // Output a warning.

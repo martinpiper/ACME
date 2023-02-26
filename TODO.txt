@@ -285,8 +285,8 @@ ACME TODO file.
 					>> parse_expression
 						>> Perhaps this can save the last expression that was parsed?
 							Which can then be output
-	* TODO: !scriptpython "TestPython.py" , <parameter 1> , <parameter n>
-	* TODO: !scriptpython <parameter 1> , <parameter n> {
+	* Done: !scriptpythonfile "TestPython.py" , <parameter 1> , <parameter n>
+	* TODO: !scriptpythoninline <parameter 1> , <parameter n> {
 		For these can use the !for model
 	* TODO: Automatically include the "import acme", then parameters, then labels
 

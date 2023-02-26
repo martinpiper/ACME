@@ -70,7 +70,7 @@ PyMODINIT_FUNC PyInit_acme(void)
 }
 
 
-extern "C" int RunScript_Python(char *name , char *python)
+extern "C" int RunScript_Python(char *preamble , char *name , char *python)
 {
     wchar_t *program = Py_DecodeLocale(name, NULL);
     if (program == NULL)
@@ -85,6 +85,10 @@ extern "C" int RunScript_Python(char *name , char *python)
         fprintf(stderr, "Error: could not extend in-built modules table\n");
         exit(1);
     }
+
+	std::string fullSource;
+	fullSource.append(preamble);
+	fullSource.append(python);
 
     /* Pass argv[0] to the Python interpreter */
     Py_SetProgramName(program);
@@ -103,7 +107,7 @@ extern "C" int RunScript_Python(char *name , char *python)
         fprintf(stderr, "Error: could not import module 'acme'\n");
     }
 
-	PyRun_SimpleString(python);
+	PyRun_SimpleString(fullSource.c_str());
 
 	if (Py_FinalizeEx() < 0)
 	{

@@ -421,62 +421,110 @@ static enum eos_t PO_source(void) {// Now GotByte = illegal char
 }
 
 
+static dynabuf_t*	userParameter;
 
-static enum eos_t PO_scriptpython(void)
+static enum eos_t PO_scriptpythonfile(void)
 {
-	if (GotByte == '{')
+	FILE *fd;
+	size_t fileSize;
+	input_t	new_input, *outer_input;
+	char	*filename;
+	bool firstParameter = TRUE;
+
+	SKIPSPACE();
+	if (GotByte != '"' && GotByte != '\'')
 	{
-		Throw_error("TODO:");
+		Throw_error(exception_missing_filename);
+		return(ENSURE_EOS);
 	}
-	else if (GotByte == '"' || GotByte == '\'')
+
+	if(Input_read_filename(TRUE,TRUE))
+		return(SKIP_REMAINDER);
+
+	filename = (char *) safe_malloc(GlobalDynaBuf->size);	// MPi: Arrays must be a constant expression
+	strcpy(filename, GLOBALDYNABUF_CURRENT);
+
+	DYNABUF_CLEAR(userParameter);
+	DynaBuf_add_string(userParameter , "import acme\n");
+	DynaBuf_add_string(userParameter , "acmeParameters = [");
+
+	while (GotByte != CHAR_EOS)
 	{
-		FILE *fd;
-		size_t fileSize;
-		input_t	new_input, *outer_input;
-
-		if(Input_read_filename(TRUE,TRUE))
-			return(SKIP_REMAINDER);
-
-		outer_input = Input_now;// remember old input
-
-		if((fd = fopen(GLOBALDYNABUF_CURRENT, FILE_READBINARY)))
+		SKIPSPACE();
+		if (GotByte == ',')
 		{
-			char	*python;
-			char	*filename = (char *) safe_malloc(GlobalDynaBuf->size);	// MPi: Arrays must be a constant expression
-			strcpy(filename, GLOBALDYNABUF_CURRENT);
-
-			fseek(fd, 0, SEEK_END);
-			fileSize = ftell(fd);
-			rewind(fd);
-
-			python = (char *) safe_malloc(fileSize + 1);
-			fread(python , 1 , fileSize , fd);
-			fclose(fd);
-			python[fileSize] = '\0';
-
-			new_input = *Input_now;// copy current input structure into new
-			new_input.original_filename = filename;
-			new_input.source_is_ram = TRUE;
-			Input_now = &new_input;// activate new input
-
-			RunScript_Python(filename , python);
-			
-			free(python);
+			if (!firstParameter)
+			{
+				DynaBuf_add_string(userParameter , " , ");
+			}
+			GetByte();
+			continue;
+		}
+		if (GotByte == '"')
+		{
+			DYNABUF_APPEND(userParameter, '"');
+			GetQuotedByte();	// read initial character
+			// send characters until closing quote is reached
+			while(GotByte && (GotByte != '"')) {
+				DYNABUF_APPEND(userParameter, GotByte);
+				GetQuotedByte();
+			}
+			DYNABUF_APPEND(userParameter, '"');
+			firstParameter = FALSE;
+			GetByte();
 		}
 		else
 		{
-			Throw_error(exception_cannot_open_input_file);
+
+			result_t	result;
+			ALU_any_result(&result);
+			if(result.flags & MVALUE_IS_FP)
+			{
+				DynaBuf_add_double(userParameter,result.val.fpval);
+			}
+			else
+			{
+				DynaBuf_add_signed_long(userParameter,result.val.intval);
+			}
+			firstParameter = FALSE;
 		}
-
-		GLOBALDYNABUF_CURRENT;
-
-		Input_now = outer_input;
-		GotByte = CHAR_EOS;
-		return(AT_EOS_ANYWAY);
 	}
 
-	Throw_error(exception_syntax);
-	return(ENSURE_EOS);
+	DynaBuf_add_string(userParameter , "]\n");
+	DynaBuf_append(userParameter, '\0');
+
+	outer_input = Input_now;// remember old input
+
+	if((fd = fopen(filename, FILE_READBINARY)))
+	{
+		char	*python;
+
+		fseek(fd, 0, SEEK_END);
+		fileSize = ftell(fd);
+		rewind(fd);
+
+		python = (char *) safe_malloc(fileSize + 1);
+		fread(python , 1 , fileSize , fd);
+		fclose(fd);
+		python[fileSize] = '\0';
+
+		new_input = *Input_now;// copy current input structure into new
+		new_input.original_filename = filename;
+		new_input.source_is_ram = TRUE;
+		Input_now = &new_input;// activate new input
+
+		RunScript_Python(userParameter->buffer , filename , python);
+			
+		free(python);
+	}
+	else
+	{
+		Throw_error(exception_cannot_open_input_file);
+	}
+
+	Input_now = outer_input;
+	GotByte = CHAR_EOS;
+	return(AT_EOS_ANYWAY);
 }
 
 
@@ -489,13 +537,15 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("ifndef",	PO_ifndef),
 	PREDEFNODE("macro",	PO_macro),
 	PREDEFNODE("source",	PO_source),
-	PREDEFNODE("scriptpython",	PO_scriptpython),
+	PREDEFNODE("scriptpythonfile",	PO_scriptpythonfile),
 	PREDEFLAST("src",	PO_source),
 	//    ^^^^ this marks the last element
 };
 
 // register pseudo opcodes and build keyword tree for until/while
 void Flow_init(void) {
+	userParameter = DynaBuf_create(1024);
+
 	Tree_add_table(&condkey_tree, condkeys);
 	Tree_add_table(&pseudo_opcode_tree, pseudo_opcodes);
 }
