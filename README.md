@@ -14,6 +14,8 @@ Quick start
 
 This example will use ACME to assemble an example, start the visual debugger, start Vice in remote debugger mode, and show how single stepping works.
 
+* To run acme.exe you will need python39.dll (x86 32 bit). To use Python scripting functionality you will need Python39.zip. These files can be in your path or in the same directory as acme.exe
+  * These files can also be found in: https://github.com/martinpiper/ACME/tree/master/Release
 * Open a command prompt window this, I usually use: "Windows key + R" type "cmd" then press return
 * In the command prompt window, use the "cd" command to change to the directory of this ACME archive, for example: cd c:\Work\ACME
 * Next assemble the Test.a example file using: Release\ACME.exe -v3 Test.a
