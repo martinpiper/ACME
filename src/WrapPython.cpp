@@ -70,7 +70,7 @@ PyMODINIT_FUNC PyInit_acme(void)
 }
 
 
-extern "C" int RunScript_Python(char *parameters , char *name , char *python)
+extern "C" int RunScript_Python(const char *parameters , const char *name , const char *python)
 {
     wchar_t *program = Py_DecodeLocale(name, NULL);
     if (program == NULL)
@@ -88,9 +88,9 @@ extern "C" int RunScript_Python(char *parameters , char *name , char *python)
 
 	std::string fullSource;
 	fullSource.append("import acme\n");
-	fullSource.append("acmeParameters = [");
+	fullSource.append("acmeParameters = (");
 	fullSource.append(parameters);
-	fullSource.append("]\n");
+	fullSource.append(")\n");
 	fullSource.append(python);
 
     /* Pass argv[0] to the Python interpreter */

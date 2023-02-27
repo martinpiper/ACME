@@ -285,6 +285,34 @@ char GetQuotedByte(void) {
 	return(GotByte);
 }
 
+
+char GetRawByte(void) {
+	int	from_file;	// must be an int to catch EOF
+
+	// If byte source is RAM, then no conversion is necessary,
+	// because in RAM the source already has high-level format
+	if(Input_now->source_is_ram)
+		GotByte = *(Input_now->src.ram_ptr++);
+	// Otherwise, the source is a file.
+	else {
+		// fetch a fresh byte from the current source file
+		from_file = getc(Input_now->src.fd);
+		switch(from_file) {
+
+		case EOF:
+			// remember to send an end-of-file
+			Input_now->state = INPUTSTATE_EOF;
+			GotByte = CHAR_EOS;	// end of statement
+			break;
+
+		default:
+			GotByte = from_file;
+		}
+
+	}
+	return(GotByte);
+}
+
 // Skip remainder of statement, for example on error
 void Input_skip_remainder(void) {
 	while(GotByte)

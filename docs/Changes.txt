@@ -52,6 +52,18 @@ peekbyte(address)
 		$04 , $09 , $0e , $33
 
 
+When an error is encountered, for example "Value not defined." then the last parsed expression is also displayed, this can help to narrow down the cause of the error.
+
+
+Python scripting is included, this allows python to generate complex assembly. This can be useful for parsing complex files and then generating assembly data statements.
+	Parameters can also be passed from the assembler to the python script, allowing the same python code to use different parameters, for example.
+	!scriptpythonfile "TestPython.py" , <parameter 1> , <parameter n>
+	!scriptpythoninline <parameter 1> , <parameter n> { }
+	When the python code is called, it will already have the "acme" object imported, and a typle called acmeParameters which contains the parameters from the assembler. Strings can also be used.
+	Python can use "acme.source("	inc .myzp+1\n	inc $0401")" to pass back assembly code fragments to the assembler.
+	An usage example is included in: TestPython.a and TestPython.py
+
+
 ----------------------------------------------------------------------
 Section:   New in release 1.00mp
 ----------------------------------------------------------------------

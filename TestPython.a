@@ -18,7 +18,11 @@ start
 !scriptpythonfile "TestPython.py" , .myzp , start
 !scriptpythonfile "TestPython.py" , .myzp , "test string" , start
 
-;!scriptpythoninline .myzp {
-;}
+!scriptpythoninline .myzp {
+print("Python (inline) is assembling...")
+print(acmeParameters)
+acme.source("	inc .myzp+1\n	inc $0401")
+}
 
+; Tests error display of undefined parameters
 ;	+MTest .udef1 , start
