@@ -1,0 +1,28 @@
+!cpu 6510
+!ct scr
+!to "TestPython.prg", cbm
+
+.myzp = $02
+
+!macro MTest .p1 , .p2 {
+;	lda #<.p1
+	lda #<.p2
+}
+
+* = 1024
+start
+	nop
+
+!scriptpythonfile "TestPython.py"
+!scriptpythonfile "TestPython.py" , .myzp
+!scriptpythonfile "TestPython.py" , .myzp , start
+!scriptpythonfile "TestPython.py" , .myzp , "test string" , start
+
+!scriptpythoninline .myzp {
+print("Python (inline) is assembling...")
+print(acmeParameters)
+acme.source("	inc .myzp+1\n	inc $0401")
+}
+
+; Tests error display of undefined parameters
+;	+MTest .udef1 , start

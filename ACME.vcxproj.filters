@@ -93,6 +93,9 @@
     <ClInclude Include="src\tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\WrapPython.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\acme.c">
@@ -149,6 +152,9 @@
     <ClCompile Include="src\tree.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\WrapPython.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Makefile" />
@@ -177,6 +183,12 @@
       <Filter>Docs</Filter>
     </None>
     <None Include="TestForForwardReference.a">
+      <Filter>Asm</Filter>
+    </None>
+    <None Include="TestPython.a">
+      <Filter>Asm</Filter>
+    </None>
+    <None Include="TestPython.py">
       <Filter>Asm</Filter>
     </None>
   </ItemGroup>

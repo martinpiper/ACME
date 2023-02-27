@@ -268,3 +268,28 @@ ACME TODO file.
 		".aLabel": [(0, 1234)],
 		".l1": [(1, 134), (0, 436)]
 	}
+	>> Note: c:\users\martin piper\appdata\local\programs\python\python39\include\pyport.h
+		Needed:
+			// NOTE: Wrong header
+			//#include <inttypes.h>
+			#include <stdint.h>
+		>> LINK : fatal error LNK1104: cannot open file 'python39_d.lib'
+			C:\Users\Martin Piper\AppData\Local\Programs\Python\Python39\libs
+				Needed to copy "python39.lib" to "python39_d.lib"
+	>> The EXE type needed to be changed to x64 and python.dll is x64
+	* Done: For anonymous errors like: Error - File TestPython.py, line 1 (Zone <untitled>): Value not defined.
+		These need to emit the problematic line which includes the label etc...
+			throw_message can output the information
+			However Parse_until_eob_or_eof will need to "save" the last processed line
+				>> ALU_any_result
+					>> parse_expression
+						>> Perhaps this can save the last expression that was parsed?
+							Which can then be output
+	* Done: !scriptpythonfile "TestPython.py" , <parameter 1> , <parameter n>
+	* Done: !scriptpythoninline <parameter 1> , <parameter n> {
+		For these can use the !for model
+	* Done: Automatically include the "import acme", then parameters
+	* TODO: Automatically add labels
+	* Done: Change back to use x86 build from: https://www.python.org/downloads/release/python-390/
+		https://www.python.org/ftp/python/3.9.0/python-3.9.0.exe
+			C:\Users\Martin Piper\AppData\Local\Programs\Python\Python39-32

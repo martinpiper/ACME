@@ -22,6 +22,7 @@
 #include "macro.h"
 #include "mnemo.h"
 #include "tree.h"
+#include "WrapPython.h"
 
 
 // type definitions
@@ -50,7 +51,7 @@ static node_t	condkeys[]	= {
 // Helper functions for "!for" and "!do"
 
 // Parse a loop body (could also be used for macro body)
-static void parse_ram_block(int line_number, char* body) {
+void parse_ram_block(int line_number, char* body) {
 	Input_now->line_number = line_number;// set line number to loop start
 	Input_now->src.ram_ptr = body;// set RAM read pointer to loop
 	// Parse loop body
@@ -419,6 +420,205 @@ static enum eos_t PO_source(void) {// Now GotByte = illegal char
 	return(ENSURE_EOS);
 }
 
+
+static dynabuf_t*	userParameter;
+static dynabuf_t*	inlinescriptParameter;
+
+static enum eos_t PO_scriptpythonfile(void)
+{
+	FILE *fd;
+	size_t fileSize;
+	input_t	new_input, *outer_input;
+	char	*filename;
+	bool firstParameter = TRUE;
+
+	SKIPSPACE();
+	if (GotByte != '"' && GotByte != '\'')
+	{
+		Throw_error(exception_missing_filename);
+		return(ENSURE_EOS);
+	}
+
+	if(Input_read_filename(TRUE,TRUE))
+		return(SKIP_REMAINDER);
+
+	filename = (char *) safe_malloc(GlobalDynaBuf->size);	// MPi: Arrays must be a constant expression
+	strcpy(filename, GLOBALDYNABUF_CURRENT);
+
+	DYNABUF_CLEAR(userParameter);
+
+	while (GotByte != CHAR_EOS)
+	{
+		SKIPSPACE();
+		if (GotByte == ',')
+		{
+			if (!firstParameter)
+			{
+				DynaBuf_add_string(userParameter , " , ");
+			}
+			GetByte();
+			continue;
+		}
+		if (GotByte == '"')
+		{
+			DYNABUF_APPEND(userParameter, '"');
+			GetQuotedByte();	// read initial character
+			// send characters until closing quote is reached
+			while(GotByte && (GotByte != '"')) {
+				DYNABUF_APPEND(userParameter, GotByte);
+				GetQuotedByte();
+			}
+			DYNABUF_APPEND(userParameter, '"');
+			firstParameter = FALSE;
+			GetByte();
+		}
+		else
+		{
+
+			result_t	result;
+			ALU_any_result(&result);
+			if(result.flags & MVALUE_IS_FP)
+			{
+				DynaBuf_add_double(userParameter,result.val.fpval);
+			}
+			else
+			{
+				DynaBuf_add_signed_long(userParameter,result.val.intval);
+			}
+			firstParameter = FALSE;
+		}
+	}
+
+	DynaBuf_append(userParameter, '\0');
+
+	outer_input = Input_now;// remember old input
+
+	if((fd = fopen(filename, FILE_READBINARY)))
+	{
+		char	*python;
+
+		fseek(fd, 0, SEEK_END);
+		fileSize = ftell(fd);
+		rewind(fd);
+
+		python = (char *) safe_malloc(fileSize + 1);
+		fread(python , 1 , fileSize , fd);
+		fclose(fd);
+		python[fileSize] = '\0';
+
+		new_input = *Input_now;// copy current input structure into new
+		new_input.original_filename = filename;
+		new_input.source_is_ram = TRUE;
+		Input_now = &new_input;// activate new input
+
+		RunScript_Python(userParameter->buffer , filename , python);
+			
+		free(python);
+	}
+	else
+	{
+		Throw_error(exception_cannot_open_input_file);
+		return(AT_EOS_ANYWAY);
+	}
+
+	Input_now = outer_input;
+	GotByte = CHAR_EOS;
+	return(AT_EOS_ANYWAY);
+}
+
+static enum eos_t PO_scriptpythoninline(void)
+{
+	input_t	new_input, *outer_input;
+	bool firstParameter = TRUE;
+	int openBraces = 1;
+
+	SKIPSPACE();
+
+	DYNABUF_CLEAR(userParameter);
+
+	while (GotByte != CHAR_EOS && GotByte != '{')
+	{
+		SKIPSPACE();
+		if (GotByte == ',')
+		{
+			if (!firstParameter)
+			{
+				DynaBuf_add_string(userParameter , " , ");
+			}
+			GetByte();
+			continue;
+		}
+		if (GotByte == '"')
+		{
+			DYNABUF_APPEND(userParameter, '"');
+			GetQuotedByte();	// read initial character
+			// send characters until closing quote is reached
+			while(GotByte && (GotByte != '"')) {
+				DYNABUF_APPEND(userParameter, GotByte);
+				GetQuotedByte();
+			}
+			DYNABUF_APPEND(userParameter, '"');
+			firstParameter = FALSE;
+			GetByte();
+		}
+		else
+		{
+
+			result_t	result;
+			ALU_any_result(&result);
+			if(result.flags & MVALUE_IS_FP)
+			{
+				DynaBuf_add_double(userParameter,result.val.fpval);
+			}
+			else
+			{
+				DynaBuf_add_signed_long(userParameter,result.val.intval);
+			}
+			firstParameter = FALSE;
+		}
+	}
+
+	DynaBuf_append(userParameter, '\0');
+
+	outer_input = Input_now;// remember old input
+
+	DYNABUF_CLEAR(inlinescriptParameter);
+	SKIPSPACE();
+	GetRawByte();
+
+	while (GotByte != CHAR_EOS && !(openBraces == 1 && GotByte == '}'))
+	{
+		if (GotByte == '}')
+		{
+			openBraces--;
+		}
+		else if (GotByte == '{')
+		{
+			openBraces++;
+		}
+
+		DynaBuf_append(inlinescriptParameter , GotByte);
+		GetRawByte();
+	}
+	DynaBuf_append(inlinescriptParameter, '\0');
+
+	if (GotByte != '}')
+	{
+		Throw_serious_error(exception_no_right_brace);
+		return(AT_EOS_ANYWAY);
+	}
+
+	new_input = *Input_now;// copy current input structure into new
+	new_input.source_is_ram = TRUE;
+	Input_now = &new_input;// activate new input
+
+	RunScript_Python(userParameter->buffer , new_input.original_filename , inlinescriptParameter->buffer);
+
+	Input_now = outer_input;
+	GotByte = CHAR_EOS;
+	return(AT_EOS_ANYWAY);
+}
+
 // pseudo opcode table
 static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("do",	PO_do),
@@ -428,12 +628,17 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("ifndef",	PO_ifndef),
 	PREDEFNODE("macro",	PO_macro),
 	PREDEFNODE("source",	PO_source),
+	PREDEFNODE("scriptpythonfile",	PO_scriptpythonfile),
+	PREDEFNODE("scriptpythoninline",	PO_scriptpythoninline),
 	PREDEFLAST("src",	PO_source),
 	//    ^^^^ this marks the last element
 };
 
 // register pseudo opcodes and build keyword tree for until/while
 void Flow_init(void) {
+	userParameter = DynaBuf_create(1024);
+	inlinescriptParameter = DynaBuf_create(32768);
+
 	Tree_add_table(&condkey_tree, condkeys);
 	Tree_add_table(&pseudo_opcode_tree, pseudo_opcodes);
 }

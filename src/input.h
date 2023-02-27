@@ -61,6 +61,8 @@ extern void	Input_new_file(const char* filename, FILE* fd);
 // get next byte from currently active byte source in shortened high-level
 // format. When inside quotes, use GetQuotedByte() instead!
 extern char	GetByte(void);
+// Gets the next byte without any extra processing except that CHAR_EOS is returned for end of file
+extern char GetRawByte(void);
 // get next byte from currently active byte source in un-shortened high-level
 // format. Complains if CHAR_EOS (end of statement) is read.
 extern char	GetQuotedByte(void);

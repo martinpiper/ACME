@@ -14,6 +14,7 @@
 #include "section.h"
 #include "tree.h"
 #include "acme.h"
+#include <string.h>
 
 
 // Constants
@@ -221,7 +222,22 @@ char GetByte(void) {
 //	} while(TRUE);
 		if(GotByte == CHAR_SOL)
 			Input_now->line_number++;
-		return(GotByte);
+
+	if (gLastParsedExpressionActive)
+	{
+		size_t len = strlen(gLastParsedExpression);
+		if (len < (sizeof(gLastParsedExpression) - 5))
+		{
+			gLastParsedExpression[len] = GotByte;
+			gLastParsedExpression[len+1] = '\0';
+		}
+		else
+		{
+			gLastParsedExpressionActive = FALSE;
+		}
+	}
+
+	return(GotByte);
 }
 
 // This function delivers the next byte from the currently active byte source
@@ -266,6 +282,34 @@ char GetQuotedByte(void) {
 	// now check for end of statement
 	if(GotByte == CHAR_EOS)
 		Throw_error("Quotes still open at end of line.");
+	return(GotByte);
+}
+
+
+char GetRawByte(void) {
+	int	from_file;	// must be an int to catch EOF
+
+	// If byte source is RAM, then no conversion is necessary,
+	// because in RAM the source already has high-level format
+	if(Input_now->source_is_ram)
+		GotByte = *(Input_now->src.ram_ptr++);
+	// Otherwise, the source is a file.
+	else {
+		// fetch a fresh byte from the current source file
+		from_file = getc(Input_now->src.fd);
+		switch(from_file) {
+
+		case EOF:
+			// remember to send an end-of-file
+			Input_now->state = INPUTSTATE_EOF;
+			GotByte = CHAR_EOS;	// end of statement
+			break;
+
+		default:
+			GotByte = from_file;
+		}
+
+	}
 	return(GotByte);
 }
 

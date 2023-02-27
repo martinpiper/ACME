@@ -92,6 +92,7 @@ static enum eos_t PO_swizzle(void) {
 		}
 	}
 	free(temp);
+	return(ENSURE_EOS);
 }
 
 

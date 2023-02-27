@@ -18,6 +18,8 @@
 #include "output.h"
 #include "section.h"
 #include "tree.h"
+#include "alu.h"
+#include <string.h>
 
 
 // Constants
@@ -35,6 +37,7 @@ const char	s_scrxor[]	= "scrxor";
 // Exception messages during assembly
 const char	exception_cannot_open_input_file[] = "Cannot open input file.";
 const char	exception_missing_string[]	= "No string given.";
+const char	exception_missing_filename[]	= "No filename given.";
 const char	exception_no_left_brace[]	= "Missing '{'.";
 const char	exception_no_memory_left[]	= "Out of memory.";
 const char	exception_no_right_brace[]= "Found end-of-file instead of '}'.";
@@ -337,6 +340,14 @@ static void throw_message(const char* message, const char* type) {
 		// MPi: Output messages in Microsoft Visual Studio format so that when users press F4 (GoToNextErrorTag / Edit.GoToNextLocation) in the IDE they will be taken to the correct source file and line number.
 		fprintf(msg_stream, "%s(%d) : %s (%s %s): %s\n",Input_now->original_filename,Input_now->line_number,type,Section_now->type, Section_now->title,message);
 	}
+	if (strlen(gLastParsedExpression) > 2)
+	{
+		fprintf(msg_stream, "Last parsed expression: %s\n",gLastParsedExpression);
+	}
+//	if (strlen(GLOBALDYNABUF_CURRENT) > 2)
+//	{
+//		fprintf(msg_stream, "Current token: %s\n",GLOBALDYNABUF_CURRENT);
+//	}
 }
 
 // Output a warning.
