@@ -33,6 +33,7 @@ fooProfile.log.old
 [Rr]elease/
 
 build/
+target/
 
 *Debug*/
 *Release*/

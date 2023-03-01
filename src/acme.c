@@ -51,6 +51,7 @@ static const char	FILE_WRITEBINARY[]	= "wb";
 // names for error messages
 static const char	name_outfile[]		= "output filename";
 static const char	name_dumpfile[]		= "label dump filename";
+static const char	name_pdbfile[]		= "pdb filename";
 // long options
 #define OPTION_HELP		"help"
 #define OPTION_FORMAT		"format"
@@ -66,6 +67,7 @@ static const char	name_dumpfile[]		= "label dump filename";
 #define OPTION_VERSION		"version"
 #define OPTION_MSVC			"msvc"
 #define OPTION_LIB			"lib"
+#define OPTION_PDB			"pdb"
 
 
 // Variables
@@ -127,6 +129,7 @@ static void show_help_and_exit(void) {
 "  -DEXPRESSION           pre-define labels.\n"	FIXME	*/
 "      --" OPTION_USE_STDOUT "       fix for 'Relaunch64' IDE (see docs).\n"
 "      --" OPTION_MSVC "             Changes the output message format to that used by the Microsoft Visual Studio IDE.\n"	// MPi: New command line option
+"      --" OPTION_PDB "              Select PDB file.\n"	// MPi: New command line option
 "      --" OPTION_LIB "              Adds a path to search for library includes.\n"	// MPi: New command line option
 PLATFORM_OPTION_HELP
 "  -V, --" OPTION_VERSION "          show version and exit.\n"
@@ -394,6 +397,8 @@ static const char* long_option(const char* string) {
 	{
 		gLibraryIncludes[gNumLibraryIncludes++] = _strdup(cliargs_get_string("library include"));
 	}
+	else if(strcmp(string, OPTION_PDB) == 0)
+		PDB_filename = cliargs_get_string(name_pdbfile);
 	PLATFORM_LONGOPTION_CODE
 	else if(strcmp(string, OPTION_VERSION) == 0)
 		show_version(TRUE);

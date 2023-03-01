@@ -11,6 +11,11 @@
 
 ACME TODO file.
 
+* It might be possible to find the current pyton file and line being executed and pass that to the assembly PDB information
+
+
+
+
 * Command line option to define labels
 
 

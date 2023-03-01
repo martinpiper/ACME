@@ -64,6 +64,9 @@ Python scripting is included, this allows python to generate complex assembly. T
 	An usage example is included in: TestPython.a and TestPython.py
 
 
+New CLI switch: "--pdb <filename>"
+
+
 ----------------------------------------------------------------------
 Section:   New in release 1.00mp
 ----------------------------------------------------------------------
