@@ -2,6 +2,7 @@
 
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
+#include "frameobject.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
@@ -17,6 +18,20 @@ extern "C" {
 
 static PyObject *acme_source(PyObject *self, PyObject *args)
 {
+#if 0
+	PyFrameObject *fo = PyEval_GetFrame();
+//	fo = PyFrame_GetBack(fo);	// This seems to cause PyTraceBack_Here to throw an exception
+	PyTraceBack_Here(fo);
+	PyObject * exc;
+	PyObject * val;
+	PyObject * tb;
+	PyErr_Fetch(&exc, &val, &tb);
+	// Note: This line seems to be accurate and includes the common header we add on
+	int line = PyLong_AsLong(PyObject_GetAttrString(PyObject_GetAttrString(tb, "tb_frame"), "f_lineno"));
+	// This will always be "<string>" because we use PyRun_SimpleString()
+//	const char * filename = PyUnicode_AsUTF8(PyObject_GetAttrString(PyObject_GetAttrString(PyObject_GetAttrString(tb, "tb_frame"), "f_code"), "co_filename"));
+#endif
+
 	char *command;
 
 	if (!PyArg_ParseTuple(args, "s", &command))
