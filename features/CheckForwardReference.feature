@@ -12,7 +12,8 @@ Feature: Test forward reference assembly
 
   Scenario Outline: Execute assembly
 
-    And I run the command line: <build>\acme.exe --pdb target\TestForForwardReference.pdb --labeldump target\TestForForwardReference.lbl TestForForwardReference.a
+    And I run the command line: <build>\acme.exe -v9 --pdb target\TestForForwardReference.pdb --labeldump target\TestForForwardReference.lbl TestForForwardReference.a
+    Then property "test.BDD6502.lastProcessOutput" must contain string "Detected result change: 1: length:TestForForwardReference.a:19:1 : From 0 to 24"
     
     Given open file "target\TestForForwardReference.pdb" for reading
     Then expect the next line to contain "INCLUDES:0"
