@@ -213,7 +213,13 @@
     <None Include="CleanProjectFullyWithAttrib.bat" />
     <None Include="DoBackup.bat" />
     <None Include="docs\COPYING" />
+    <None Include="FeatureEditor.bat" />
+    <None Include="features\CheckForwardReference.feature" />
+    <None Include="features\CheckPython.feature" />
+    <None Include="features\CheckTest.feature" />
+    <None Include="features\CheckTrigno.feature" />
     <None Include="README.md" />
+    <None Include="RunTests.bat" />
     <None Include="src\Makefile" />
     <None Include="src\Makefile.dos" />
     <None Include="src\Makefile.riscos" />
@@ -222,6 +228,7 @@
     <None Include="TestForForwardReference.a" />
     <None Include="TestPython.a" />
     <None Include="TestPython.py" />
+    <None Include="trigono.a" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ACME_Lib\6502\Help.txt" />

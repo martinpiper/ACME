@@ -22,6 +22,9 @@
     <Filter Include="Docs">
       <UniqueIdentifier>{1b085d35-012b-41cb-bde9-21dbdb12704c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{7eb9e4dd-0270-4786-b172-0828550197fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\_amiga.h">
@@ -190,6 +193,27 @@
     </None>
     <None Include="TestPython.py">
       <Filter>Asm</Filter>
+    </None>
+    <None Include="features\CheckForwardReference.feature">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="features\CheckPython.feature">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="features\CheckTest.feature">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="features\CheckTrigno.feature">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="trigono.a">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="FeatureEditor.bat">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="RunTests.bat">
+      <Filter>Tests</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
