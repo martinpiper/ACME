@@ -101,11 +101,13 @@ extern "C" int RunScript_Python(const char *parameters , const char *name , cons
         exit(1);
     }
 
+	// Source preamble...
 	std::string fullSource;
 	fullSource.append("import acme\n");
 	fullSource.append("acmeParameters = (");
 	fullSource.append(parameters);
 	fullSource.append(")\n");
+	// ... until this point, include the real source
 	fullSource.append(python);
 
     /* Pass argv[0] to the Python interpreter */
