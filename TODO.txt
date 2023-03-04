@@ -16,6 +16,18 @@ ACME TODO file.
 
 
 
+* A label with "start" and a local label ".start" need to be differentiated in the lbl/map/pdb files to avoid the situation where this gets confusing results: And I load labels "foo"
+	This was picking up the wrong start address: When I execute the procedure at start for no more than 194 instructions
+
+
+
+* Currently is the remote debugger displays source for a memory address, but that memory address as two or more mappings, the results can be confusing.
+	Have the option to filter the source display by a list of zones, if more than one zone is found for an address range
+		Pick by zone and display the filename along with the zone
+	This was apparent when trying to display source for the APU, but it can also happen if combined PDBs are loaded for cartridge or multi-load code
+
+
+
 
 * Command line option to define labels
 
