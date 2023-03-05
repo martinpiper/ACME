@@ -11,14 +11,6 @@
 
 ACME TODO file.
 
-* It might be possible to find the current pyton file and line being executed and pass that to the assembly PDB information
-	>> Note: This line seems to be accurate and includes the common header we add on
-		> This will always be "<string>" because we use PyRun_SimpleString()
-	This means when it's <string> the "name" (filename) passed in to RunScript_Python() plus a line number offset, can be used.
-		When fullSource is being composed, the line number offset can be further adjusted by the size of the source preamble that does the import and defines acmeParameters etc.
-
-
-
 * A label with "start" and a local label ".start" need to be differentiated in the lbl/map/pdb files to avoid the situation where this gets confusing results: And I load labels "foo"
 	This was picking up the wrong start address: When I execute the procedure at start for no more than 194 instructions
 

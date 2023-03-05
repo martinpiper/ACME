@@ -229,3 +229,14 @@ It's possible to break into the execution by sending a character. For example to
 	* Done: Change back to use x86 build from: https://www.python.org/downloads/release/python-390/
 		https://www.python.org/ftp/python/3.9.0/python-3.9.0.exe
 			C:\Users\Martin Piper\AppData\Local\Programs\Python\Python39-32
+
+
+
+
+* It might be possible to find the current pyton file and line being executed and pass that to the assembly PDB information
+	>> Note: This line seems to be accurate and includes the common header we add on
+		> This will always be "<string>" because we use PyRun_SimpleString()
+	This means when it's <string> the "name" (filename) passed in to RunScript_Python() plus a line number offset, can be used.
+		When fullSource is being composed, the line number offset can be further adjusted by the size of the source preamble that does the import and defines acmeParameters etc.
+		> Input_now should be updated with the filename and any adjusted line number
+	Use command line parameters: -v9 --pdb target\TestPython.pdb --labeldump target\TestPython.lbl TestPython.a

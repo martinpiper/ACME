@@ -509,6 +509,7 @@ static enum eos_t PO_scriptpythonfile(void)
 		new_input = *Input_now;// copy current input structure into new
 		new_input.original_filename = filename;
 		new_input.source_is_ram = TRUE;
+		new_input.line_number = 1;
 		Input_now = &new_input;// activate new input
 
 		RunScript_Python(userParameter->buffer , filename , python);
@@ -586,6 +587,9 @@ static enum eos_t PO_scriptpythoninline(void)
 	SKIPSPACE();
 	GetRawByte();
 
+	new_input = *Input_now;// copy current input structure into new
+	new_input.source_is_ram = TRUE;
+
 	while (GotByte != CHAR_EOS && !(openBraces == 1 && GotByte == '}'))
 	{
 		if (GotByte == '}')
@@ -608,8 +612,6 @@ static enum eos_t PO_scriptpythoninline(void)
 		return(AT_EOS_ANYWAY);
 	}
 
-	new_input = *Input_now;// copy current input structure into new
-	new_input.source_is_ram = TRUE;
 	Input_now = &new_input;// activate new input
 
 	RunScript_Python(userParameter->buffer , new_input.original_filename , inlinescriptParameter->buffer);

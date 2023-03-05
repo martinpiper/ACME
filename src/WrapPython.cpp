@@ -16,9 +16,12 @@ extern "C" {
 #include "WrapPython.h"
 }
 
+static input_t sInputContext;
+
 static PyObject *acme_source(PyObject *self, PyObject *args)
 {
-#if 0
+#if 1
+	input_t	new_input = sInputContext;
 	PyFrameObject *fo = PyEval_GetFrame();
 //	fo = PyFrame_GetBack(fo);	// This seems to cause PyTraceBack_Here to throw an exception
 	PyTraceBack_Here(fo);
@@ -28,8 +31,20 @@ static PyObject *acme_source(PyObject *self, PyObject *args)
 	PyErr_Fetch(&exc, &val, &tb);
 	// Note: This line seems to be accurate and includes the common header we add on
 	int line = PyLong_AsLong(PyObject_GetAttrString(PyObject_GetAttrString(tb, "tb_frame"), "f_lineno"));
-	// This will always be "<string>" because we use PyRun_SimpleString()
-//	const char * filename = PyUnicode_AsUTF8(PyObject_GetAttrString(PyObject_GetAttrString(PyObject_GetAttrString(tb, "tb_frame"), "f_code"), "co_filename"));
+	// This will usually (but not always) be "<string>" because we use PyRun_SimpleString()
+	const char * filename = PyUnicode_AsUTF8(PyObject_GetAttrString(PyObject_GetAttrString(PyObject_GetAttrString(tb, "tb_frame"), "f_code"), "co_filename"));
+	if (filename[0] == '<')
+	{
+		new_input.line_number += line;
+	}
+	else
+	{
+		new_input.line_number = line;
+		new_input.original_filename = filename;
+	}
+
+	// Setup a fake input source for the assembler to use
+	Input_now = &new_input;
 #endif
 
 	char *command;
@@ -56,7 +71,6 @@ static PyObject *acme_source(PyObject *self, PyObject *args)
 	finalBuffer[theSource.length() + 1] = CHAR_EOF;
 	finalBuffer[theSource.length() + 2] = CHAR_EOF;
 	finalBuffer[theSource.length() + 3] = CHAR_EOF;
-	Input_now->line_number = 1;
 	Input_now->src.ram_ptr = finalBuffer;
 	Parse_until_eob_or_eof();
 
@@ -84,9 +98,10 @@ PyMODINIT_FUNC PyInit_acme(void)
 	return PyModule_Create(&acmemodule);
 }
 
-
 extern "C" int RunScript_Python(const char *parameters , const char *name , const char *python)
 {
+	sInputContext = *Input_now;
+
     wchar_t *program = Py_DecodeLocale(name, NULL);
     if (program == NULL)
 	{
@@ -108,6 +123,9 @@ extern "C" int RunScript_Python(const char *parameters , const char *name , cons
 	fullSource.append(parameters);
 	fullSource.append(")\n");
 	// ... until this point, include the real source
+	int lineAdjust = std::count(fullSource.begin() , fullSource.end() , '\n');
+	sInputContext.line_number -= lineAdjust;
+	sInputContext.line_number--;
 	fullSource.append(python);
 
     /* Pass argv[0] to the Python interpreter */
