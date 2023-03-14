@@ -27,3 +27,16 @@ acme.source("	inc .myzp+1\n	inc $0401")
 
 ; Tests error display of undefined parameters
 ;	+MTest .udef1 , start
+
+*=$1000
+TestMemory
+
+!scriptpythoninline {
+print("Python (inline2) is assembling...")
+acme.bytenum(10)
+acme.bytestr(str(123))
+acme.bytestr(str([0,0xed,2,3,4,5,6,7,8,9,10]))
+acme.bytestr(str(bytearray([65,66,67,200,201,202,203,69,70,71])))
+}
+
+TestMemoryEnd

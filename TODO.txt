@@ -11,6 +11,29 @@
 
 ACME TODO file.
 
+
+* Definitely need acme.byte(value) to output a raw byte at the current PC, skipping all the processing by acme.source("	!by 12") etc
+	PO_08
+	acme.byte([values...])
+	or even
+	acme.byte(val1, val2, etc)
+	acme.word()
+	etc
+
+
+
+
+* Think about:
+	sys.path.insert(0, '../../C64/stdlib')
+	Could this be added automatically based on the lib path?
+
+
+
+* To enhance python debugging with PDB, it is possible to output the code that python emits (send to the assembler) to a temporary file and write PDB entries for that file
+
+
+
+
 * A label with "start" and a local label ".start" need to be differentiated in the lbl/map/pdb files to avoid the situation where this gets confusing results: And I load labels "foo"
 	This was picking up the wrong start address: When I execute the procedure at start for no more than 194 instructions
 

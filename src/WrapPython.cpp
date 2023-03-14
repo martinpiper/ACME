@@ -14,16 +14,16 @@ extern "C" {
 #include "global.h"
 #include "flow.h"
 #include "WrapPython.h"
+#include "output.h"
 }
 
 static input_t sInputContext;
 
-static PyObject *acme_source(PyObject *self, PyObject *args)
+static void commonSetupDebug(PyObject *self, PyObject *args)
 {
 #if 1
-	input_t	new_input = sInputContext;
 	PyFrameObject *fo = PyEval_GetFrame();
-//	fo = PyFrame_GetBack(fo);	// This seems to cause PyTraceBack_Here to throw an exception
+	//	fo = PyFrame_GetBack(fo);	// This seems to cause PyTraceBack_Here to throw an exception
 	PyTraceBack_Here(fo);
 	PyObject * exc;
 	PyObject * val;
@@ -35,17 +35,23 @@ static PyObject *acme_source(PyObject *self, PyObject *args)
 	const char * filename = PyUnicode_AsUTF8(PyObject_GetAttrString(PyObject_GetAttrString(PyObject_GetAttrString(tb, "tb_frame"), "f_code"), "co_filename"));
 	if (filename[0] == '<')
 	{
-		new_input.line_number += line;
+		Input_now->line_number += line;
 	}
 	else
 	{
-		new_input.line_number = line;
-		new_input.original_filename = filename;
+		Input_now->line_number = line;
+		Input_now->original_filename = filename;
 	}
 
-	// Setup a fake input source for the assembler to use
-	Input_now = &new_input;
 #endif
+}
+
+static PyObject *acme_source(PyObject *self, PyObject *args)
+{
+	// Setup a fake input source for the assembler to use
+	input_t	new_input = sInputContext;
+	Input_now = &new_input;
+	commonSetupDebug(self , args);
 
 	char *command;
 
@@ -79,8 +85,92 @@ static PyObject *acme_source(PyObject *self, PyObject *args)
 	return PyLong_FromLong(0);
 }
 
+static PyObject *acme_bytenum(PyObject *self, PyObject *args)
+{
+	// Setup a fake input source for the assembler to use
+	input_t	new_input = sInputContext;
+	Input_now = &new_input;
+	commonSetupDebug(self , args);
+
+	int theInt;
+
+	if (!PyArg_ParseTuple(args, "i", &theInt))
+	{
+		return NULL;
+	}
+
+	Output_8b(theInt);
+
+	return PyLong_FromLong(0);
+}
+
+static PyObject *acme_bytestr(PyObject *self, PyObject *args)
+{
+	// Setup a fake input source for the assembler to use
+	input_t	new_input = sInputContext;
+	Input_now = &new_input;
+	commonSetupDebug(self , args);
+
+	char *command;
+	if (!PyArg_ParseTuple(args, "s", &command))
+	{
+		return NULL;
+	}
+
+//	printf("bytestr: %s\n" , command);
+
+	if (strncmp(command , "bytearray(b'" , 12) == 0)
+	{
+		command += 12;
+		while (command[0] != '\'')
+		{
+			if (command[0] == '\\')
+			{
+				if (command[1] == 'x')
+				{
+					command+=2;
+					char temp[1024];
+					int pos = 0;
+					temp[0] = command[0];
+					temp[1] = command[1];
+					temp[2] = '\0';
+					Output_8b(strtol(temp , 0 , 16));
+					command+=2;
+					continue;
+				}
+				if (command[1] == '\'')
+				{
+					Output_8b(command[1]);
+					command+=2;
+					continue;
+				}
+				printf("****EEK: %s\n" , command);
+			}
+			Output_8b(command[0]);
+			command++;
+		}
+		return PyLong_FromLong(0);
+	}
+	if (command[0] == '[')
+	{
+		command++;
+		char *tok = strtok(command,",]");
+		while (tok != 0)
+		{
+			Output_8b(atoi(tok));
+			tok = strtok(0,",]");
+		}
+		return PyLong_FromLong(0);
+	}
+
+	Output_8b(atoi(command));
+	return PyLong_FromLong(0);
+}
+
 static PyMethodDef AcmeMethods[] = {
 	{"source",  acme_source, METH_VARARGS, "Adds source code to be assembled."},
+	{"bytenum",  acme_bytenum, METH_VARARGS, "Adds byte(s) to output as number."},
+	{"bytestr",  acme_bytestr, METH_VARARGS, "Adds byte(s) to output as string."},
 	{NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
