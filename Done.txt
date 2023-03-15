@@ -251,3 +251,10 @@ It's possible to break into the execution by sending a character. For example to
 	acme.byte(val1, val2, etc)
 	acme.word()
 	etc
+
+
+
+
+* Think about:
+	sys.path.insert(0, '../../C64/stdlib')
+	Could this be added automatically based on the lib path?

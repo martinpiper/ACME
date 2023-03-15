@@ -123,6 +123,7 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 		Throw_error(unexpectedPythonType);
 		return NULL;
 	}
+	char *originalCommand = command;
 
 //	printf("bytestr: %s\n" , command);
 
@@ -158,6 +159,7 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 			Output_8b(command[0]);
 			command++;
 		}
+//		PyMem_Free(originalCommand);
 		return PyLong_FromLong(0);
 	}
 	if (command[0] == '[')
@@ -169,10 +171,13 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 			Output_8b(atoi(tok));
 			tok = strtok(0,",]");
 		}
+//		PyMem_Free(originalCommand);
 		return PyLong_FromLong(0);
 	}
 
 	Output_8b(atoi(command));
+
+//	PyMem_Free(originalCommand);
 	return PyLong_FromLong(0);
 }
 
@@ -217,6 +222,13 @@ extern "C" int RunScript_Python(const char *parameters , const char *name , cons
 
 	// Source preamble...
 	std::string fullSource;
+	fullSource.append("import sys\n");
+	for (int i = 0 ; i < gNumLibraryIncludes ; i++)
+	{
+		fullSource.append("sys.path.insert(0, '");
+		fullSource.append(gLibraryIncludes[i]);
+		fullSource.append("')\n");
+	}
 	fullSource.append("import acme\n");
 	fullSource.append("acmeParameters = (");
 	fullSource.append(parameters);

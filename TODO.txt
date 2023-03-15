@@ -12,12 +12,6 @@
 ACME TODO file.
 
 
-* Think about:
-	sys.path.insert(0, '../../C64/stdlib')
-	Could this be added automatically based on the lib path?
-
-
-
 * To enhance python debugging with PDB, it is possible to output the code that python emits (send to the assembler) to a temporary file and write PDB entries for that file
 
 

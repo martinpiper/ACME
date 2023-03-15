@@ -59,8 +59,14 @@ Python scripting is included, this allows python to generate complex assembly. T
 	Parameters can also be passed from the assembler to the python script, allowing the same python code to use different parameters, for example.
 	!scriptpythonfile "TestPython.py" , <parameter 1> , <parameter n>
 	!scriptpythoninline <parameter 1> , <parameter n> { }
-	When the python code is called, it will already have the "acme" object imported, and a typle called acmeParameters which contains the parameters from the assembler. Strings can also be used.
+	When the python code is called, it will already have the "sys" and "acme" module imported, and a tuple called "acmeParameters" which contains the parameters from the assembler. Strings can also be used.
+	Any paths added via the command line option "--lib" will also be included as a python module include paths with: sys.path.insert(0, '<path>')
 	Python can use "acme.source("	inc .myzp+1\n	inc $0401")" to pass back assembly code fragments to the assembler.
+	Bytes can also be added with:
+		acme.bytenum(10)
+		acme.bytestr(str(123))
+		acme.bytestr(str([0,0xed,2,3,4,5,6,7,8,9,10]))
+		acme.bytestr(str(bytearray([65,66,67,200,201,202,203,69,70,71])))
 	An usage example is included in: TestPython.a and TestPython.py
 
 
