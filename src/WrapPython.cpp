@@ -141,9 +141,14 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 
 //	printf("bytestr: %s\n" , command);
 
-	if (strncmp(command , "bytearray(b'" , 12) == 0)
+	if (strncmp(command , "bytearray(" , 10) == 0)
 	{
-		command += 12;
+		command += 10;
+	}
+
+	if (strncmp(command , "b'" , 2) == 0)
+	{
+		command += 2;
 		while (command[0] != '\'')
 		{
 			if (command[0] == '\\')
