@@ -12,17 +12,6 @@
 ACME TODO file.
 
 
-* Definitely need acme.byte(value) to output a raw byte at the current PC, skipping all the processing by acme.source("	!by 12") etc
-	PO_08
-	acme.byte([values...])
-	or even
-	acme.byte(val1, val2, etc)
-	acme.word()
-	etc
-
-
-
-
 * Think about:
 	sys.path.insert(0, '../../C64/stdlib')
 	Could this be added automatically based on the lib path?

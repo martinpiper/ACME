@@ -240,3 +240,14 @@ It's possible to break into the execution by sending a character. For example to
 		When fullSource is being composed, the line number offset can be further adjusted by the size of the source preamble that does the import and defines acmeParameters etc.
 		> Input_now should be updated with the filename and any adjusted line number
 	Use command line parameters: -v9 --pdb target\TestPython.pdb --labeldump target\TestPython.lbl TestPython.a
+
+
+
+
+* Definitely need acme.byte(value) to output a raw byte at the current PC, skipping all the processing by acme.source("	!by 12") etc
+	PO_08
+	acme.byte([values...])
+	or even
+	acme.byte(val1, val2, etc)
+	acme.word()
+	etc

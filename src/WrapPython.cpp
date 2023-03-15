@@ -19,6 +19,8 @@ extern "C" {
 
 static input_t sInputContext;
 
+static char *unexpectedPythonType = "Unexpected python type";
+
 static void commonSetupDebug(PyObject *self, PyObject *args)
 {
 #if 1
@@ -56,7 +58,10 @@ static PyObject *acme_source(PyObject *self, PyObject *args)
 	char *command;
 
 	if (!PyArg_ParseTuple(args, "s", &command))
+	{
+		Throw_error(unexpectedPythonType);
 		return NULL;
+	}
 
 	std::string theSource = command;
 	std::replace( theSource.begin(), theSource.end(), '\t', ' ');
@@ -96,6 +101,7 @@ static PyObject *acme_bytenum(PyObject *self, PyObject *args)
 
 	if (!PyArg_ParseTuple(args, "i", &theInt))
 	{
+		Throw_error(unexpectedPythonType);
 		return NULL;
 	}
 
@@ -114,6 +120,7 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 	char *command;
 	if (!PyArg_ParseTuple(args, "s", &command))
 	{
+		Throw_error(unexpectedPythonType);
 		return NULL;
 	}
 
@@ -138,13 +145,15 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 					command+=2;
 					continue;
 				}
-				if (command[1] == '\'')
+				if (command[1] == '\'' || command[1] == '\\')
 				{
 					Output_8b(command[1]);
 					command+=2;
 					continue;
 				}
+				// https://www.w3schools.com/python/gloss_python_escape_characters.asp
 				printf("****EEK: %s\n" , command);
+				Throw_serious_error("Unexpected python encoding type");
 			}
 			Output_8b(command[0]);
 			command++;
