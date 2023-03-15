@@ -14,7 +14,6 @@ extern "C" {
 #include "global.h"
 #include "flow.h"
 #include "WrapPython.h"
-#include "output.h"
 }
 
 static input_t sInputContext;
@@ -90,6 +89,21 @@ static PyObject *acme_source(PyObject *self, PyObject *args)
 	return PyLong_FromLong(0);
 }
 
+// Outputs full source for a byte value, which can be slow. It is needed because all the logic for handling the program counter is included in the buffer parser.
+void Output_8b_source(int value)
+{
+	char theLine[128];
+	sprintf(theLine , "!by %d" , value);
+	int len = strlen(theLine);
+	theLine[len] = CHAR_EOS;
+	theLine[len+1] = CHAR_EOF;
+	theLine[len+2] = '\0';
+	Input_now->src.ram_ptr = theLine;
+	Input_now->source_is_ram = true;
+	Input_now->state = INPUTSTATE_NORMAL;
+	Parse_until_eob_or_eof();
+}
+
 static PyObject *acme_bytenum(PyObject *self, PyObject *args)
 {
 	// Setup a fake input source for the assembler to use
@@ -105,7 +119,7 @@ static PyObject *acme_bytenum(PyObject *self, PyObject *args)
 		return NULL;
 	}
 
-	Output_8b(theInt);
+	Output_8b_source(theInt);
 
 	return PyLong_FromLong(0);
 }
@@ -142,13 +156,37 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 					temp[0] = command[0];
 					temp[1] = command[1];
 					temp[2] = '\0';
-					Output_8b(strtol(temp , 0 , 16));
+					Output_8b_source(strtol(temp , 0 , 16));
 					command+=2;
 					continue;
 				}
 				if (command[1] == '\'' || command[1] == '\\')
 				{
-					Output_8b(command[1]);
+					Output_8b_source(command[1]);
+					command+=2;
+					continue;
+				}
+				if (command[1] == 'b')
+				{
+					Output_8b_source(0x08);
+					command+=2;
+					continue;
+				}
+				if (command[1] == 't')
+				{
+					Output_8b_source(0x09);
+					command+=2;
+					continue;
+				}
+				if (command[1] == 'n')
+				{
+					Output_8b_source(0x0a);
+					command+=2;
+					continue;
+				}
+				if (command[1] == 'r')
+				{
+					Output_8b_source(0x0d);
 					command+=2;
 					continue;
 				}
@@ -156,7 +194,7 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 				printf("****EEK: %s\n" , command);
 				Throw_serious_error("Unexpected python encoding type");
 			}
-			Output_8b(command[0]);
+			Output_8b_source(command[0]);
 			command++;
 		}
 //		PyMem_Free(originalCommand);
@@ -168,14 +206,14 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 		char *tok = strtok(command,",]");
 		while (tok != 0)
 		{
-			Output_8b(atoi(tok));
+			Output_8b_source(atoi(tok));
 			tok = strtok(0,",]");
 		}
 //		PyMem_Free(originalCommand);
 		return PyLong_FromLong(0);
 	}
 
-	Output_8b(atoi(command));
+	Output_8b_source(atoi(command));
 
 //	PyMem_Free(originalCommand);
 	return PyLong_FromLong(0);

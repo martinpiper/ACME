@@ -18,7 +18,7 @@ Feature: Test python mixed with assembly
     Then expect the next line to contain "FILES:2"
     Then expect the next line to contain "1:TestPython.py"
     Then expect the next line to contain "0:TestPython.a"
-    Then expect the next line to contain "ADDRS:65"
+    Then expect the next line to contain "ADDRS:66"
     # Check the correct file and line number references are output for !scriptpythonfile and !scriptpythoninline commands
     Then expect the next line to contain "$400:1:0:14"
     Then expect the next line to contain "$401:1:1:4"
@@ -48,8 +48,8 @@ Feature: Test python mixed with assembly
     Then property "test.BDD6502.lastHexDump" must contain string "420: 60 e6 02 ee 00 04 ee 20  d0 60 00 00 00 00 00 00"
 
     When I hex dump memory between TestMemory and TestMemoryEnd
-    Then property "test.BDD6502.lastHexDump" must contain string "1000: 0a 7b 00 ed 02 03 04 05  06 07 08 09 0a 41 42 43"
-    Then property "test.BDD6502.lastHexDump" must contain string "1010: c8 c9 ca cb 45 46 47"
+    Then property "test.BDD6502.lastHexDump" must contain string "1000: 0a 7b 00 ed 02 03 04 05  06 07 08 09 0a 08 09 0a"
+    Then property "test.BDD6502.lastHexDump" must contain string "1010: 0b 0c 0d ca cb 45 46 47"
 
     When I execute the procedure at start for no more than 10 instructions
 
