@@ -231,6 +231,8 @@ static int perform_pass(void) {
 	FILE*	fd;
 	int	i;
 
+	clear_current_file_state();
+
 	if (gLabel_set_value_changed_allowed > 0) {
 		gLabel_set_value_changed_allowed--;
 	}

@@ -320,6 +320,22 @@ bool Parse_optional_block(void) {
 	return(TRUE);
 }
 
+static char currentFileName[1024];
+static int currentfileLine;
+void clear_current_file_state(void) {
+	currentFileName[0] = 0;
+	currentfileLine = -1;
+}
+void save_current_file_state(void) {
+	strcpy(currentFileName , Input_now->original_filename);
+
+//	if (currentfileLine != Input_now->line_number)
+//	{
+//		printf("** %s : %d\n" , currentFileName , Input_now->line_number);
+//	}
+
+	currentfileLine = Input_now->line_number;
+}
 
 // Error handling
 
@@ -339,6 +355,11 @@ static void throw_message(const char* message, const char* type) {
 	{
 		// MPi: Output messages in Microsoft Visual Studio format so that when users press F4 (GoToNextErrorTag / Edit.GoToNextLocation) in the IDE they will be taken to the correct source file and line number.
 		fprintf(msg_stream, "%s(%d) : %s (%s %s): %s\n",Input_now->original_filename,Input_now->line_number,type,Section_now->type, Section_now->title,message);
+	}
+	// This outputs any known previous context, mostly useful for macros where it is useful to know where the macro is being used from
+	if (currentfileLine >= 0)
+	{
+		fprintf(msg_stream, "%s(%d) : Previous context hint\n",currentFileName,currentfileLine);
 	}
 	if (strlen(gLastParsedExpression) > 2)
 	{

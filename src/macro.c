@@ -222,6 +222,8 @@ int		macroBackup_line_number;
 zone_t		macroBackup_zone;
 
 
+static int macroNestLevel = 0;
+
 // Parse macro call ("+MACROTITLE"). Has to be re-entrant.
 void Macro_parse_call(void) {	// Now GotByte = dot or first char of macro name
 	char		local_gotbyte;
@@ -274,6 +276,11 @@ void Macro_parse_call(void) {	// Now GotByte = dot or first char of macro name
 		} while(Input_accept_comma());
 	}
 
+	if (macroNestLevel == 0)
+	{
+		save_current_file_state();
+	}
+	macroNestLevel++;
 	// Only use the top most context for the debug output
 	if (previouscontext_enable == 0)
 	{
@@ -363,5 +370,10 @@ void Macro_parse_call(void) {	// Now GotByte = dot or first char of macro name
 	if (previouscontext_enable > 0)
 	{
 		previouscontext_enable--;
+	}
+	macroNestLevel--;
+	if (macroNestLevel == 0)
+	{
+		clear_current_file_state();
 	}
 }

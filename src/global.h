@@ -108,4 +108,7 @@ extern void	Throw_serious_error(const char*);
 extern void	Bug_found(const char*, int);
 
 
+extern void clear_current_file_state(void);
+extern void save_current_file_state(void);
+
 #endif
