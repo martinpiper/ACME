@@ -1,0 +1,16 @@
+!cpu 6510
+!ct scr
+!to "TestLabelDefined.prg", cbm
+
+.myzp = $02
+
+!macro MTest ~.p1 {
+	.p1 = *
+}
+
+* = 1024
+start
+	+MTest ~pos1
+	lda #0
+	+MTest ~pos1
+	rts

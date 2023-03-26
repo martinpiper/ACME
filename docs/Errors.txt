@@ -178,6 +178,7 @@ Illegal postfix.
 Label already defined.
     You defined a label that already had a different value. To change
     a label's value, use the "!set" pseudo opcode.
+	Potential label names that are at fault are output. This helps with tracking down the problematic area.
 
 Macro already defined.
     Macros can only be defined once. If you define a macro twice, ACME

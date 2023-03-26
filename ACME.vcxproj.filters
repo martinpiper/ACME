@@ -215,6 +215,9 @@
     <None Include="RunTests.bat">
       <Filter>Tests</Filter>
     </None>
+    <None Include="TestLabelDefined.a">
+      <Filter>Asm</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Done.txt">

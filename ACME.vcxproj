@@ -226,6 +226,7 @@
     <None Include="Test.a" />
     <None Include="TestACME.a" />
     <None Include="TestForForwardReference.a" />
+    <None Include="TestLabelDefined.a" />
     <None Include="TestPython.a" />
     <None Include="TestPython.py" />
     <None Include="trigono.a" />

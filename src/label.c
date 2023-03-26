@@ -6,6 +6,7 @@
 // Label stuff
 
 #include <stdio.h>
+#include <string.h>
 #include "acme.h"
 #include "alu.h"
 #include "cpu.h"
@@ -192,6 +193,27 @@ label_t* Label_find(zone_t zone, int flags) {
 	return(label);
 }
 
+static int valueToFind = 0;
+static char theLabelHints[2048];
+
+static void FindLabel(node_ra_t* node, FILE* fd)
+{
+	label_t*	label	= node->body;
+	if ( ! ( (label->result.flags & MVALUE_DEFINED) && !(label->result.flags & MVALUE_IS_FP) ) )
+	{
+		return;
+	}
+
+	if (label->result.val.intval == valueToFind)
+	{
+		if (strlen(theLabelHints) < (sizeof(theLabelHints) - strlen(node->id_string) - 30))
+		{
+			strcat(theLabelHints , " : ");
+			strcat(theLabelHints , node->id_string);
+		}
+	}
+}
+
 // Assign value to label. The function acts upon the label's flag bits and
 // produces an error if needed.
 int gLabel_set_value_changed_allowed = 0;
@@ -211,7 +233,19 @@ void Label_set_value(label_t* label, result_t* new, bool change_allowed) {
 		|| ((oldflags & MVALUE_IS_FP)
 		? (label->result.val.fpval != new->val.fpval)
 		: (label->result.val.intval != new->val.intval)))
-			Throw_error("Label already defined.");
+		{
+			int i;
+			valueToFind = label->result.val.intval;
+			theLabelHints[0] = 0;
+			strcat(theLabelHints , "Label already defined.");
+			for (i=0;i<=zone_max;i++)
+			{
+				// Dump unused labels
+				Tree_dump_forest(Label_forest, i, FindLabel, 0);
+			}
+			Throw_error(theLabelHints);
+		}
+
 	} else
 		// Label is not defined yet OR redefinitions are allowed
 		label->result = *new;
