@@ -11,6 +11,11 @@
 
 ACME TODO file.
 
+* acme_bytestr() will need proper tests for the entire number range, with and without " and ' characters
+	Due to needing this kind of test: if (strncmp(command , "b'" , 2) == 0 || strncmp(command , "b\"" , 2) == 0)
+
+
+
 
 * To enhance python debugging with PDB, it is possible to output the code that python emits (send to the assembler) to a temporary file and write PDB entries for that file
 

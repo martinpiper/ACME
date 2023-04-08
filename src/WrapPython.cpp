@@ -146,10 +146,11 @@ static PyObject *acme_bytestr(PyObject *self, PyObject *args)
 		command += 10;
 	}
 
-	if (strncmp(command , "b'" , 2) == 0)
+	if (strncmp(command , "b'" , 2) == 0 || strncmp(command , "b\"" , 2) == 0)
 	{
+		char endQuoteChar = command[1];
 		command += 2;
-		while (command[0] != '\'')
+		while (command[0] != endQuoteChar)
 		{
 			if (command[0] == '\\')
 			{
