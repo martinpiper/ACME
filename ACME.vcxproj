@@ -229,6 +229,10 @@
     <None Include="TestLabelDefined.a" />
     <None Include="TestPython.a" />
     <None Include="TestPython.py" />
+    <None Include="TestPythonBin1.a" />
+    <None Include="TestPythonBin2.a" />
+    <None Include="TestPythonBin3.a" />
+    <None Include="TestPythonBin4.a" />
     <None Include="trigono.a" />
   </ItemGroup>
   <ItemGroup>

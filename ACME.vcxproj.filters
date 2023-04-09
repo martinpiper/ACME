@@ -218,6 +218,18 @@
     <None Include="TestLabelDefined.a">
       <Filter>Asm</Filter>
     </None>
+    <None Include="TestPythonBin1.a">
+      <Filter>Asm</Filter>
+    </None>
+    <None Include="TestPythonBin2.a">
+      <Filter>Asm</Filter>
+    </None>
+    <None Include="TestPythonBin3.a">
+      <Filter>Asm</Filter>
+    </None>
+    <None Include="TestPythonBin4.a">
+      <Filter>Asm</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Done.txt">

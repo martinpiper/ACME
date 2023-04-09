@@ -1,6 +1,7 @@
 !cpu 6510
 !ct scr
 !to "TestPython.prg", cbm
+!initmem $a5
 
 .myzp = $02
 
@@ -40,3 +41,40 @@ acme.bytestr(str(bytearray([8,9,10,11,12,13,202,203,69,70,71])))
 }
 
 TestMemoryEnd
+
+
+*=$2000
+!scriptpythoninline {
+print("Python (inline bin1) is assembling...")
+fileContent = []
+with open("target/bin1.bin", mode='rb') as file:
+    fileContent = file.read()
+acme.bytestr(str(fileContent))
+}
+
+*=$2200
+!scriptpythoninline {
+print("Python (inline bin2) is assembling...")
+fileContent = []
+with open("target/bin2.bin", mode='rb') as file:
+    fileContent = file.read()
+acme.bytestr(str(fileContent))
+}
+
+*=$2400
+!scriptpythoninline {
+print("Python (inline bin3) is assembling...")
+fileContent = []
+with open("target/bin3.bin", mode='rb') as file:
+    fileContent = file.read()
+acme.bytestr(str(fileContent))
+}
+
+*=$2600
+!scriptpythoninline {
+print("Python (inline bin4) is assembling...")
+fileContent = []
+with open("target/bin4.bin", mode='rb') as file:
+    fileContent = file.read()
+acme.bytestr(str(fileContent))
+}

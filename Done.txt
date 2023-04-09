@@ -258,3 +258,9 @@ It's possible to break into the execution by sending a character. For example to
 * Think about:
 	sys.path.insert(0, '../../C64/stdlib')
 	Could this be added automatically based on the lib path?
+
+
+
+
+* acme_bytestr() will need proper tests for the entire number range, with and without " and ' characters
+	Due to needing this kind of test: if (strncmp(command , "b'" , 2) == 0 || strncmp(command , "b\"" , 2) == 0)
