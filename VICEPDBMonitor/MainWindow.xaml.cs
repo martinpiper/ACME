@@ -33,6 +33,7 @@ namespace VICEPDBMonitor
         MemoryView mMemoryView;
         ProfileView mProfileView;
 
+        bool mAlternateDevice = false;
         bool mDump = false;
         bool mUsedLabels = false;
         bool mAccessUsed = false;
@@ -691,6 +692,7 @@ namespace VICEPDBMonitor
 
         private void HandleCheckBoxes()
         {
+            mAlternateDevice = (mEnableAlternateDevice.IsChecked == true);
             mDump = (mDoDump.IsChecked == true);
             mUsedLabels = (mCheckUsedLabels.IsChecked == true);
             mAccessUsed = (mCheckAccessUse.IsChecked == true);
@@ -988,6 +990,22 @@ namespace VICEPDBMonitor
             ProfileView view = new ProfileView();
             view.Show();
             mProfileView = view;
+        }
+
+        private void mEnableAlternateDevice_Checked(object sender, RoutedEventArgs e)
+        {
+            HandleCheckBoxes();
+//            mGridCodeViews.ColumnDefinitions[0].Width = new GridLength(1, GridUnitType.Star);
+            if (mAlternateDevice)
+            {
+                mGridCodeViews.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star);
+            }
+            else
+            {
+                mGridCodeViews.ColumnDefinitions[2].Width = new GridLength(0.1, GridUnitType.Star);
+            }
+
+            HandleCodeView();
         }
     }
 

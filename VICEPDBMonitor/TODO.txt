@@ -3,6 +3,10 @@
 * When debugging IRQDisk it would be good to show side-by-side views for C64 and disk
 	The easiest way would be to have a check-box for drive 8 and another side-by-side view for mRegsBox and mTextBox where drive 8 updates go
 	The enrichment of views will need some work since the source view uses m_registerSet which comes from the primary view...
+	Use mTextBox_Other
+		Grid.ColumnDefinitions needed to make the nested Grid column sizes changable with the GridSplitter
+		Just alter the current visible view with: m_readerAndDispaly.SetCodeWindowControl(mTextBox);
+	* Perhaps HandleCodeView can be altered to send two requests for data...
 
 
 
