@@ -271,7 +271,7 @@ namespace VICEPDBMonitor
                     {
                         continue;
                     }
-                    if (!line.StartsWith(".C:"))
+                    if ( !(line.StartsWith(".C:") || line.StartsWith(".8:")) )
                     {
                         continue;
                     }

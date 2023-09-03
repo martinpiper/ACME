@@ -7,6 +7,12 @@
 		Grid.ColumnDefinitions needed to make the nested Grid column sizes changable with the GridSplitter
 		Just alter the current visible view with: m_readerAndDispaly.SetCodeWindowControl(mTextBox);
 	* Perhaps HandleCodeView can be altered to send two requests for data...
+	* It looks like the get_registers_callback is going to have to detect the device and track state for the source window update
+		* Or perhaps ParseRegisters detects the machine type since it is going to be called early...
+		* mContextDisk is going to have to be used to set the final device state after the two dev/r command pairs
+	** Since messages are threaded and over the network, addTextCommand is going to need to add a dev c: or dev 8: option and store that in its CommandStruct
+		or in its userdata
+	** Or perhaps just the button to update the second view... Regardless of the first view stepping...
 
 
 

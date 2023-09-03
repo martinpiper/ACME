@@ -291,6 +291,10 @@ namespace VICEPDBMonitor
                 }
 
                 int foundFirstPos = mGotTextWorking.IndexOf("(C:$");
+                if (foundFirstPos < 0)
+                {
+                    foundFirstPos = mGotTextWorking.IndexOf("(8:$");
+                }
                 if (foundFirstPos >= 0 && mGotTextWorking.Length >= 9)
                 {
                     int foundThirdPos = mGotTextWorking.IndexOf(") ", foundFirstPos);

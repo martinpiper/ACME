@@ -11,6 +11,12 @@
 
 ACME TODO file.
 
+* PDB address information is wrong when using !pseudopc
+	It is outputting the address where it is in the assembled memory, not the intended address
+
+
+
+
 * To enhance python debugging with PDB, it is possible to output the code that python emits (send to the assembler) to a temporary file and write PDB entries for that file
 
 
