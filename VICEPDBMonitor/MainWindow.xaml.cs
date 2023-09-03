@@ -33,6 +33,10 @@ namespace VICEPDBMonitor
         MemoryView mMemoryView;
         ProfileView mProfileView;
 
+        bool mLastParsedC64Registers = false;
+        bool mLastParsedDriveRegisters = false;
+        bool mViewDisk = false;
+        bool mContextDisk = false;
         bool mDump = false;
         bool mUsedLabels = false;
         bool mAccessUsed = false;
@@ -300,20 +304,57 @@ namespace VICEPDBMonitor
 
         public void SetSourceView(String text)
         {
-            m_readerAndDispaly.SetSouceView(EnrichDumpWithMemory(text));
-        }
+            if (mViewDisk)
+            {
+                if (text.IndexOf(".C:") >= 0 )
+                {
+                    m_readerAndDispaly.SetCodeWindowControl(mTextBox);
+                }
+                else if (text.IndexOf(".8:") >= 0)
+                {
+                    m_readerAndDispaly.SetCodeWindowControl(mTextBox_Other);
+                }
+                else if (mContextDisk)
+                {
+                    m_readerAndDispaly.SetCodeWindowControl(mTextBox_Other);
+                }
+                else
+                {
+                    m_readerAndDispaly.SetCodeWindowControl(mTextBox);
+                }
+            }
+            else
+            {
+                m_readerAndDispaly.SetCodeWindowControl(mTextBox);
+            }
 
-        private void AppendTextSourceView(String text, Brush brush)
-        {
-            m_readerAndDispaly.AppendTextSouceView(text, brush);
+            m_readerAndDispaly.SetSouceView(EnrichDumpWithMemory(text));
         }
 
         private void UpdateLabelView(String text)
         {
             mLabelsBox.Text = text;
         }
+        String mLastRegsGotC64 = "";
+        String mLastRegsGotDrive = "";
         private void UpdateRegsView(String text)
         {
+            if (mLastParsedC64Registers)
+            {
+                mLastRegsGotC64 = text;
+            }
+            if (mLastParsedDriveRegisters)
+            {
+                mLastRegsGotDrive = text;
+            }
+
+            if (mViewDisk && mLastRegsGotC64.Length > 5 && mLastRegsGotDrive.Length > 5)
+            {
+                // Append the two register sets into the same window
+                mRegsBox.Text = "Drive:\r" + mLastRegsGotDrive + "\rC64:\r" + mLastRegsGotC64;
+                return;
+            }
+
             mRegsBox.Text = text;
         }
 
@@ -391,6 +432,16 @@ namespace VICEPDBMonitor
         {
             if (m_registerSet.SetFromString(theReply))
             {
+                if (theReply.IndexOf("LIN CYC") > 0)
+                {
+                    mLastParsedC64Registers = true;
+                    mLastParsedDriveRegisters = false;
+                }
+                else
+                {
+                    mLastParsedDriveRegisters = true;
+                    mLastParsedC64Registers = false;
+                }
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
             }
         }
@@ -472,14 +523,26 @@ namespace VICEPDBMonitor
 
         private void get_registers_callmeback(NoArgDelegate callme)
         {
+            mLastParsedC64Registers = false;
+            mLastParsedDriveRegisters = false;
+            mRegsBox.Text = "";
+
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
+            if (mContextDisk)
+            {
+                vcom.addTextCommand("dev 8:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
+            }
+            else
+            {
+                vcom.addTextCommand("dev c:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
+            }
+
             vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), callme, this.Dispatcher);
         }
 
         private void get_registers()
         {
-            VICECOMManager vcom = VICECOMManager.getVICEComManager();
-            vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), null, this.Dispatcher);
+            get_registers_callmeback(null);
         }
 
         private void get_registers_callback(string reply, object userData)
@@ -560,6 +623,18 @@ namespace VICEPDBMonitor
 
         private void show_diss_get_post_dissasem(string reply, object userData)
         {
+            if (reply.IndexOf(".;") >= 0 && reply.IndexOf("ADDR") >= 0)
+            {
+                // If we have registers...
+                if (reply.IndexOf("LIN CYC") > 0)
+                {
+                    mLastParsedC64Registers = true;
+                }
+                else
+                {
+                    mLastParsedDriveRegisters = true;
+                }
+            }
             string displayText = String.Empty;
             try
             {
@@ -691,6 +766,8 @@ namespace VICEPDBMonitor
 
         private void HandleCheckBoxes()
         {
+            mViewDisk = (mEnableViewDisk.IsChecked == true);
+            mContextDisk = (mContextDiskCheck.IsChecked == true);
             mDump = (mDoDump.IsChecked == true);
             mUsedLabels = (mCheckUsedLabels.IsChecked == true);
             mAccessUsed = (mCheckAccessUse.IsChecked == true);
@@ -988,6 +1065,36 @@ namespace VICEPDBMonitor
             ProfileView view = new ProfileView();
             view.Show();
             mProfileView = view;
+        }
+
+        private void mEnableViewDisk_Checked(object sender, RoutedEventArgs e)
+        {
+            HandleCheckBoxes();
+//            mGridCodeViews.ColumnDefinitions[0].Width = new GridLength(1, GridUnitType.Star);
+            if (mViewDisk)
+            {
+                mGridCodeViews.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star);
+            }
+            else
+            {
+                mGridCodeViews.ColumnDefinitions[2].Width = new GridLength(0.01, GridUnitType.Star);
+            }
+
+            HandleCodeView();
+        }
+
+        private void mContextDisk_Click(object sender, RoutedEventArgs e)
+        {
+            HandleCheckBoxes();
+            if (mContextDisk)
+            {
+                dispatchCommand("dev 8:");
+            }
+            else
+            {
+                dispatchCommand("dev c:");
+            }
+            HandleCodeView();
         }
     }
 

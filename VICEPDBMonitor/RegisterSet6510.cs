@@ -110,11 +110,15 @@ namespace VICEPDBMonitor
             bool returnValue = false;
             //  ADDR AC XR YR SP 00 01 NV-BDIZC LIN CYC  STOPWATCH
             //.;0427 ad 00 00 f4 2f 37 10100100 000 000   87547824
+            // Or for disk device can be:
+            //  ADDR A  X  Y  SP 00 01 NV-BDIZC  STOPWATCH
+            //.;069a 01 02 37 3f 00 01 00100100   15142219
             int index = emulator.IndexOf(".;"); //seems when you have break point this can get messed up
             if (index >= 0)
             {
                 string parse = emulator.Substring(index);
-                string[] parse2 = parse.Split(new char[2] { ' ','\r' },StringSplitOptions.RemoveEmptyEntries);
+                string[] parse2 = parse.Split(new char[2] { ' ', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+
                 m_PC = int.Parse(parse2[0].Substring(2), NumberStyles.HexNumber);
                 m_A = int.Parse(parse2[1], NumberStyles.HexNumber);
                 m_X = int.Parse(parse2[2], NumberStyles.HexNumber);
@@ -129,9 +133,19 @@ namespace VICEPDBMonitor
                 m_I = parse2[7][5] - '0';
                 m_Z = parse2[7][6] - '0';
                 m_C = parse2[7][7] - '0';
-                m_Line = int.Parse(parse2[8], NumberStyles.HexNumber);
-                m_Cycle = int.Parse(parse2[9], NumberStyles.HexNumber);
-                m_Stopwatch = int.Parse(parse2[10], NumberStyles.Integer);
+
+                if (emulator.IndexOf("LIN CYC") > 0)
+                {
+                    m_Line = int.Parse(parse2[8], NumberStyles.HexNumber);
+                    m_Cycle = int.Parse(parse2[9], NumberStyles.HexNumber);
+                    m_Stopwatch = int.Parse(parse2[10], NumberStyles.Integer);
+                }
+                else
+                {
+                    m_Line = 0;
+                    m_Cycle = 0;
+                    m_Stopwatch = int.Parse(parse2[8], NumberStyles.Integer);
+                }
                 returnValue = true;
             }
             index = emulator.IndexOf("APUDebug: >> PC:");

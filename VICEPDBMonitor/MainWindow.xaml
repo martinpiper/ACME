@@ -32,7 +32,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="mCommandBox" Margin="10,0,10,10" TextWrapping="Wrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" FontFamily="Consolas" KeyDown="commandBox_KeyDown" Height="22" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="mCommandBox" Margin="10,0,299,10" TextWrapping="Wrap" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" FontFamily="Consolas" KeyDown="commandBox_KeyDown" Height="22" VerticalAlignment="Bottom"/>
         <Grid Margin="5,0,2,37" RenderTransformOrigin="0.727,0.489">
             <Grid.RowDefinitions>
                 <RowDefinition Height="230*" MinHeight="100"/>
@@ -63,13 +63,28 @@
             <TextBox x:Name="mRegsBox" Margin="10,25,10,6" TextWrapping="Wrap" Text="TextBox" IsReadOnly="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" FontFamily="Courier New" TextOptions.TextFormattingMode="Display" FontStretch="ExtraExpanded" FontSize="14" HorizontalScrollBarVisibility="Auto"/>
             <GridSplitter HorizontalAlignment="Stretch" Margin="10,0,0,0" Grid.Row="1" Grid.ColumnSpan="2" Cursor="SizeNS"/>
             <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Grid.RowSpan="3" />
-            <RichTextBox x:Name="mTextBox" Margin="10,6,10,0" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False" Grid.Row="2">
-                <FlowDocument>
-                    <Paragraph>
-                        <Run Language="en-gb" Text="Waiting to connect..."/>
-                    </Paragraph>
-                </FlowDocument>
-            </RichTextBox>
+            <Grid x:Name="mGridCodeViews" Margin="10,6,10,0" Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="5" MinWidth="5" />
+                    <ColumnDefinition Width="0.01*"/>
+                </Grid.ColumnDefinitions>
+                <RichTextBox x:Name="mTextBox" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False">
+                    <FlowDocument>
+                        <Paragraph>
+                            <Run Language="en-gb" Text="Waiting to connect..."/>
+                        </Paragraph>
+                    </FlowDocument>
+                </RichTextBox>
+                <RichTextBox x:Name="mTextBox_Other" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" IsUndoEnabled="False" Grid.Column="2">
+                    <FlowDocument>
+                        <Paragraph>
+                            <Run Language="en-gb" Text="Waiting to connect..."/>
+                        </Paragraph>
+                    </FlowDocument>
+                </RichTextBox>
+                <GridSplitter HorizontalAlignment="Stretch" Width="5" Grid.Column="1"/>
+            </Grid>
             <Button Content="Profile add" Margin="0,0,104,28" Width="75" Click="Button_Click_ProfileAdd" Height="20" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Grid.Row="1"/>
             <CheckBox x:Name="mCheckAccessUse" Content="Access use" Grid.Column="2" HorizontalAlignment="Right" Margin="0,0,102,8" VerticalAlignment="Bottom" Checked="CheckBox_Checked_1" Grid.Row="1"/>
             <Button x:Name="mScreenButton" Content="Screen" Grid.Column="2" Margin="0,0,10,54" Click="mScreenButton_Click" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Grid.Row="1"/>
@@ -106,6 +121,8 @@
             </TabControl>
         </Grid>
         <Button Content="Break" Margin="0,0,184,151" VerticalAlignment="Bottom" Click="Button_Click_Break" Height="20" HorizontalAlignment="Right" Width="75"/>
+        <CheckBox x:Name="mEnableViewDisk" Content="View Disk" Margin="0,0,10,96" HorizontalAlignment="Right" Width="80" Height="15" VerticalAlignment="Bottom" RenderTransformOrigin="0.69,0.267" Click="mEnableViewDisk_Checked"/>
+        <CheckBox x:Name="mContextDiskCheck" Content="Use Disk" Margin="976,596,15,0" VerticalAlignment="Top" Click="mContextDisk_Click"/>
         <CheckBox x:Name="mDoSource" Content="Source" HorizontalAlignment="Right" Margin="0,0,203,197" IsChecked="True" Click="mDoSource_Click" Height="15" VerticalAlignment="Bottom" Width="56"/>
         <CheckBox x:Name="mDoDisassembly" Content="Disassembly" Margin="0,0,174,177" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom"/>
         <Button Content="Step in" HorizontalAlignment="Right" Margin="0,0,104,126" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepIn" Height="20"/>
@@ -118,16 +135,16 @@
         <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,192,55" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
         <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,177" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
         <Button x:Name="Memory_view" Content="Memory view" Margin="0,0,104,75" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Memory_view_Click"/>
-        <Button Content="Delete breaks" Margin="0,0,104,32" VerticalAlignment="Bottom" Click="OnDeleteBreaks" HorizontalAlignment="Right" Width="75"/>
+        <Button Content="Delete breaks" Margin="0,0,104,12" VerticalAlignment="Bottom" Click="OnDeleteBreaks" HorizontalAlignment="Right" Width="75"/>
         <Button x:Name="mShowScriptPanel" Content="Script Panel" Margin="0,0,10,167" HorizontalAlignment="Right" Width="75" Height="22" VerticalAlignment="Bottom" Click="mShowScriptPanel_Click" />
         <Button x:Name="mAPUorCPU" Content="APU/*6502*" Margin="0,0,10,194" HorizontalAlignment="Right" Width="75" Click="onAPUorCPU" Height="20" VerticalAlignment="Bottom"/>
         <Button x:Name="viewSprites" Content="Sprites" Margin="0,0,10,142" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewSprites_Click"/>
         <Button x:Name ="viewChars" Content="Chars" Grid.Column="2" Margin="0,0,10,116" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="viewChars_Click"/>
-        <Button x:Name="mCalculator" Content="Calculator" Margin="0,0,10,60" Click="calculator_Click" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom"/>
-        <Button x:Name="mDoChis" Content="CHIS" Margin="0,0,10,32" Click="mDoChis_Click" HorizontalAlignment="Right" Width="75" Height="23" VerticalAlignment="Bottom"/>
+        <Button x:Name="mCalculator" Content="Calculator" Margin="0,0,10,40" Click="calculator_Click" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom"/>
+        <Button x:Name="mDoChis" Content="CHIS" Margin="0,0,10,12" Click="mDoChis_Click" HorizontalAlignment="Right" Width="75" Height="23" VerticalAlignment="Bottom"/>
         <Button x:Name="mButtonDisplayClear" Content="Display clear" Margin="0,0,184,220" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Button_Display_Clear" RenderTransformOrigin="0.693,0.45"/>
         <Button x:Name="mButtonDisplayFull" Content="Display full" Margin="0,0,104,220" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Button_Display_Full"/>
         <Button x:Name="mButtonDisplayAhead" Content="Display ahead" Margin="0,0,10,220" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="87" Click="Button_Display_Ahead"/>
-        <Button x:Name="Profile_view" Content="Profile view" Margin="0,0,184,32" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Profile_view_Click"/>
+        <Button x:Name="Profile_view" Content="Profile view" Margin="0,0,184,12" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Profile_view_Click"/>
     </Grid>
 </Window>
