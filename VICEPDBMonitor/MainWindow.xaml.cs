@@ -308,17 +308,13 @@ namespace VICEPDBMonitor
             {
                 if (text.IndexOf(".C:") >= 0 )
                 {
-                    mLastParsedC64Registers = true;
-                }
-                if (text.IndexOf(".8:") >= 0)
-                {
-                    mLastParsedDriveRegisters = true;
-                }
-                if (mLastParsedC64Registers)
-                {
                     m_readerAndDispaly.SetCodeWindowControl(mTextBox);
                 }
-                else if (mLastParsedDriveRegisters)
+                else if (text.IndexOf(".8:") >= 0)
+                {
+                    m_readerAndDispaly.SetCodeWindowControl(mTextBox_Other);
+                }
+                else if (mContextDisk)
                 {
                     m_readerAndDispaly.SetCodeWindowControl(mTextBox_Other);
                 }
@@ -339,17 +335,27 @@ namespace VICEPDBMonitor
         {
             mLabelsBox.Text = text;
         }
-        String mLastRegsGot = "";
+        String mLastRegsGotC64 = "";
+        String mLastRegsGotDrive = "";
         private void UpdateRegsView(String text)
         {
-            if (mViewDisk && mLastParsedC64Registers && mLastParsedDriveRegisters && mLastRegsGot.Length > 5)
+            if (mLastParsedC64Registers)
+            {
+                mLastRegsGotC64 = text;
+            }
+            if (mLastParsedDriveRegisters)
+            {
+                mLastRegsGotDrive = text;
+            }
+
+            if (mViewDisk && mLastRegsGotC64.Length > 5 && mLastRegsGotDrive.Length > 5)
             {
                 // Append the two register sets into the same window
-                mRegsBox.Text = "Drive:\r" + mLastRegsGot + "\rC64:\r" + text;
+                mRegsBox.Text = "Drive:\r" + mLastRegsGotDrive + "\rC64:\r" + mLastRegsGotC64;
                 return;
             }
+
             mRegsBox.Text = text;
-            mLastRegsGot = text;
         }
 
 
@@ -429,10 +435,12 @@ namespace VICEPDBMonitor
                 if (theReply.IndexOf("LIN CYC") > 0)
                 {
                     mLastParsedC64Registers = true;
+                    mLastParsedDriveRegisters = false;
                 }
                 else
                 {
                     mLastParsedDriveRegisters = true;
+                    mLastParsedC64Registers = false;
                 }
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new OneArgDelegate(UpdateRegsView), theReply);
             }
@@ -520,41 +528,16 @@ namespace VICEPDBMonitor
             mRegsBox.Text = "";
 
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
-            if (mViewDisk)
+            if (mContextDisk)
             {
-                NoArgDelegate callme2 = null;
-                if (callme != null)
-                {
-                    callme2 = (NoArgDelegate)callme.Clone();
-                }
                 vcom.addTextCommand("dev 8:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
-                vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), callme, this.Dispatcher);
-
-                vcom.addTextCommand("dev c:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
-                vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), callme2, this.Dispatcher);
-
-                if (mContextDisk)
-                {
-                    vcom.addTextCommand("dev 8:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
-                }
-                else
-                {
-                    vcom.addTextCommand("dev c:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
-                }
             }
             else
             {
-                if (mContextDisk)
-                {
-                    vcom.addTextCommand("dev 8:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
-                }
-                else
-                {
-                    vcom.addTextCommand("dev c:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
-                }
-
-                vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), callme, this.Dispatcher);
+                vcom.addTextCommand("dev c:", CommandStruct.eMode.DoCommandThrowAwayResults, null, null, this.Dispatcher);
             }
+
+            vcom.addTextCommand("r", CommandStruct.eMode.DoCommandReturnResults, new CommandStruct.CS_TextDelegate(get_registers_callback), callme, this.Dispatcher);
         }
 
         private void get_registers()
@@ -1103,6 +1086,15 @@ namespace VICEPDBMonitor
         private void mContextDisk_Click(object sender, RoutedEventArgs e)
         {
             HandleCheckBoxes();
+            if (mContextDisk)
+            {
+                dispatchCommand("dev 8:");
+            }
+            else
+            {
+                dispatchCommand("dev c:");
+            }
+            HandleCodeView();
         }
     }
 
