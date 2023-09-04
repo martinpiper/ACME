@@ -1,6 +1,7 @@
 !to "TestACME.prg", cbm
 !sl "TestACME.map"
 !svl "TestACME.lbl"
+!pdb "TestACME.pdb"
 !cpu 6510
 !ct pet
 
@@ -36,3 +37,23 @@ WoobleAddrPC lda WoobleAddrPC
 ;Flooble
 ;	inc VIC2ScreenColour
 ;	rts
+
+
+
+!pseudopc $100 {
+thisPseudoPCLabel1
+	nop
+
+thisPseudoPCLabel2
+	nop
+
+.thisPseudoPCLabel2p
+	nop
+
+thisPseudoPCLabel3
+	nop
+
+.thisPseudoPCLabel3p
+	nop
+
+}

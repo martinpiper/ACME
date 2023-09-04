@@ -9,7 +9,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>--lib ../C64/stdlib/ -v9 --pdb target\TestLabelDefined.pdb --labeldump target\TestLabelDefined.lbl TestLabelDefined.a</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-v9 TestACME.a</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

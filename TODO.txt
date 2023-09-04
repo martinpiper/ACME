@@ -3,16 +3,39 @@
 // $(ProjectDir)
 // -v9 Test.a
 
+// -v9 TestACME.a
+
 // C:\work\C64\Scroller
 // -v3 --msvc ScrollEntry.a
 
 // C:\work\c64\Tusari2
 // -v4 --msvc --lib ../Scroller/ ScrollEntry.a ScrollEntry_Tusari.a ScrollEntryAfter.a
 
+// --lib ../C64/stdlib/ -v9 --pdb target\TestLabelDefined.pdb --labeldump target\TestLabelDefined.lbl TestLabelDefined.a
+
 ACME TODO file.
 
 * PDB address information is wrong when using !pseudopc
 	It is outputting the address where it is in the assembled memory, not the intended address
+	> Probably add some detection to PO_pseudopc to add an address mapping to PDB (like PDBAddFileLineToAddr )
+		>> Useful globals for PDBAddFileLineToAddr
+			current_offset (but needs new signed offset)
+			uses_pseudo_pc
+		Currently the PDB debugger bodges APU support by looking for mAPUCode_Start
+		So when the PDB output stage happens, any address mappings can be added
+		> Clear the address mapping table each pass. Only the last pass mapping table is used, basically.
+
+
+
+
+* It would be better to include some kind of device ID value for PDB debugging, either in the address or in the zone.
+	This is because currently APU code, or drive code, addresses can overlap with C64 addresses in the memory map
+	The current PDB debuggder handles APU code view by bodging the address by looking for "APUCode_Start" and setting mAPUCode_Start
+	Perhaps the top address bits would be better??
+		The request for PDB information can then add in the requesting device ID
+
+	A new pseudo op comand to set the current device ID for the code being assembled up until the end of the block?
+
 
 
 

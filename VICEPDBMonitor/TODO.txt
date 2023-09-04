@@ -1,6 +1,5 @@
 ﻿TODO File for VICE PDB Monitor
 
-
 * Profiling data can be shown in the disassembly and source views. Basically show the accumulated count for that particular memory location.
 	This expands the display outside the labels view
 

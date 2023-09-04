@@ -1083,16 +1083,19 @@ namespace VICEPDBMonitor
             HandleCodeView();
         }
 
+        public static bool mIsDriveMode = false;
         private void mContextDisk_Click(object sender, RoutedEventArgs e)
         {
             HandleCheckBoxes();
             if (mContextDisk)
             {
                 dispatchCommand("dev 8:");
+                mIsDriveMode = true;
             }
             else
             {
                 dispatchCommand("dev c:");
+                mIsDriveMode = false;
             }
             HandleCodeView();
         }

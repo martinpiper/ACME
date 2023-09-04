@@ -16,6 +16,11 @@ namespace VICEPDBMonitor
         public int mZone = -1;
         public int mFile = -1;
         public int mLine = -1;
+
+        public AddrInfo Clone()
+        {
+            return (AddrInfo) this.MemberwiseClone();
+        }
     }
 
     public class LabelInfo
@@ -43,6 +48,8 @@ namespace VICEPDBMonitor
         MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
 
         int mAPUCode_Start = 0;
+        int mDriveCode_Start = 0;
+        int mDriveCode_StartReal = 0;
 
         public static PDBData getInstance() { return g_PDBData; }
 
@@ -157,6 +164,14 @@ namespace VICEPDBMonitor
                                 {
                                     mAPUCode_Start = labelInfo.mAddr;
                                 }
+                                else if (labelInfo.mLabel.Equals("DriveCode_Start"))
+                                {
+                                    mDriveCode_Start = labelInfo.mAddr;
+                                }
+                                else if (labelInfo.mLabel.Equals("DriveCode_StartReal"))
+                                {
+                                    mDriveCode_StartReal = labelInfo.mAddr;
+                                }
                                 mAllLabels.Add(labelInfo);
                                 mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
                                 mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
@@ -246,11 +261,24 @@ namespace VICEPDBMonitor
         {
             if (MainWindow.mIsAPUMode)
             {
-                AddrInfo tweakedInfo = mAddrInfoByAddr[(PC*4) + mAPUCode_Start];
+                AddrInfo tweakedInfo = mAddrInfoByAddr[(PC*4) + mAPUCode_Start].Clone();
                 tweakedInfo.mAddr -= mAPUCode_Start;
                 tweakedInfo.mAddr /= 4;
                 tweakedInfo.mNextAddr = tweakedInfo.mAddr + 1;
                 tweakedInfo.mPrevAddr = tweakedInfo.mAddr - 1;
+                if (tweakedInfo.mPrevAddr < 0)
+                {
+                    tweakedInfo.mPrevAddr = 0;
+                }
+                return tweakedInfo;
+            }
+            if (MainWindow.mIsDriveMode)
+            {
+                int delta = -mDriveCode_Start + mDriveCode_StartReal;
+                AddrInfo tweakedInfo = mAddrInfoByAddr[PC - delta].Clone();
+                tweakedInfo.mAddr += delta;
+                tweakedInfo.mNextAddr += delta;
+                tweakedInfo.mPrevAddr += delta;
                 if (tweakedInfo.mPrevAddr < 0)
                 {
                     tweakedInfo.mPrevAddr = 0;

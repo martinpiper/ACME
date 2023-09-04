@@ -171,3 +171,10 @@ Mixed asm and source mode, all on one line?
 		or in its userdata
 	** Or perhaps just the button to update the second view... Regardless of the first view stepping...
 		>> Toggle "Use Disk" as needed to update the view(s). Toggle "View Disk" to toggle the second view.
+
+
+
+
+* Add DriveCode_Start and DriveCode_StartReal detection and use that to modify the drive code source display
+	Similar to how mAPUCode_Start works
+	mIsDriveMode like mIsAPUMode
