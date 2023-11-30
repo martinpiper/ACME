@@ -212,6 +212,7 @@ It's possible to break into the execution by sending a character. For example to
 		>> LINK : fatal error LNK1104: cannot open file 'python39_d.lib'
 			C:\Users\Martin Piper\AppData\Local\Programs\Python\Python39\libs
 				Needed to copy "python39.lib" to "python39_d.lib"
+			>> copy %LOCALAPPDATA%\Programs\Python\Python39-32\Libs\python39.lib %LOCALAPPDATA%\Programs\Python\Python39-32\Libs\python39_d.lib
 	>> The EXE type needed to be changed to x64 and python.dll is x64
 	* Done: For anonymous errors like: Error - File TestPython.py, line 1 (Zone <untitled>): Value not defined.
 		These need to emit the problematic line which includes the label etc...

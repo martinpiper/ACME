@@ -35,6 +35,7 @@ ACME TODO file.
 		The request for PDB information can then add in the requesting device ID
 
 	A new pseudo op comand to set the current device ID for the code being assembled up until the end of the block?
+	>> Adding (logical ORing) a number into the top 8 bits of the zone would probably be best.
 
 
 
