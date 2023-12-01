@@ -24,6 +24,9 @@ ACME TODO file.
 		Currently the PDB debugger bodges APU support by looking for mAPUCode_Start
 		So when the PDB output stage happens, any address mappings can be added
 		> Clear the address mapping table each pass. Only the last pass mapping table is used, basically.
+	>> The values in the "LABELS:" section are OK, it's just the values in the "ADDRS:" section
+		Yes the code is stored in the RAM, so it still needs to original PDB info, however the PDB info also needs a duplicate to account for the destination address (and device)
+
 
 
 
@@ -36,6 +39,9 @@ ACME TODO file.
 
 	A new pseudo op comand to set the current device ID for the code being assembled up until the end of the block?
 	>> Adding (logical ORing) a number into the top 8 bits of the zone would probably be best.
+		C: = 0x00
+		8: = 0x08
+		APU: = 0x40
 
 
 
