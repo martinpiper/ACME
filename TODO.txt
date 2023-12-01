@@ -42,6 +42,7 @@ ACME TODO file.
 		C: = 0x00
 		8: = 0x08
 		APU: = 0x40
+	>> Then in VICEPDBMonitor all usage of getAddrInfoForAddr() can be updated to include the device
 
 
 
