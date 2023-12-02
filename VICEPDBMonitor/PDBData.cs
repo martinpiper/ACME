@@ -16,6 +16,7 @@ namespace VICEPDBMonitor
         public int mZone = -1;
         public int mFile = -1;
         public int mLine = -1;
+        public int mDevice = 0;
 
         public AddrInfo Clone()
         {
@@ -30,6 +31,7 @@ namespace VICEPDBMonitor
         public string mLabel;
         public bool mUsed;
         public bool mMemory;
+        public int mDevice;
     }
 
     public class PDBData

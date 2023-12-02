@@ -28,7 +28,7 @@ struct cpu_t {
 extern struct cpu_t	*CPU_now;// Struct of current CPU type (default 6502)
 extern result_int_t	CPU_pc;	// Current program counter (pseudo value)
 extern int		CPU_2add;	// add to PC after statement
-
+extern intval_t current_device;
 
 // Prototypes
 
@@ -44,5 +44,6 @@ extern void	CPU_set_pc(intval_t new_pc);
 extern bool	CPU_find_cpu_struct(struct cpu_t** target);
 // return whether offset assembly is active
 extern bool	CPU_uses_pseudo_pc(void);
+extern intval_t CPU_the_pseudo_pc_offset(void);
 
 #endif

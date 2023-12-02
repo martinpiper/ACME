@@ -40,5 +40,6 @@ extern int GetLabelAge(const int currentPass, const char *label, const char *fil
 extern int IsLabelSameAsLastValue(const int theValue, const char *label, const char *filename, int linenumber, int zone);
 extern int GetLabelNumberDifferences(const char *label, const char *filename, int linenumber, int zone);
 extern void SortFile( const char *filename );
+extern void SetDevice( const int device );
 
 #endif

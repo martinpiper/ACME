@@ -11,6 +11,8 @@ extern "C" {
 #include "global.h"
 }
 
+static int device = 0;
+
 struct DebugInfo
 {
 	DebugInfo() : mLineNumber( 0 )
@@ -19,6 +21,7 @@ struct DebugInfo
 	std::string mFilename;
 	int mLineNumber;
 	int mZone;
+	int mDevice;
 };
 
 std::map<int , DebugInfo> sAddrMap;
@@ -26,14 +29,16 @@ std::map<int , DebugInfo> sAddrMap;
 extern void PDBInit( void )
 {
 	sAddrMap.clear();
+	device = 0;
 }
 
 extern "C" void PDBAddFileLineToAddr( const int address , const char *filename , const int lineNumber , const int zone )
 {
-	DebugInfo &debug = sAddrMap[ address ];
+	DebugInfo &debug = sAddrMap[ address | (device << 24)];
 	debug.mFilename = filename;
 	debug.mLineNumber = lineNumber;
-	debug.mZone = zone;
+	debug.mZone = zone | (device << 24);
+	debug.mDevice = device;
 }
 
 extern "C" void PDBSave( FILE *fp )
@@ -74,7 +79,7 @@ extern "C" void PDBSave( FILE *fp )
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		fprintf( fp , "$%x:%d:%d:%d\n" , st->first , debug.mZone , filenameIndex[ debug.mFilename ] , debug.mLineNumber );
+		fprintf( fp , "$%x:%d:%d:%d\n" , st->first & 0xffffff , debug.mZone , filenameIndex[ debug.mFilename ] , debug.mLineNumber );
 
 		st++;
 	}
@@ -88,12 +93,16 @@ extern "C" void PDBSave2( FILE *fp )
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		if (st->first > 0 && st->first > (previousUsed+1))
+		// TODO: This only displays the free map for device 0 (C:)
+		if (debug.mDevice == 0)
 		{
-			countBlocks++;
-		}
+			if (st->first > 0 && st->first > (previousUsed+1))
+			{
+				countBlocks++;
+			}
 
-		previousUsed = st->first;
+			previousUsed = st->first;
+		}
 
 		st++;
 	}
@@ -108,12 +117,16 @@ extern "C" void PDBSave2( FILE *fp )
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		if (st->first > 0 && st->first > (previousUsed+1))
+		// TODO: This only displays the free map for device 0 (C:)
+		if (debug.mDevice == 0)
 		{
-			fprintf( fp , "$%x-$%x:$%x\n" , previousUsed + 1 , (st->first)-1 , ((st->first)-1) - previousUsed );
-		}
+			if (st->first > 0 && st->first > (previousUsed+1))
+			{
+				fprintf( fp , "$%x-$%x:$%x\n" , previousUsed + 1 , (st->first)-1 , ((st->first)-1) - previousUsed );
+			}
 
-		previousUsed = st->first;
+			previousUsed = st->first;
+		}
 
 		st++;
 	}
@@ -218,3 +231,9 @@ extern "C" void SortFile( const char *filename )
 		fileOut.close();
 	}
 }
+
+extern "C" void SetDevice( const int idevice )
+{
+	device = idevice;
+}
+

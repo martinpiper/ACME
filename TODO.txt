@@ -26,7 +26,9 @@ ACME TODO file.
 		> Clear the address mapping table each pass. Only the last pass mapping table is used, basically.
 	>> The values in the "LABELS:" section are OK, it's just the values in the "ADDRS:" section
 		Yes the code is stored in the RAM, so it still needs to original PDB info, however the PDB info also needs a duplicate to account for the destination address (and device)
-
+	> Note code that updates these: uses_pseudo_pc
+		current_offset
+		PO_pseudopc
 
 
 
@@ -44,6 +46,11 @@ ACME TODO file.
 		APU: = 0x40
 	>> Then in VICEPDBMonitor all usage of getAddrInfoForAddr() can be updated to include the device
 
+	> Could use code like PO_zone
+	* Hmm perhaps expanding !zone would be the bext option...
+		Like: !zone C:
+		>> New command: !device which copies !zone mostly
+	* TODO: Look for " << 24" in relation to device and make this a common function?
 
 
 

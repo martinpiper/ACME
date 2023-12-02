@@ -14,6 +14,8 @@
 #include "mnemo.h"
 #include "output.h"
 #include "tree.h"
+#include <string.h>
+#include "acme.h"
 
 
 // Constants
@@ -64,6 +66,7 @@ struct cpu_t	*CPU_now;	// Struct of current CPU type (default 6502)
 result_int_t	CPU_pc;	// (Pseudo) program counter at start of statement
 int		CPU_2add;	// Increase PC by this after statement
 static intval_t	current_offset;	// PseudoPC - MemIndex
+intval_t current_device;
 static bool	uses_pseudo_pc;	// offset assembly active?
 // predefined stuff
 static node_t*	CPU_tree	= NULL;// tree to hold CPU types
@@ -156,6 +159,55 @@ static enum eos_t PO_pseudopc(void) {
 	return(ENSURE_EOS);
 }
 
+static enum eos_t PO_device(void) {
+	intval_t oldDevice = current_device;
+
+	current_device = 0x00;
+
+	if(BYTEFLAGS(GotByte) & CONTS_KEYWORD)
+	{
+		Input_read_keyword();
+
+		if (_stricmp(GlobalDynaBuf->buffer , "c") == 0)
+		{
+			current_device = 0x00;
+		}
+		else if (_stricmp(GlobalDynaBuf->buffer , "cpu") == 0)
+		{
+			current_device = 0x00;
+		}
+		else if (_stricmp(GlobalDynaBuf->buffer , "8") == 0)
+		{
+			current_device = 0x08;
+		}
+		else if (_stricmp(GlobalDynaBuf->buffer , "apu") == 0)
+		{
+			current_device = 0x40;
+		}
+		else if (_stricmp(GlobalDynaBuf->buffer , "a") == 0)
+		{
+			current_device = 0x40;
+		}
+		else
+		{
+			Throw_error("Unknown device name found");
+		}
+	}
+
+	SetDevice(current_device);
+
+	if(Parse_optional_block())
+	{
+		// restore old
+		current_device = oldDevice;
+	}
+
+	SetDevice(current_device);
+
+	return(ENSURE_EOS);
+}
+
+
 // End offset assembly
 static enum eos_t PO_realpc(void) {
 	Throw_first_pass_warning(Warning_old_offset_assembly);
@@ -169,6 +221,10 @@ static enum eos_t PO_realpc(void) {
 // return whether offset assembly is active
 bool CPU_uses_pseudo_pc(void) {
 	return(uses_pseudo_pc);
+}
+
+intval_t CPU_the_pseudo_pc_offset(void) {
+	return(current_offset);
 }
 
 // If cpu type and value match, set register length variable to value.
@@ -221,7 +277,8 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("al",	PO_al),
 	PREDEFNODE("as",	PO_as),
 	PREDEFNODE(s_rl,	PO_rl),
-	PREDEFLAST("rs",	PO_rs),
+	PREDEFNODE("rs",	PO_rs),
+	PREDEFLAST("device",	PO_device),
 	//    ^^^^ this marks the last element
 };
 
@@ -236,6 +293,7 @@ void CPU_passinit(struct cpu_t* cpu_type) {
 	CPU_65816.long_regs[LONGREG_IDX_R] = FALSE;	// short index regs
 	uses_pseudo_pc	= FALSE;	// offset assembly is not active,
 	current_offset	= 0;		// so offset is 0
+	current_device = 0;
 }
 
 // create cpu type tree (is done early)

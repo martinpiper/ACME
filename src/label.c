@@ -27,6 +27,24 @@
 // Variables
 node_ra_t*	Label_forest[256];// ... (because of 8-bit hash)
 
+static char *getDeviceNameFromNumber(const int device)
+{
+	char *name = 0;
+	switch(device)
+	{
+	default:
+	case 0x00:
+		name = "C";
+		break;
+	case 0x08:
+		name = "8";
+		break;
+	case 0x40:
+		name = "A";
+		break;
+	}
+	return name;
+}
 
 // Dump label value and flags to dump file
 static void dump_one_label(node_ra_t* node, FILE* fd) {
@@ -62,6 +80,8 @@ static void dump_one_label(node_ra_t* node, FILE* fd) {
 		fprintf(fd, "; ?");
 	if(label->usage == 0)
 		fprintf(fd, "; unused");
+	if(label->device != 0)
+		fprintf(fd, "; device=%s " , getDeviceNameFromNumber(label->device));
 	fprintf(fd, "\n");
 }
 
@@ -87,7 +107,7 @@ void DumpLabelForPDB(node_ra_t* node, FILE* fd)
 		return;
 	}
 
-	fprintf( fd , "$%x:%d:%s" , label->result.val.intval , gTheZone , node->id_string );
+	fprintf( fd , "$%x:%d:%s" , label->result.val.intval , gTheZone | (label->device << 24) , node->id_string );
 
 	if ( label->usage )
 	{
@@ -123,7 +143,7 @@ static void dump_one_label_vice(node_ra_t* node, FILE* fd)
 		(label->result.flags & MVALUE_IS_ADDRESS)
 	)
 	{
-		fprintf(fd,"al C:%0.4x .%s\n",label->result.val.intval,node->id_string);
+		fprintf(fd,"al %s:%0.4x .%s\n",getDeviceNameFromNumber(label->device),label->result.val.intval,node->id_string);
 	}
 }
 
@@ -140,7 +160,7 @@ static void dump_one_label_vice2(node_ra_t* node, FILE* fd)
 		!(label->result.flags & MVALUE_IS_ADDRESS)
 	)
 	{
-		fprintf(fd,"al C:%0.4x .%s\n",label->result.val.intval,node->id_string);
+		fprintf(fd,"al %s:%0.4x .%s\n",getDeviceNameFromNumber(label->device),label->result.val.intval,node->id_string);
 	}
 }
 
@@ -183,6 +203,7 @@ label_t* Label_find(zone_t zone, int flags) {
 			label->result.val.intval = 0;
 		label->usage = 0;// usage count
 		label->pass = pass_count;
+		label->device = current_device;
 		node->body = label;
 	} else
 		label = node->body;
@@ -499,6 +520,7 @@ label_t* Label_fix_forward_name(void) {
 	if(counter_label->pass != pass_count) {
 		counter_label->pass = pass_count;
 		counter_label->result.val.intval = 0;
+		counter_label->device = current_device;
 	}
 	number = (unsigned long) counter_label->result.val.intval;
 	// now append to the name to make it unique

@@ -1,4 +1,5 @@
 !to "TestACME.prg", cbm
+!sal
 !sl "TestACME.map"
 !svl "TestACME.lbl"
 !pdb "TestACME.pdb"
@@ -41,19 +42,28 @@ WoobleAddrPC lda WoobleAddrPC
 
 
 !pseudopc $100 {
+
+!device
+
+!device c {
 thisPseudoPCLabel1
 	nop
 
 thisPseudoPCLabel2
 	nop
+}
 
+!device 8 {
 .thisPseudoPCLabel2p
 	nop
 
 thisPseudoPCLabel3
 	nop
+}
 
+!device apu {
 .thisPseudoPCLabel3p
 	nop
+}
 
 }

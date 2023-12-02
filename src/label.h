@@ -15,6 +15,7 @@ struct label_t {
 	struct result_t	result;	// Expression flags and value
 	int		usage;	// usage count
 	int		pass;	// pass of creation (for anon counters)
+	int	device;	// The device when the label was really defined
 };
 
 
