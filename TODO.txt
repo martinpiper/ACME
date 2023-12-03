@@ -15,24 +15,6 @@
 
 ACME TODO file.
 
-* PDB address information is wrong when using !pseudopc
-	It is outputting the address where it is in the assembled memory, not the intended address
-	> Probably add some detection to PO_pseudopc to add an address mapping to PDB (like PDBAddFileLineToAddr )
-		>> Useful globals for PDBAddFileLineToAddr
-			current_offset (but needs new signed offset)
-			uses_pseudo_pc
-		Currently the PDB debugger bodges APU support by looking for mAPUCode_Start
-		So when the PDB output stage happens, any address mappings can be added
-		> Clear the address mapping table each pass. Only the last pass mapping table is used, basically.
-	>> The values in the "LABELS:" section are OK, it's just the values in the "ADDRS:" section
-		Yes the code is stored in the RAM, so it still needs to original PDB info, however the PDB info also needs a duplicate to account for the destination address (and device)
-	> Note code that updates these: uses_pseudo_pc
-		current_offset
-		PO_pseudopc
-
-
-
-
 * It would be better to include some kind of device ID value for PDB debugging, either in the address or in the zone.
 	This is because currently APU code, or drive code, addresses can overlap with C64 addresses in the memory map
 	The current PDB debuggder handles APU code view by bodging the address by looking for "APUCode_Start" and setting mAPUCode_Start
@@ -55,7 +37,19 @@ ACME TODO file.
 
 
 
+* When running Vice without "-moncommands TestIRQDisk.lbl" make the disassembly enrich better, to spot labels and potentially immediate values
+	The Vice disassembly with labels in "8:" does not entirely work correctly, so it's better not to run with those labels loaded.
+	Use the device and the zone information to pick the correct labels from the PDB
+	The disassembly address needs the label name inserted on it's own line, preferably.
+	Immediate values could retain the value in parenthesis.
+
+
+
+
+
 * To enhance python debugging with PDB, it is possible to output the code that python emits (send to the assembler) to a temporary file and write PDB entries for that file
+	Similar to EnrichDumpWithMemory but create a new method.
+
 
 
 
@@ -69,6 +63,8 @@ ACME TODO file.
 	Have the option to filter the source display by a list of zones, if more than one zone is found for an address range
 		Pick by zone and display the filename along with the zone
 	This was apparent when trying to display source for the APU, but it can also happen if combined PDBs are loaded for cartridge or multi-load code
+	* The PDB output from ACME also needs to include extra ADDR chunks for addresses that overlap due to !pseudopc and !device usage
+	* The PDB read needs to store device memory mappings separately
 
 
 
