@@ -265,3 +265,22 @@ It's possible to break into the execution by sending a character. For example to
 
 * acme_bytestr() will need proper tests for the entire number range, with and without " and ' characters
 	Due to needing this kind of test: if (strncmp(command , "b'" , 2) == 0 || strncmp(command , "b\"" , 2) == 0)
+
+
+
+
+* PDB address information is wrong when using !pseudopc
+	It is outputting the address where it is in the assembled memory, not the intended address
+	> Probably add some detection to PO_pseudopc to add an address mapping to PDB (like PDBAddFileLineToAddr )
+		>> Useful globals for PDBAddFileLineToAddr
+			current_offset (but needs new signed offset)
+			uses_pseudo_pc
+		Currently the PDB debugger bodges APU support by looking for mAPUCode_Start
+		So when the PDB output stage happens, any address mappings can be added
+		> Clear the address mapping table each pass. Only the last pass mapping table is used, basically.
+	>> The values in the "LABELS:" section are OK, it's just the values in the "ADDRS:" section
+		Yes the code is stored in the RAM, so it still needs to original PDB info, however the PDB info also needs a duplicate to account for the destination address (and device)
+	> Note code that updates these: uses_pseudo_pc
+		current_offset
+		PO_pseudopc
+	* Temporarily removing "mDriveCode_Start" and "mDriveCode_StartReal" initialisation shows the new pseudo PC output works.
