@@ -93,5 +93,4 @@ thisPseudoPC2Label3
 .thisPseudoPC2Label3p
 	lda #4
 }
-
 }

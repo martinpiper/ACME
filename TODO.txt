@@ -34,8 +34,8 @@ ACME TODO file.
 		>> New command: !device which copies !zone mostly
 	* TODO: Look for " << 24" in relation to device and make this a common function?
 
-	* TestACMe.a shows a bug where the same !pseudopc address does not output multiple entries for that address in the PDB
-	** Separate device in the PDB, don't merge with zone.
+	* Done: TestACMe.a shows a bug where the same !pseudopc address does not output multiple entries for that address in the PDB
+	** Done: Separate device in the PDB, don't merge with zone.
 
 
 

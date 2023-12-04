@@ -107,7 +107,7 @@ void DumpLabelForPDB(node_ra_t* node, FILE* fd)
 		return;
 	}
 
-	fprintf( fd , "$%x:%d:%s" , label->result.val.intval , gTheZone | (label->device << 24) , node->id_string );
+	fprintf( fd , "$%x:%d:%s" , label->result.val.intval , gTheZone , node->id_string );
 
 	if ( label->usage )
 	{
@@ -127,7 +127,7 @@ void DumpLabelForPDB(node_ra_t* node, FILE* fd)
 		fprintf(fd,":0");
 	}
 
-	fprintf(fd,"\n");
+	fprintf(fd,":%d\n" , label->device);
 }
 
 static void dump_one_label_vice(node_ra_t* node, FILE* fd)

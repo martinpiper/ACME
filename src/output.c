@@ -128,20 +128,20 @@ static void real_output(intval_t byte) {
 
 	if (previouscontext_enable > 0)
 	{
-		PDBAddFileLineToAddr( write_idx , macroBackup_original_filename , macroBackup_line_number , macroBackup_zone );
+		PDBAddFileLineToAddr( write_idx , macroBackup_original_filename , macroBackup_line_number , Section_now->zone , FALSE );
 
 		if (CPU_uses_pseudo_pc())
 		{
-			PDBAddFileLineToAddr( (write_idx + CPU_the_pseudo_pc_offset()) & 0xffff, macroBackup_original_filename , macroBackup_line_number , macroBackup_zone );
+			PDBAddFileLineToAddr( (write_idx + CPU_the_pseudo_pc_offset()) & 0xffff, macroBackup_original_filename , macroBackup_line_number , Section_now->zone , TRUE );
 		}
 	}
 	else
 	{
-		PDBAddFileLineToAddr( write_idx , Input_now->original_filename , Input_now->line_number , Section_now->zone );
+		PDBAddFileLineToAddr( write_idx , Input_now->original_filename , Input_now->line_number , Section_now->zone , FALSE );
 
 		if (CPU_uses_pseudo_pc())
 		{
-			PDBAddFileLineToAddr( (write_idx  + CPU_the_pseudo_pc_offset()) & 0xffff, Input_now->original_filename , Input_now->line_number , Section_now->zone );
+			PDBAddFileLineToAddr( (write_idx  + CPU_the_pseudo_pc_offset()) & 0xffff, Input_now->original_filename , Input_now->line_number , Section_now->zone , TRUE );
 		}
 	}
 

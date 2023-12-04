@@ -22,9 +22,10 @@ struct DebugInfo
 	int mLineNumber;
 	int mZone;
 	int mDevice;
+	bool mIsPseudo;
 };
 
-std::map<int , DebugInfo> sAddrMap;
+std::multimap<int , DebugInfo> sAddrMap;
 
 extern void PDBInit( void )
 {
@@ -32,13 +33,16 @@ extern void PDBInit( void )
 	device = 0;
 }
 
-extern "C" void PDBAddFileLineToAddr( const int address , const char *filename , const int lineNumber , const int zone )
+extern "C" void PDBAddFileLineToAddr( const int address , const char *filename , const int lineNumber , const int zone , const bool isPseudo )
 {
-	DebugInfo &debug = sAddrMap[ address | (device << 24)];
+	DebugInfo debug;
 	debug.mFilename = filename;
 	debug.mLineNumber = lineNumber;
-	debug.mZone = zone | (device << 24);
+	debug.mZone = zone;
 	debug.mDevice = device;
+	debug.mIsPseudo = isPseudo;
+
+	sAddrMap.insert(std::pair<int,DebugInfo>(address,debug));
 }
 
 extern "C" void PDBSave( FILE *fp )
@@ -46,7 +50,7 @@ extern "C" void PDBSave( FILE *fp )
 	std::map< std::string , int > filenameIndex;
 	int theIndex = 0;
 
-	std::map<int , DebugInfo>::iterator st = sAddrMap.begin();
+	std::multimap<int , DebugInfo>::iterator st = sAddrMap.begin();
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
@@ -79,7 +83,7 @@ extern "C" void PDBSave( FILE *fp )
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		fprintf( fp , "$%x:%d:%d:%d\n" , st->first & 0xffffff , debug.mZone , filenameIndex[ debug.mFilename ] , debug.mLineNumber );
+		fprintf( fp , "$%x:%d:%d:%d:%d\n" , st->first , debug.mZone , filenameIndex[ debug.mFilename ] , debug.mLineNumber , debug.mDevice );
 
 		st++;
 	}
@@ -89,19 +93,20 @@ extern "C" void PDBSave2( FILE *fp )
 {
 	int previousUsed = -1;
 	int countBlocks = 0;
-	std::map<int , DebugInfo>::iterator st = sAddrMap.begin();
+	std::multimap<int , DebugInfo>::iterator st = sAddrMap.begin();
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		// TODO: This only displays the free map for device 0 (C:)
-		if (debug.mDevice == 0)
+		// Only display pseudo addresses for device 0, or non-pseudo addresses
+		if (!debug.mIsPseudo || (debug.mIsPseudo && debug.mDevice == 0))
 		{
-			if (st->first > 0 && st->first > (previousUsed+1))
+			int addr = st->first;
+			if (addr > 0 && addr > (previousUsed+1))
 			{
 				countBlocks++;
 			}
 
-			previousUsed = st->first;
+			previousUsed = addr;
 		}
 
 		st++;
@@ -117,15 +122,15 @@ extern "C" void PDBSave2( FILE *fp )
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		// TODO: This only displays the free map for device 0 (C:)
-		if (debug.mDevice == 0)
+		if (!debug.mIsPseudo || (debug.mIsPseudo && debug.mDevice == 0))
 		{
-			if (st->first > 0 && st->first > (previousUsed+1))
+			int addr = st->first;
+			if (addr > 0 && addr > (previousUsed+1))
 			{
-				fprintf( fp , "$%x-$%x:$%x\n" , previousUsed + 1 , (st->first)-1 , ((st->first)-1) - previousUsed );
+				fprintf( fp , "$%x-$%x:$%x\n" , previousUsed + 1 , addr-1 , (addr-1) - previousUsed );
 			}
 
-			previousUsed = st->first;
+			previousUsed = addr;
 		}
 
 		st++;
