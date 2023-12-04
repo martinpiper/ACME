@@ -47,23 +47,51 @@ WoobleAddrPC lda WoobleAddrPC
 
 !device c {
 thisPseudoPCLabel1
-	nop
+	sta 0
 
 thisPseudoPCLabel2
-	nop
+	sta 1
 }
 
 !device 8 {
 .thisPseudoPCLabel2p
-	nop
+	sta 2
 
 thisPseudoPCLabel3
-	nop
+	sta 3
 }
 
 !device apu {
 .thisPseudoPCLabel3p
-	nop
+	sta 4
+}
+
+}
+
+
+!pseudopc $100 {
+
+!device
+
+!device c {
+thisPseudoPC2Label1
+	lda #0
+
+thisPseudoPC2Label2
+	lda #1
+}
+
+!device 8 {
+.thisPseudoPC2Label2p
+	lda #2
+
+thisPseudoPC2Label3
+	lda #3
+}
+
+!device apu {
+.thisPseudoPC2Label3p
+	lda #4
 }
 
 }
