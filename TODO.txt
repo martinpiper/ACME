@@ -69,10 +69,12 @@ ACME TODO file.
 	This was apparent when trying to display source for the APU, but it can also happen if combined PDBs are loaded for cartridge or multi-load code
 	* The PDB output from ACME also needs to include extra ADDR chunks for addresses that overlap due to !pseudopc and !device usage
 	* The PDB read needs to store device memory mappings separately
-	* When reading multiple PDBs (which could obviously have the same zone number) the base zone number (zone 0) is adjusted by the highest zone value (minus device) loaded so far, plus 1...
+	>> ** When reading multiple PDBs (which could obviously have the same zone number) the base zone number (zone 0) is adjusted by the highest zone value (minus device) loaded so far, plus 1...
 		Note this following code isn't quite accurate, it needs to track the maximum some from the ADDRS section as well...: mLabelInfoByZone.Keys.Max()
-	* Add a tab to the "break" view showing a list of zones that are active for the current memory address?
+	>> * Add a tab to the "break" view showing a list of zones that are active for the current memory address?
 		Also use the device from the currently selected view
+		> If there are multiple entries for the same address, but different zones, these could have different previous/next memory addresses in the AddrInfo because the source code context is different
+			This causes problems for the mixed source and disassembly view since the current zone/device/context would need to be known
 
 
 
