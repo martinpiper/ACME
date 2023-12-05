@@ -70,6 +70,7 @@ ACME TODO file.
 	* The PDB output from ACME also needs to include extra ADDR chunks for addresses that overlap due to !pseudopc and !device usage
 	* The PDB read needs to store device memory mappings separately
 	* When reading multiple PDBs (which could obviously have the same zone number) the base zone number (zone 0) is adjusted by the highest zone value (minus device) loaded so far, plus 1...
+		Note this following code isn't quite accurate, it needs to track the maximum some from the ADDRS section as well...: mLabelInfoByZone.Keys.Max()
 	* Add a tab to the "break" view showing a list of zones that are active for the current memory address?
 		Also use the device from the currently selected view
 
