@@ -46,10 +46,10 @@ namespace VICEPDBMonitor
 
             try
             {
-                int theZone = m_PDBData.getAddrInfoForAddr(m_registerSet.GetPC()).mZone; //mAddrInfoByAddr[mPC].mZone;
+                int theZone = m_PDBData.getAddrInfoForAddr(m_registerSet.GetPC()).mZone;
                 while (theZone >= 0)
                 {
-                    List<LabelInfo> theLabels = m_PDBData.getLabelsForZone(theZone); //mLabelInfoByZone[theZone];
+                    List<LabelInfo> theLabels = m_PDBData.getLabelsForZone(theZone);
                     allLabels.AddRange(theLabels);
 
                     // MPi: TODO: Replace with previous zone in the hierarchy when ACME saves it
@@ -242,9 +242,9 @@ namespace VICEPDBMonitor
                 int lastSourceIndexDisplayed = -1;
                 int lastSourceLineDisplayed = -1;
 
-                int[] lastDisplayedLine = new int[m_PDBData.getNumFiles()]; //mSourceFileNamesLength
+                int[] lastDisplayedLine = new int[m_PDBData.getNumFiles()];
                 int i;
-                for (i = 0; i < m_PDBData.getNumFiles(); i++) //mSourceFileNamesLength
+                for (i = 0; i < m_PDBData.getNumFiles(); i++)
                 {
                     lastDisplayedLine[i] = 0;
                 }
@@ -288,10 +288,10 @@ namespace VICEPDBMonitor
 
                     try
                     {
-                        AddrInfo addrInfo = m_PDBData.getAddrInfoForAddr(theAddr); //mAddrInfoByAddr[theAddr];
-                        if (lastSourceDisplayed != m_PDBData.getSourceFileName(addrInfo.mFile)) //mSourceFileNames[addrInfo.mFile])
+                        AddrInfo addrInfo = m_PDBData.getAddrInfoForAddr(theAddr);
+                        if (lastSourceDisplayed != m_PDBData.getSourceFileName(addrInfo.mFile))
                         {
-                            lastSourceDisplayed = m_PDBData.getSourceFileName(addrInfo.mFile); // mSourceFileNames[addrInfo.mFile];
+                            lastSourceDisplayed = m_PDBData.getSourceFileName(addrInfo.mFile);
                             displayText += "--- " + lastSourceDisplayed + " ---\r";
                         }
                         if ((addrInfo.mLine - lastDisplayedLine[addrInfo.mFile]) > 5)
@@ -320,7 +320,7 @@ namespace VICEPDBMonitor
                                 // Stop displaying the same source and line multiple times in a row
                                 continue;
                             }
-                            lastSourceLine = string.Format("{0,5:###}", i) + ": " + m_PDBData.getLineFromSourceFile(addrInfo.mFile, i); // mSourceFiles[addrInfo.mFile][i];
+                            lastSourceLine = string.Format("{0,5:###}", i) + ": " + m_PDBData.getLineFromSourceFile(addrInfo.mFile, i);
                             lastSourceIndexDisplayed = addrInfo.mFile;
                             lastSourceLineDisplayed = i;
                         }
@@ -363,14 +363,14 @@ namespace VICEPDBMonitor
             string displayText = string.Empty;
             try
             {
-                AddrInfo addrInfo = m_PDBData.getAddrInfoForAddr(m_registerSet.GetPC()); // mAddrInfoByAddr[mPC];
+                AddrInfo addrInfo = m_PDBData.getAddrInfoForAddr(m_registerSet.GetPC());
                 // MPi: TODO: Tweak the 20 range based on the display height?
                 int range = 20;
                 int startPrev = m_registerSet.GetPC();
                 // Step backwards trying to find a good starting point to disassemble
                 while (range-- > 0)
                 {
-                    AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(startPrev); // mAddrInfoByAddr[startPrev];
+                    AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(startPrev);
                     if (addrInfo2.mPrevAddr < 0)
                     {
                         break;
@@ -378,7 +378,7 @@ namespace VICEPDBMonitor
                     startPrev = addrInfo2.mPrevAddr;
                 }
 
-                displayText += "File:" + m_PDBData.getSourceFileName(addrInfo.mFile) + "\n"; // mSourceFileNames[addrInfo.mFile] + "\n";
+                displayText += "File:" + m_PDBData.getSourceFileName(addrInfo.mFile) + "\n";
                 displayText += "Line:" + (addrInfo.mLine + 1) + "\n";
                 int theLine = addrInfo.mLine - 10;  // MPi: TODO: Tweak the - 10 based on the display height?
                 if (theLine < 0)
@@ -397,7 +397,7 @@ namespace VICEPDBMonitor
                     {
                         displayText += "  ";
                     }
-                    string source = m_PDBData.getLineFromSourceFile(addrInfo.mFile, theLine++);  //mSourceFiles[addrInfo.mFile][theLine++];
+                    string source = m_PDBData.getLineFromSourceFile(addrInfo.mFile, theLine++);
                     source = source.Replace('\n', '\r');
                     source.TrimEnd();
 
@@ -439,7 +439,7 @@ namespace VICEPDBMonitor
                     // Step backwards trying to find a good starting point to disassemble
                     while (range-- > 0)
                     {
-                        AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(startPrev); //mAddrInfoByAddr[startPrev];
+                        AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(startPrev);
                         if (addrInfo2.mPrevAddr < 0)
                         {
                             break;
@@ -452,7 +452,7 @@ namespace VICEPDBMonitor
                     // Step forwards trying to find a good ending point to disassemble
                     while (range-- > 0)
                     {
-                        AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(endNext); //mAddrInfoByAddr[endNext];
+                        AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(endNext);
                         if (addrInfo2.mNextAddr < 0)
                         {
                             break;
@@ -485,7 +485,7 @@ namespace VICEPDBMonitor
                 int theZone = m_PDBData.getAddrInfoForAddr(m_registerSet.GetPC()).mZone;
                 while (theZone >= 0)
                 {
-                    List<LabelInfo> theLabels = m_PDBData.getLabelsForZone(theZone); //mLabelInfoByZone[theZone];
+                    List<LabelInfo> theLabels = m_PDBData.getLabelsForZone(theZone);
 
                     foreach (LabelInfo aLabel in theLabels)
                     {
