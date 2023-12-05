@@ -136,6 +136,10 @@ namespace VICEPDBMonitor
                                 }
                                 addrInfo.mFile = localFileIndex + int.Parse(tokens[2]);
                                 addrInfo.mLine = int.Parse(tokens[3]) - 1;  // Files lines are 1 based in the debug file
+                                if (tokens.Length >= 5)
+                                {
+                                    addrInfo.mDevice = int.Parse(tokens[4]);
+                                }
                                                                             //								mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
                                 mAddrInfoByAddr[addrInfo.mAddr] = addrInfo;
                             }
@@ -162,6 +166,12 @@ namespace VICEPDBMonitor
                                 labelInfo.mLabel = tokens[2];
                                 labelInfo.mUsed = int.Parse(tokens[3]) == 1;
                                 labelInfo.mMemory = int.Parse(tokens[4]) == 1;
+                                labelInfo.mDevice = 0;
+                                if (tokens.Length >= 6)
+                                {
+                                    labelInfo.mDevice = int.Parse(tokens[5]);
+                                }
+
                                 if (labelInfo.mLabel.Equals("APUCode_Start"))
                                 {
                                     mAPUCode_Start = labelInfo.mAddr;
