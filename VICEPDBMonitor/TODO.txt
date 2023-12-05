@@ -121,3 +121,7 @@ When a label is in zero page show the lo/hi memory address and a brief memory du
 
 
 When stepping maintain a history of execution, register values and status states.
+
+
+
+* If there is no source available for the address, and if "source" is selected, then show disassembly instead of a blank window.
