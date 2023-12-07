@@ -42,6 +42,17 @@ extern "C" void PDBAddFileLineToAddr( const int address , const char *filename ,
 	debug.mDevice = device;
 	debug.mIsPseudo = isPseudo;
 
+	std::pair<std::multimap<int , DebugInfo>::iterator , std::multimap<int , DebugInfo>::iterator> range = sAddrMap.equal_range(address);
+	while (range.first != range.second)
+	{
+		DebugInfo &test = range.first->second;
+		if ( (test.mLineNumber == debug.mLineNumber) && (test.mZone == debug.mZone) && (test.mDevice == debug.mDevice) && (test.mFilename == debug.mFilename))
+		{
+			return;
+		}
+		range.first++;
+	}
+
 	sAddrMap.insert(std::pair<int,DebugInfo>(address,debug));
 }
 
