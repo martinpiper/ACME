@@ -78,6 +78,13 @@ ACME TODO file.
 
 
 
+* Add option to save out breakpoints in the source to a file suitable for use in Vice
+	Create an empty file if no breakpoints flagged
+	Remember to include the device and address. e.g.
+	break c:1234
+
+
+
 
 
 * Command line option to define labels
