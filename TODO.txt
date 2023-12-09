@@ -75,6 +75,9 @@ ACME TODO file.
 		Also use the device from the currently selected view
 		> If there are multiple entries for the same address, but different zones, these could have different previous/next memory addresses in the AddrInfo because the source code context is different
 			This causes problems for the mixed source and disassembly view since the current zone/device/context would need to be known
+	> OnContextChecked OnContextUnchecked
+		// TODO: Implement filtering
+		mContextList
 
 
 

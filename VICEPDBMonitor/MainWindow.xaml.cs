@@ -46,6 +46,7 @@ namespace VICEPDBMonitor
         //Regex mBreakPointHitRegex;
         List<BreakPointDataSource> mBreakPoints;
         ObservableCollection<AssertDataSource> mAssertList;
+        ObservableCollection<ContextDataSource> mContextList;
 
 
         private delegate void NoArgDelegate();
@@ -953,6 +954,22 @@ namespace VICEPDBMonitor
             AssertDataSource ADS = dgc.DataContext as AssertDataSource;
             int breakNum = ADS.Number;
             dispatchCommand("disable " + breakNum);
+        }
+
+        private void OnContextChecked(object sender, RoutedEventArgs e)
+        {
+            DataGridCell dgc = sender as DataGridCell;
+            ContextDataSource ADS = dgc.DataContext as ContextDataSource;
+            String breakNum = ADS.Number;
+            // TODO: Implement filtering
+        }
+
+        private void OnContextUnchecked(object sender, RoutedEventArgs e)
+        {
+            DataGridCell dgc = sender as DataGridCell;
+            ContextDataSource ADS = dgc.DataContext as ContextDataSource;
+            String breakNum = ADS.Number;
+            // TODO: Implement filtering
         }
 
         private void removeButton_Click(object sender, RoutedEventArgs e)

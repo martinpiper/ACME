@@ -118,6 +118,24 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
+                <TabItem Header="Context">
+                    <DataGrid x:Name="ContextDataGrid" ItemsSource="{Binding Source=mContextList}" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="En" Binding="{Binding Enable, UpdateSourceTrigger=PropertyChanged}" >
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style>
+                                        <EventSetter Event="ToggleButton.Checked" Handler="OnContextChecked" />
+                                        <EventSetter Event="ToggleButton.Unchecked" Handler="OnContextUnchecked" />
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
+                            <DataGridTextColumn Header="#" Binding="{Binding Number}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Device" Binding="{Binding Device}" IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
             </TabControl>
         </Grid>
         <Button Content="Break" Margin="0,0,184,151" VerticalAlignment="Bottom" Click="Button_Click_Break" Height="20" HorizontalAlignment="Right" Width="75"/>
