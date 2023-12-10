@@ -47,58 +47,63 @@ namespace VICEPDBMonitor
         List<List<string>> mSourceFiles = new List<List<string>>();
         List<LabelInfo> mAllLabels = new List<LabelInfo>();
 
-        Dictionary<int, Dictionary<int, SortedDictionary<int, AddrInfo>>> mAddrInfoByAddrByZoneByDevice = new Dictionary<int, Dictionary<int, SortedDictionary<int, AddrInfo>>>();
+        Dictionary<int, MultiMap<int, AddrInfo>> mAddrInfoByAddrByDevice = new Dictionary<int, MultiMap<int, AddrInfo>>();
         SortedDictionary<int, AddrInfo> mAddrInfoByAddr = new SortedDictionary<int, AddrInfo>();
 //        MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
         MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
 //        MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
+
+        Dictionary<string, ContextDataSource> contextByKey = new Dictionary<string, ContextDataSource>();
 
         public void refreshContextListForAddress(int address)
         {
             MainWindow.mContextList.Clear();
             SortedSet<string> set = new SortedSet<string>();
 
-            Dictionary<int, SortedDictionary<int, AddrInfo>> addrInfoByAddrByZone = null;
-            Dictionary<int, SortedDictionary<int, AddrInfo>> addrInfoByAddrByZone2 = null;
-            mAddrInfoByAddrByZoneByDevice.TryGetValue(0x00, out addrInfoByAddrByZone);
+            MultiMap<int, AddrInfo> addrInfoByAddr = null;
+            MultiMap<int, AddrInfo> addrInfoByAddr2 = null;
+            mAddrInfoByAddrByDevice.TryGetValue(0x00, out addrInfoByAddr);
             if (MainWindow.mIsAPUMode)
             {
-                mAddrInfoByAddrByZoneByDevice.TryGetValue(0x40, out addrInfoByAddrByZone2);
-                if (addrInfoByAddrByZone2 != null)
+                mAddrInfoByAddrByDevice.TryGetValue(0x40, out addrInfoByAddr2);
+                if (addrInfoByAddr2 != null)
                 {
-                    addrInfoByAddrByZone = addrInfoByAddrByZone2;
+                    addrInfoByAddr = addrInfoByAddr2;
                 }
             }
             if (MainWindow.mIsDriveMode)
             {
-                mAddrInfoByAddrByZoneByDevice.TryGetValue(0x08, out addrInfoByAddrByZone2);
-                if (addrInfoByAddrByZone2 != null)
+                mAddrInfoByAddrByDevice.TryGetValue(0x08, out addrInfoByAddr2);
+                if (addrInfoByAddr2 != null)
                 {
-                    addrInfoByAddrByZone = addrInfoByAddrByZone2;
+                    addrInfoByAddr = addrInfoByAddr2;
                 }
             }
 
-            if (addrInfoByAddrByZone != null)
+            if (addrInfoByAddr != null)
             {
-                foreach (KeyValuePair<int, SortedDictionary<int, AddrInfo>> addrInfoByAddr in addrInfoByAddrByZone)
+                foreach (AddrInfo addrInfo in addrInfoByAddr[address])
                 {
-                    AddrInfo addrInfo = null;
-                    addrInfoByAddr.Value.TryGetValue(address, out addrInfo);
-                    if (addrInfo != null)
+                    if (addrInfo.mContext == null)
                     {
-                        if (addrInfo.mContext == null)
+                        ContextDataSource temp = new ContextDataSource();
+                        temp.Source = mSourceFileNames[addrInfo.mFile];
+                        temp.Device = addrInfo.mDevice.ToString();
+                        temp.Zone = addrInfo.mZone.ToString();
+                        temp.Enable = true;
+                        temp.previousEnable = false;
+
+                        if (!contextByKey.ContainsKey(temp.getKey()))
                         {
-                            addrInfo.mContext = new ContextDataSource();
-                            addrInfo.mContext.Source = mSourceFileNames[addrInfo.mFile];
-                            addrInfo.mContext.Device = addrInfo.mDevice.ToString();
-                            addrInfo.mContext.Zone = addrInfo.mZone.ToString();
-                            addrInfo.mContext.Enable = false;
-                            addrInfo.mContext.previousEnable = addrInfo.mContext.Enable;
+                            contextByKey[temp.getKey()] = temp;
                         }
-                        if (set.Add(addrInfo.mContext.getKey()))
-                        {
-                            MainWindow.mContextList.Add(addrInfo.mContext);
-                        }
+
+                        // Only get one such item that contains this info
+                        addrInfo.mContext = contextByKey[temp.getKey()];
+                    }
+                    if (set.Add(addrInfo.mContext.getKey()))
+                    {
+                        MainWindow.mContextList.Add(addrInfo.mContext);
                     }
                 }
             }
@@ -201,19 +206,13 @@ namespace VICEPDBMonitor
                                 mAddrInfoByAddr[addrInfo.mAddr] = addrInfo;
 
                                 // There has to be a better way to create default entries if they don't exist...
-                                Dictionary<int, SortedDictionary<int, AddrInfo>> addrInfoByAddrByZone;
-                                if (!mAddrInfoByAddrByZoneByDevice.TryGetValue(addrInfo.mDevice, out addrInfoByAddrByZone))
+                                MultiMap<int, AddrInfo> addrInfoByAddr;
+                                if (!mAddrInfoByAddrByDevice.TryGetValue(addrInfo.mDevice, out addrInfoByAddr))
                                 {
-                                    addrInfoByAddrByZone = new Dictionary<int, SortedDictionary<int, AddrInfo>>();
-                                    mAddrInfoByAddrByZoneByDevice[addrInfo.mDevice] = addrInfoByAddrByZone;
+                                    addrInfoByAddr = new MultiMap<int, AddrInfo>();
+                                    mAddrInfoByAddrByDevice[addrInfo.mDevice] = addrInfoByAddr;
                                 }
-                                SortedDictionary<int, AddrInfo> addrInfoByAddr;
-                                if (!addrInfoByAddrByZone.TryGetValue(addrInfo.mZone, out addrInfoByAddr))
-                                {
-                                    addrInfoByAddr = new SortedDictionary<int, AddrInfo>();
-                                    addrInfoByAddrByZone[addrInfo.mZone] = addrInfoByAddr;
-                                }
-                                addrInfoByAddr[addrInfo.mAddr] = addrInfo;
+                                addrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
                             }
                         }
                         else if (line.IndexOf("LABELS:") == 0)
@@ -324,28 +323,6 @@ namespace VICEPDBMonitor
 
             // Link the AddrInfo by their respective device and then zone
             int thePrevAddr = -1;
-            foreach (KeyValuePair<int, Dictionary<int, SortedDictionary<int, AddrInfo>>> pair1 in mAddrInfoByAddrByZoneByDevice)
-            {
-                Dictionary<int, SortedDictionary<int, AddrInfo>> byZone = pair1.Value;
-                foreach (KeyValuePair<int, SortedDictionary<int, AddrInfo>> pair2 in byZone)
-                {
-                    SortedDictionary<int, AddrInfo> byAddr = pair2.Value;
-                    foreach (KeyValuePair<int, AddrInfo> pair in byAddr)
-                    {
-                        pair.Value.mPrevAddr = thePrevAddr;
-                        thePrevAddr = pair.Value.mAddr;
-                    }
-                    thePrevAddr = -1;
-                    foreach (KeyValuePair<int, AddrInfo> pair in byAddr.Reverse())
-                    {
-                        pair.Value.mNextAddr = thePrevAddr;
-                        thePrevAddr = pair.Value.mAddr;
-                    }
-                }
-            }
-
-
-            thePrevAddr = -1;
             foreach (KeyValuePair<int, AddrInfo> pair in mAddrInfoByAddr)
             {
                 pair.Value.mPrevAddr = thePrevAddr;
