@@ -64,6 +64,15 @@ namespace VICEPDBMonitor
             m_memDump = new C64MemDump();
             m_memDump.SetRegisterSet(m_registerSet);
 
+            // TODO: This must come from the PDB info and maintain its Enable state
+            mContextList = new ObservableCollection<ContextDataSource>();
+            ContextDataSource cds = new ContextDataSource();
+//            cds.Enable = true;
+            cds.Number = "3";
+            cds.Source = "hello world.a";
+            cds.Zone = "456";
+            cds.Device = "8";
+            mContextList.Add(cds);
             //this must be BEFORE we parse the PDB Data
             mAssertList = new ObservableCollection<AssertDataSource>();
             string[] commandLineArgs = Environment.GetCommandLineArgs();
@@ -118,6 +127,7 @@ namespace VICEPDBMonitor
             mAssertList.Add(AD);*/
 
             AssertDataGrid.ItemsSource = mAssertList;
+            ContextDataGrid.ItemsSource = mContextList;
         }
 
         public void canStep(object sender, CanExecuteRoutedEventArgs e)
@@ -959,17 +969,23 @@ namespace VICEPDBMonitor
         private void OnContextChecked(object sender, RoutedEventArgs e)
         {
             DataGridCell dgc = sender as DataGridCell;
-            ContextDataSource ADS = dgc.DataContext as ContextDataSource;
-            String breakNum = ADS.Number;
-            // TODO: Implement filtering
+            ContextDataSource cds = dgc.DataContext as ContextDataSource;
+            if (cds.previousEnable != cds.Enable)
+            {
+                cds.previousEnable = cds.Enable;
+                HandleCodeView();
+            }
         }
 
         private void OnContextUnchecked(object sender, RoutedEventArgs e)
         {
             DataGridCell dgc = sender as DataGridCell;
-            ContextDataSource ADS = dgc.DataContext as ContextDataSource;
-            String breakNum = ADS.Number;
-            // TODO: Implement filtering
+            ContextDataSource cds = dgc.DataContext as ContextDataSource;
+            if (cds.previousEnable != cds.Enable)
+            {
+                cds.previousEnable = cds.Enable;
+                HandleCodeView();
+            }
         }
 
         private void removeButton_Click(object sender, RoutedEventArgs e)

@@ -13,5 +13,6 @@ namespace VICEPDBMonitor
         public string Source { get; set; }
         public string Zone { get; set; }
         public string Device { get; set; }
+        public bool previousEnable { get; set; }
     }
 }
