@@ -14,9 +14,11 @@ namespace VICEPDBMonitor
         public int mPrevAddr = -1;
         public int mNextAddr = -1;
         public int mZone = -1;
+        public int mBaseZone = -1;
         public int mFile = -1;
         public int mLine = -1;
         public int mDevice = 0;
+        public ContextDataSource mContext = null;
 
         public AddrInfo Clone()
         {
@@ -44,10 +46,63 @@ namespace VICEPDBMonitor
         List<string> mSourceFileNamesFound = new List<string>();
         List<List<string>> mSourceFiles = new List<List<string>>();
         List<LabelInfo> mAllLabels = new List<LabelInfo>();
+
+        Dictionary<int, Dictionary<int, SortedDictionary<int, AddrInfo>>> mAddrInfoByAddrByZoneByDevice = new Dictionary<int, Dictionary<int, SortedDictionary<int, AddrInfo>>>();
         SortedDictionary<int, AddrInfo> mAddrInfoByAddr = new SortedDictionary<int, AddrInfo>();
-        MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
+//        MultiMap<int, LabelInfo> mLabelInfoByAddr = new MultiMap<int, LabelInfo>();
         MultiMap<int, LabelInfo> mLabelInfoByZone = new MultiMap<int, LabelInfo>();
-        MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
+//        MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
+
+        public void refreshContextListForAddress(int address)
+        {
+            MainWindow.mContextList.Clear();
+            SortedSet<string> set = new SortedSet<string>();
+
+            Dictionary<int, SortedDictionary<int, AddrInfo>> addrInfoByAddrByZone = null;
+            Dictionary<int, SortedDictionary<int, AddrInfo>> addrInfoByAddrByZone2 = null;
+            mAddrInfoByAddrByZoneByDevice.TryGetValue(0x00, out addrInfoByAddrByZone);
+            if (MainWindow.mIsAPUMode)
+            {
+                mAddrInfoByAddrByZoneByDevice.TryGetValue(0x40, out addrInfoByAddrByZone2);
+                if (addrInfoByAddrByZone2 != null)
+                {
+                    addrInfoByAddrByZone = addrInfoByAddrByZone2;
+                }
+            }
+            if (MainWindow.mIsDriveMode)
+            {
+                mAddrInfoByAddrByZoneByDevice.TryGetValue(0x08, out addrInfoByAddrByZone2);
+                if (addrInfoByAddrByZone2 != null)
+                {
+                    addrInfoByAddrByZone = addrInfoByAddrByZone2;
+                }
+            }
+
+            if (addrInfoByAddrByZone != null)
+            {
+                foreach (KeyValuePair<int, SortedDictionary<int, AddrInfo>> addrInfoByAddr in addrInfoByAddrByZone)
+                {
+                    AddrInfo addrInfo = null;
+                    addrInfoByAddr.Value.TryGetValue(address, out addrInfo);
+                    if (addrInfo != null)
+                    {
+                        if (addrInfo.mContext == null)
+                        {
+                            addrInfo.mContext = new ContextDataSource();
+                            addrInfo.mContext.Source = mSourceFileNames[addrInfo.mFile];
+                            addrInfo.mContext.Device = addrInfo.mDevice.ToString();
+                            addrInfo.mContext.Zone = addrInfo.mZone.ToString();
+                            addrInfo.mContext.Enable = false;
+                            addrInfo.mContext.previousEnable = addrInfo.mContext.Enable;
+                        }
+                        if (set.Add(addrInfo.mContext.getKey()))
+                        {
+                            MainWindow.mContextList.Add(addrInfo.mContext);
+                        }
+                    }
+                }
+            }
+        }
 
         int mAPUCode_Start = 0;
         int mDriveCode_Start = 0;
@@ -73,6 +128,12 @@ namespace VICEPDBMonitor
                 // Read the file and parse it line by line.
                 using (System.IO.StreamReader file = new System.IO.StreamReader(commandLineArgs[i]))
                 {
+                    int baseZone = 0;
+                    if (mLabelInfoByZone.Count > 0)
+                    {
+                        baseZone = mLabelInfoByZone.Keys.Max() + 1;
+                    }
+
                     while ((line = file.ReadLine()) != null)
                     {
                         if (line.IndexOf("INCLUDES:") == 0)
@@ -118,11 +179,6 @@ namespace VICEPDBMonitor
                         else if (line.IndexOf("ADDRS:") == 0)
                         {
                             int lines = int.Parse(line.Substring(6));
-                            int baseZone = 0;
-                            if (mLabelInfoByZone.Count > 0)
-                            {
-                                baseZone = mLabelInfoByZone.Keys.Max();
-                            }
                             while (lines-- > 0)
                             {
                                 line = file.ReadLine();
@@ -134,24 +190,35 @@ namespace VICEPDBMonitor
                                 {
                                     addrInfo.mZone += baseZone;
                                 }
+                                addrInfo.mBaseZone = baseZone;
                                 addrInfo.mFile = localFileIndex + int.Parse(tokens[2]);
                                 addrInfo.mLine = int.Parse(tokens[3]) - 1;  // Files lines are 1 based in the debug file
                                 if (tokens.Length >= 5)
                                 {
                                     addrInfo.mDevice = int.Parse(tokens[4]);
                                 }
-                                                                            //								mAddrInfoByAddr.Add(addrInfo.mAddr, addrInfo);
+
                                 mAddrInfoByAddr[addrInfo.mAddr] = addrInfo;
+
+                                // There has to be a better way to create default entries if they don't exist...
+                                Dictionary<int, SortedDictionary<int, AddrInfo>> addrInfoByAddrByZone;
+                                if (!mAddrInfoByAddrByZoneByDevice.TryGetValue(addrInfo.mDevice, out addrInfoByAddrByZone))
+                                {
+                                    addrInfoByAddrByZone = new Dictionary<int, SortedDictionary<int, AddrInfo>>();
+                                    mAddrInfoByAddrByZoneByDevice[addrInfo.mDevice] = addrInfoByAddrByZone;
+                                }
+                                SortedDictionary<int, AddrInfo> addrInfoByAddr;
+                                if (!addrInfoByAddrByZone.TryGetValue(addrInfo.mZone, out addrInfoByAddr))
+                                {
+                                    addrInfoByAddr = new SortedDictionary<int, AddrInfo>();
+                                    addrInfoByAddrByZone[addrInfo.mZone] = addrInfoByAddr;
+                                }
+                                addrInfoByAddr[addrInfo.mAddr] = addrInfo;
                             }
                         }
                         else if (line.IndexOf("LABELS:") == 0)
                         {
                             int lines = int.Parse(line.Substring(7));
-                            int baseZone = 0;
-                            if (mLabelInfoByZone.Count > 0)
-                            {
-                                baseZone = mLabelInfoByZone.Keys.Max() + 1;
-                            }
                             while (lines-- > 0)
                             {
                                 line = file.ReadLine();
@@ -185,9 +252,9 @@ namespace VICEPDBMonitor
                                     mDriveCode_StartReal = labelInfo.mAddr;
                                 }
                                 mAllLabels.Add(labelInfo);
-                                mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
+//                                mLabelInfoByAddr.Add(labelInfo.mAddr, labelInfo);
                                 mLabelInfoByZone.Add(labelInfo.mZone, labelInfo);
-                                mLabelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
+//                                mLabelInfoByLabel.Add(labelInfo.mLabel, labelInfo);
                             }
                         }
                     }
@@ -255,7 +322,30 @@ namespace VICEPDBMonitor
 
             }
 
+            // Link the AddrInfo by their respective device and then zone
             int thePrevAddr = -1;
+            foreach (KeyValuePair<int, Dictionary<int, SortedDictionary<int, AddrInfo>>> pair1 in mAddrInfoByAddrByZoneByDevice)
+            {
+                Dictionary<int, SortedDictionary<int, AddrInfo>> byZone = pair1.Value;
+                foreach (KeyValuePair<int, SortedDictionary<int, AddrInfo>> pair2 in byZone)
+                {
+                    SortedDictionary<int, AddrInfo> byAddr = pair2.Value;
+                    foreach (KeyValuePair<int, AddrInfo> pair in byAddr)
+                    {
+                        pair.Value.mPrevAddr = thePrevAddr;
+                        thePrevAddr = pair.Value.mAddr;
+                    }
+                    thePrevAddr = -1;
+                    foreach (KeyValuePair<int, AddrInfo> pair in byAddr.Reverse())
+                    {
+                        pair.Value.mNextAddr = thePrevAddr;
+                        thePrevAddr = pair.Value.mAddr;
+                    }
+                }
+            }
+
+
+            thePrevAddr = -1;
             foreach (KeyValuePair<int, AddrInfo> pair in mAddrInfoByAddr)
             {
                 pair.Value.mPrevAddr = thePrevAddr;

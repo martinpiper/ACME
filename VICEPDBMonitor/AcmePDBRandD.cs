@@ -478,6 +478,8 @@ namespace VICEPDBMonitor
 
         public string UpdateLabels(bool usedLabels, bool execUsed,bool accessUsed, Dictionary<int,int> executedCount, Dictionary<int,int> accessedCount)
         {
+            m_PDBData.refreshContextListForAddress(m_registerSet.GetPC());
+
             string labels = "";
             try
             {

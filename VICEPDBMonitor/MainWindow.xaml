@@ -129,7 +129,6 @@
                                     </Style>
                                 </DataGridCheckBoxColumn.CellStyle>
                             </DataGridCheckBoxColumn>
-                            <DataGridTextColumn Header="#" Binding="{Binding Number}" IsReadOnly="True" />
                             <DataGridTextColumn Header="Source" Binding="{Binding Source}" IsReadOnly="True" />
                             <DataGridTextColumn Header="Zone" Binding="{Binding Zone}" IsReadOnly="True" />
                             <DataGridTextColumn Header="Device" Binding="{Binding Device}" IsReadOnly="True" />

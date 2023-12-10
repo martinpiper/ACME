@@ -46,7 +46,7 @@ namespace VICEPDBMonitor
         //Regex mBreakPointHitRegex;
         List<BreakPointDataSource> mBreakPoints;
         ObservableCollection<AssertDataSource> mAssertList;
-        ObservableCollection<ContextDataSource> mContextList;
+        public static ObservableCollection<ContextDataSource> mContextList;
 
 
         private delegate void NoArgDelegate();
@@ -66,13 +66,14 @@ namespace VICEPDBMonitor
 
             // TODO: This must come from the PDB info and maintain its Enable state
             mContextList = new ObservableCollection<ContextDataSource>();
+/*
             ContextDataSource cds = new ContextDataSource();
 //            cds.Enable = true;
-            cds.Number = "3";
             cds.Source = "hello world.a";
             cds.Zone = "456";
             cds.Device = "8";
             mContextList.Add(cds);
+ */
             //this must be BEFORE we parse the PDB Data
             mAssertList = new ObservableCollection<AssertDataSource>();
             string[] commandLineArgs = Environment.GetCommandLineArgs();
