@@ -54,12 +54,38 @@ namespace VICEPDBMonitor
 //        MultiMap<string, LabelInfo> mLabelInfoByLabel = new MultiMap<string, LabelInfo>();
 
         Dictionary<string, ContextDataSource> contextByKey = new Dictionary<string, ContextDataSource>();
+        SortedSet<string> currentContextSet = new SortedSet<string>();
 
         public void refreshContextListForAddress(int address)
         {
-            MainWindow.mContextList.Clear();
-            SortedSet<string> set = new SortedSet<string>();
+            lock (MainWindow.mContextList)
+            {
+                MainWindow.mContextList.Clear();
+                currentContextSet.Clear();
 
+                MultiMap<int, AddrInfo> addrInfoByAddr = getAddrInfoByAddrForDevice();
+
+                if (addrInfoByAddr != null)
+                {
+                    foreach (AddrInfo addrInfo in addrInfoByAddr[address])
+                    {
+                        if (currentContextSet.Add(addrInfo.mContext.getKey()))
+                        {
+                            MainWindow.mContextList.Add(addrInfo.mContext);
+                        }
+                    }
+                }
+            }
+
+            // For now, label refresh causes rebuild of main memory debug info as well. This is expensive, but relying on the list view cache is unreliable
+            lock (mAddrInfoByAddr)
+            {
+                mAddrInfoByAddr.Clear();
+            }
+        }
+
+        private MultiMap<int, AddrInfo> getAddrInfoByAddrForDevice()
+        {
             MultiMap<int, AddrInfo> addrInfoByAddr = null;
             MultiMap<int, AddrInfo> addrInfoByAddr2 = null;
             mAddrInfoByAddrByDevice.TryGetValue(0x00, out addrInfoByAddr);
@@ -79,34 +105,7 @@ namespace VICEPDBMonitor
                     addrInfoByAddr = addrInfoByAddr2;
                 }
             }
-
-            if (addrInfoByAddr != null)
-            {
-                foreach (AddrInfo addrInfo in addrInfoByAddr[address])
-                {
-                    if (addrInfo.mContext == null)
-                    {
-                        ContextDataSource temp = new ContextDataSource();
-                        temp.Source = mSourceFileNames[addrInfo.mFile];
-                        temp.Device = addrInfo.mDevice.ToString();
-                        temp.Zone = addrInfo.mZone.ToString();
-                        temp.Enable = true;
-                        temp.previousEnable = false;
-
-                        if (!contextByKey.ContainsKey(temp.getKey()))
-                        {
-                            contextByKey[temp.getKey()] = temp;
-                        }
-
-                        // Only get one such item that contains this info
-                        addrInfo.mContext = contextByKey[temp.getKey()];
-                    }
-                    if (set.Add(addrInfo.mContext.getKey()))
-                    {
-                        MainWindow.mContextList.Add(addrInfo.mContext);
-                    }
-                }
-            }
+            return addrInfoByAddr;
         }
 
         int mAPUCode_Start = 0;
@@ -202,8 +201,6 @@ namespace VICEPDBMonitor
                                 {
                                     addrInfo.mDevice = int.Parse(tokens[4]);
                                 }
-
-                                mAddrInfoByAddr[addrInfo.mAddr] = addrInfo;
 
                                 // There has to be a better way to create default entries if they don't exist...
                                 MultiMap<int, AddrInfo> addrInfoByAddr;
@@ -321,6 +318,38 @@ namespace VICEPDBMonitor
 
             }
 
+            // Create ContextDataSource for everything
+            foreach (int device in mAddrInfoByAddrByDevice.Keys)
+            {
+                MultiMap<int, AddrInfo> addrInfoByAddr = mAddrInfoByAddrByDevice[device];
+
+                foreach (int address in addrInfoByAddr.Keys)
+                {
+                    foreach (AddrInfo addrInfo in addrInfoByAddr[address])
+                    {
+                        ContextDataSource temp = new ContextDataSource();
+                        temp.Source = mSourceFileNames[addrInfo.mFile];
+                        temp.Device = addrInfo.mDevice.ToString();
+                        temp.Zone = addrInfo.mZone.ToString();
+                        temp.Enable = true;
+                        temp.previousEnable = true;
+
+                        if (!contextByKey.ContainsKey(temp.getKey()))
+                        {
+                            contextByKey[temp.getKey()] = temp;
+                        }
+
+                        // Only get one such item that contains this info
+                        addrInfo.mContext = contextByKey[temp.getKey()];
+                    }
+                }
+            }
+
+            checkForAddrInfoBuild();
+        }
+
+        private void relinkAddrInfoList()
+        {
             // Link the AddrInfo by their respective device and then zone
             int thePrevAddr = -1;
             foreach (KeyValuePair<int, AddrInfo> pair in mAddrInfoByAddr)
@@ -336,35 +365,106 @@ namespace VICEPDBMonitor
             }
         }
 
+        public void checkForChangedContext()
+        {
+            bool isChanged = false;
+
+            foreach (ContextDataSource context in MainWindow.mContextList)
+            {
+                if (context.Enable != context.previousEnable)
+                {
+                    isChanged = true;
+                    context.previousEnable = context.Enable;
+                }
+            }
+
+            lock (mAddrInfoByAddr)
+            {
+                if (isChanged)
+                {
+                    mAddrInfoByAddr.Clear();
+                }
+            }
+        }
+
+        public void checkForAddrInfoBuild()
+        {
+            lock (mAddrInfoByAddr)
+            {
+                if (mAddrInfoByAddr.Count == 0)
+                {
+                    HashSet<ContextDataSource> enabledSet = new HashSet<ContextDataSource>();
+
+                    foreach (ContextDataSource context in MainWindow.mContextList)
+                    {
+                        if (context.Enable)
+                        {
+                            enabledSet.Add(context);
+                        }
+                    }
+
+                    MultiMap<int, AddrInfo> addrInfoByAddr = getAddrInfoByAddrForDevice();
+
+                    if (addrInfoByAddr != null)
+                    {
+                        foreach (int address in addrInfoByAddr.Keys)
+                        {
+                            // First fill in with all the info
+                            foreach (AddrInfo addrInfo in addrInfoByAddr[address])
+                            {
+                                mAddrInfoByAddr[address] = addrInfo;
+                            }
+                            // Then filter for specific enabled context
+                            foreach (AddrInfo addrInfo in addrInfoByAddr[address])
+                            {
+                                if (enabledSet.Contains(addrInfo.mContext))
+                                {
+                                    mAddrInfoByAddr[address] = addrInfo;
+                                }
+                            }
+                        }
+                    }
+
+                    relinkAddrInfoList();
+                }
+            }
+        }
+
         public AddrInfo getAddrInfoForAddr(int PC)
         {
-            if (MainWindow.mIsAPUMode)
+            checkForChangedContext();
+            checkForAddrInfoBuild();
+
+            lock (mAddrInfoByAddr)
             {
-                AddrInfo tweakedInfo = mAddrInfoByAddr[(PC*4) + mAPUCode_Start].Clone();
-                tweakedInfo.mAddr -= mAPUCode_Start;
-                tweakedInfo.mAddr /= 4;
-                tweakedInfo.mNextAddr = tweakedInfo.mAddr + 1;
-                tweakedInfo.mPrevAddr = tweakedInfo.mAddr - 1;
-                if (tweakedInfo.mPrevAddr < 0)
+                if (MainWindow.mIsAPUMode)
                 {
-                    tweakedInfo.mPrevAddr = 0;
+                    AddrInfo tweakedInfo = mAddrInfoByAddr[(PC * 4) + mAPUCode_Start].Clone();
+                    tweakedInfo.mAddr -= mAPUCode_Start;
+                    tweakedInfo.mAddr /= 4;
+                    tweakedInfo.mNextAddr = tweakedInfo.mAddr + 1;
+                    tweakedInfo.mPrevAddr = tweakedInfo.mAddr - 1;
+                    if (tweakedInfo.mPrevAddr < 0)
+                    {
+                        tweakedInfo.mPrevAddr = 0;
+                    }
+                    return tweakedInfo;
                 }
-                return tweakedInfo;
-            }
-            if (MainWindow.mIsDriveMode)
-            {
-                int delta = -mDriveCode_Start + mDriveCode_StartReal;
-                AddrInfo tweakedInfo = mAddrInfoByAddr[PC - delta].Clone();
-                tweakedInfo.mAddr += delta;
-                tweakedInfo.mNextAddr += delta;
-                tweakedInfo.mPrevAddr += delta;
-                if (tweakedInfo.mPrevAddr < 0)
+                if (MainWindow.mIsDriveMode)
                 {
-                    tweakedInfo.mPrevAddr = 0;
+                    int delta = -mDriveCode_Start + mDriveCode_StartReal;
+                    AddrInfo tweakedInfo = mAddrInfoByAddr[PC - delta].Clone();
+                    tweakedInfo.mAddr += delta;
+                    tweakedInfo.mNextAddr += delta;
+                    tweakedInfo.mPrevAddr += delta;
+                    if (tweakedInfo.mPrevAddr < 0)
+                    {
+                        tweakedInfo.mPrevAddr = 0;
+                    }
+                    return tweakedInfo;
                 }
-                return tweakedInfo;
+                return mAddrInfoByAddr[PC];
             }
-            return mAddrInfoByAddr[PC];
         }
 
         public List<LabelInfo> getLabelsForZone(int zone)

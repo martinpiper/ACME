@@ -38,9 +38,10 @@ ACME TODO file.
 	** Done: Separate device in the PDB, don't merge with zone.
 	mAddrInfoByAddr is going to have be flattened according to the current filter...
 		When UpdateLabels does its work?
-	>> refreshContextListForAddress
+	>> refreshContextListForAddress()
 		Actually, this only need a multimap for each address in the device type...
-
+	>> checkForChangedContext()
+	** addrInfo.mContext is null, it needs to be populated much earlier... At the end of the PDB load basically...
 
 
 

@@ -375,6 +375,11 @@ namespace VICEPDBMonitor
                     {
                         break;
                     }
+                    if ((startPrev - addrInfo2.mPrevAddr) > 0x100)
+                    {
+                        break;
+                    }
+
                     startPrev = addrInfo2.mPrevAddr;
                 }
 
@@ -444,6 +449,11 @@ namespace VICEPDBMonitor
                         {
                             break;
                         }
+                        if ((startPrev - addrInfo2.mPrevAddr) > 0x100)
+                        {
+                            break;
+                        }
+
                         startPrev = addrInfo2.mPrevAddr;
                     }
 
@@ -454,6 +464,10 @@ namespace VICEPDBMonitor
                     {
                         AddrInfo addrInfo2 = m_PDBData.getAddrInfoForAddr(endNext);
                         if (addrInfo2.mNextAddr < 0)
+                        {
+                            break;
+                        }
+                        if ((addrInfo2.mNextAddr - endNext) > 0x100)
                         {
                             break;
                         }

@@ -971,22 +971,30 @@ namespace VICEPDBMonitor
         {
             DataGridCell dgc = sender as DataGridCell;
             ContextDataSource cds = dgc.DataContext as ContextDataSource;
+            if (cds == null)
+            {
+                return;
+            }
             if (cds.previousEnable != cds.Enable)
             {
-                cds.previousEnable = cds.Enable;
                 HandleCodeView();
             }
+            cds.previousEnable = cds.Enable;
         }
 
         private void OnContextUnchecked(object sender, RoutedEventArgs e)
         {
             DataGridCell dgc = sender as DataGridCell;
             ContextDataSource cds = dgc.DataContext as ContextDataSource;
+            if (cds == null)
+            {
+                return;
+            }
             if (cds.previousEnable != cds.Enable)
             {
-                cds.previousEnable = cds.Enable;
                 HandleCodeView();
             }
+            cds.previousEnable = cds.Enable;
         }
 
         private void removeButton_Click(object sender, RoutedEventArgs e)
