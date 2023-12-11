@@ -15,36 +15,6 @@
 
 ACME TODO file.
 
-* It would be better to include some kind of device ID value for PDB debugging, either in the address or in the zone.
-	This is because currently APU code, or drive code, addresses can overlap with C64 addresses in the memory map
-	The current PDB debuggder handles APU code view by bodging the address by looking for "APUCode_Start" and setting mAPUCode_Start
-	Perhaps the top address bits would be better??
-		The request for PDB information can then add in the requesting device ID
-
-	A new pseudo op comand to set the current device ID for the code being assembled up until the end of the block?
-	>> Adding (logical ORing) a number into the top 8 bits of the zone would probably be best.
-		C: = 0x00
-		8: = 0x08
-		APU: = 0x40
-	>> Then in VICEPDBMonitor all usage of getAddrInfoForAddr() can be updated to include the device
-
-	> Could use code like PO_zone
-	* Hmm perhaps expanding !zone would be the bext option...
-		Like: !zone C:
-		>> New command: !device which copies !zone mostly
-	* TODO: Look for " << 24" in relation to device and make this a common function?
-
-	* Done: TestACMe.a shows a bug where the same !pseudopc address does not output multiple entries for that address in the PDB
-	** Done: Separate device in the PDB, don't merge with zone.
-	mAddrInfoByAddr is going to have be flattened according to the current filter...
-		When UpdateLabels does its work?
-	>> refreshContextListForAddress()
-		Actually, this only need a multimap for each address in the device type...
-	>> checkForChangedContext()
-	** addrInfo.mContext is null, it needs to be populated much earlier... At the end of the PDB load basically...
-
-
-
 
 * When running Vice without "-moncommands TestIRQDisk.lbl" make the disassembly enrich better, to spot labels and potentially immediate values
 	The Vice disassembly with labels in "8:" does not entirely work correctly, so it's better not to run with those labels loaded.
