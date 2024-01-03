@@ -178,3 +178,10 @@ Mixed asm and source mode, all on one line?
 * Add DriveCode_Start and DriveCode_StartReal detection and use that to modify the drive code source display
 	Similar to how mAPUCode_Start works
 	mIsDriveMode like mIsAPUMode
+
+
+
+
+* Need a memmapshow button like Button_Click_ProfileClear, already have Button_Click_ProfileAdd ????
+	Button was misplaced
+	
