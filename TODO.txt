@@ -16,6 +16,12 @@
 ACME TODO file.
 
 
+* Zone overlaps another zone should be an error, not a warning.
+	Default to error, option to make it a warning.
+	
+
+
+
 * When running Vice without "-moncommands TestIRQDisk.lbl" make the disassembly enrich better, to spot labels and potentially immediate values
 	The Vice disassembly with labels in "8:" does not entirely work correctly, so it's better not to run with those labels loaded.
 	Use the device and the zone information to pick the correct labels from the PDB
