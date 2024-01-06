@@ -68,6 +68,7 @@ static const char	name_pdbfile[]		= "pdb filename";
 #define OPTION_MSVC			"msvc"
 #define OPTION_LIB			"lib"
 #define OPTION_PDB			"pdb"
+#define OPTION_WARNZONEOVERLAP			"warnzoneoverlap"
 
 
 // Variables
@@ -133,6 +134,7 @@ static void show_help_and_exit(void) {
 "      --" OPTION_LIB "              Adds a path to search for library includes.\n"	// MPi: New command line option
 PLATFORM_OPTION_HELP
 "  -V, --" OPTION_VERSION "          show version and exit.\n"
+"      --" OPTION_WARNZONEOVERLAP "  Changes the zone overlap error to a warning.\n"	// MPi: New command line option
 	);
 	exit(EXIT_SUCCESS);
 }
@@ -395,6 +397,8 @@ static const char* long_option(const char* string) {
 		msg_stream = stdout;
 	else if(strcmp(string, OPTION_MSVC) == 0)
 		format_msvc = TRUE;
+	else if(strcmp(string, OPTION_WARNZONEOVERLAP) == 0)
+		warn_zoneoverlap = TRUE;
 	else if(strcmp(string, OPTION_LIB) == 0)
 	{
 		gLibraryIncludes[gNumLibraryIncludes++] = _strdup(cliargs_get_string("library include"));

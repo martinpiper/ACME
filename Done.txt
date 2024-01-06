@@ -322,3 +322,13 @@ It's possible to break into the execution by sending a character. For example to
 	>> checkForChangedContext()
 	** addrInfo.mContext is null, it needs to be populated much earlier... At the end of the PDB load basically...
 
+
+
+
+
+* Zone overlaps another zone should be an error, not a warning.
+	Default to error, option to make it a warning.
+		--warnzoneoverlap
+		OPTION_WARNZONEOVERLAP, like OPTION_MSVC
+
+

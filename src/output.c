@@ -385,7 +385,8 @@ amount, amount, segment_start, write_idx);
 bool gPO_disablesegmentcheck = FALSE;
 
 // Check whether given PC is inside segment.
-static void check_segment(intval_t new_pc) {
+static void check_segment(intval_t new_pc)
+{
 	struct segment_t*	test_segment;
 
 	if (gPO_disablesegmentcheck)
@@ -393,10 +394,21 @@ static void check_segment(intval_t new_pc) {
 		return;
 	}
 	test_segment = segment_list;
-	while(test_segment) {
+	while(test_segment)
+	{
 		if((new_pc >= test_segment->start)
 		&& (new_pc < (test_segment->start) + (test_segment->length)))
-			Throw_warning("Segment starts inside another one, overwriting it.");
+		{
+			const char *message = "Segment starts inside another one, overwriting it.";
+			if (warn_zoneoverlap)
+			{
+				Throw_warning(message);
+			}
+			else
+			{
+				Throw_error(message);
+			}
+		}
 		test_segment = test_segment->next;
 	}
 }

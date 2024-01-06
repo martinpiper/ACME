@@ -108,6 +108,7 @@ int	pass_real_errors;	// Errors yet
 signed long	max_errors	= MAXERRORS;// errors before giving up
 FILE*	msg_stream		= NULL;// set to stdout by --use-stdout
 bool	format_msvc		= FALSE;// use --msvc to enable
+bool	warn_zoneoverlap = FALSE;
 
 // Functions
 

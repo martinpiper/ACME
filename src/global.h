@@ -68,6 +68,7 @@ extern int	pass_real_errors;	// Errors yet
 extern signed long	max_errors;	// errors before giving up
 extern FILE*	msg_stream;		// set to stdout by --errors_to_stdout
 extern bool format_msvc;		// use --msvc to enable
+extern bool	warn_zoneoverlap;
 
 // Macros for skipping a single space character
 #define SKIPSPACE()		do {if(GotByte   == ' ') GetByte();} while(0)

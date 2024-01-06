@@ -72,6 +72,8 @@ Python scripting is included, this allows python to generate complex assembly. T
 
 New CLI switch: "--pdb <filename>"
 
+New CLI switch: "--warnzoneoverlap" changes the zone overlap error to a warning.
+
 
 ----------------------------------------------------------------------
 Section:   New in release 1.00mp

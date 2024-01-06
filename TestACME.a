@@ -94,3 +94,9 @@ thisPseudoPC2Label3
 	lda #4
 }
 }
+
+
+; Should produce an error
+*=$0410
+	lda #2
+	rts
