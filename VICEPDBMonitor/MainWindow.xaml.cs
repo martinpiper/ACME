@@ -47,6 +47,7 @@ namespace VICEPDBMonitor
         List<BreakPointDataSource> mBreakPoints;
         ObservableCollection<AssertDataSource> mAssertList;
         public static ObservableCollection<ContextDataSource> mContextList;
+        List<string> mCommandHistoryList;
 
 
         private delegate void NoArgDelegate();
@@ -97,6 +98,9 @@ namespace VICEPDBMonitor
 
             mBreakPoints = new List<BreakPointDataSource>();
             mBreakPointDisplay.ItemsSource = mBreakPoints;
+
+            mCommandHistoryList = new List<string>();
+            mCommandBox.ItemsSource = mCommandHistoryList;
 
             VICIIRenderer.initRenderer(); //load charsets
 
@@ -755,6 +759,12 @@ namespace VICEPDBMonitor
             {
                 string command = mCommandBox.Text.Trim();
 
+                if (!mCommandHistoryList.Contains(command))
+                {
+                    mCommandHistoryList.Add(command);
+                    mCommandBox.Items.Refresh();
+                }
+
                 // Trap and elevate commands 
                 if (command.StartsWith("z"))
                 {
@@ -772,7 +782,8 @@ namespace VICEPDBMonitor
                 command = m_readerAndDispaly.PostEnterKeyForCommand(command);
 
                 dispatchCommand(command);
-                mCommandBox.Clear();
+
+                mCommandBox.Text = "";
             }
         }
 

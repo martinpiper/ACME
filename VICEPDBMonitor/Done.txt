@@ -185,3 +185,10 @@ Mixed asm and source mode, all on one line?
 * Need a memmapshow button like Button_Click_ProfileClear, already have Button_Click_ProfileAdd ????
 	Button was misplaced
 	
+
+
+
+* Command history... Up/Down arrow...
+	commandBox_KeyDown
+	Could this have a new window for the history? Like: mContextList
+	ComboBox list for history using mCommandHistoryList
