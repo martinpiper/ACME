@@ -199,3 +199,7 @@ Mixed asm and source mode, all on one line?
 * Save the command history (and other preferences) in the registry or config file?
 	https://stackoverflow.com/questions/8751650/how-to-save-and-use-apps-window-size
 	Passing in "C:\work\c64\SpriteMultiplexor\TestMultiplexor.pdb" will create a user config "C:\work\c64\SpriteMultiplexor\TestMultiplexor.pdb.marti.config" if any config is changed with SetConfig()
+
+
+
+* Save window size and state config

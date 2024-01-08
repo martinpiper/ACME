@@ -828,7 +828,7 @@ namespace VICEPDBMonitor
                 {
                     String key = "commandHistory" + mCommandHistoryList.Count;
                     mCommandHistoryList.Add(command);
-                    SetConfig(command, key);
+                    SetConfig(key, command);
                 }
 
                 // Trap and elevate commands 
@@ -853,7 +853,7 @@ namespace VICEPDBMonitor
             }
         }
 
-        private void SetConfig(string command, String key)
+        private void SetConfig(String key, string command)
         {
             configData[key] = command;
             configDataChanged = true;
@@ -1228,6 +1228,65 @@ namespace VICEPDBMonitor
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             WriteConfig();
+        }
+
+        private void Window_LocationChanged(object sender, EventArgs e)
+        {
+            SetConfig("WindowLeft", Application.Current.MainWindow.Left.ToString());
+            SetConfig("WindowTop", Application.Current.MainWindow.Top.ToString());
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            SetConfig("WindowWidth", Application.Current.MainWindow.Width.ToString());
+            SetConfig("WindowHeight", Application.Current.MainWindow.Height.ToString());
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            SetConfig("WindowState", WindowState.ToString());
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Window location
+            try
+            {
+                Application.Current.MainWindow.Left = Double.Parse(configData["WindowLeft"]);
+                Application.Current.MainWindow.Top = Double.Parse(configData["WindowTop"]);
+            }
+            catch (System.Exception f)
+            {
+            }
+
+            try
+            {
+                Application.Current.MainWindow.Width = Double.Parse(configData["WindowWidth"]);
+                Application.Current.MainWindow.Height = Double.Parse(configData["WindowHeight"]);
+            }
+            catch (System.Exception f)
+            {
+            }
+
+            try
+            {
+                string state = configData["WindowState"];
+                if (state == WindowState.Maximized.ToString())
+                {
+                    WindowState = WindowState.Maximized;
+                }
+                /*                else if (state == WindowState.Minimized.ToString())
+                                {
+                                    WindowState = WindowState.Minimized;
+                                }*/
+                else if (state == WindowState.Normal.ToString())
+                {
+                    WindowState = WindowState.Normal;
+                }
+            }
+            catch (System.Exception f)
+            {
+            }
         }
     }
 
