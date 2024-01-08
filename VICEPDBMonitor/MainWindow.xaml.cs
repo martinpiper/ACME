@@ -18,6 +18,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 
 namespace VICEPDBMonitor
 {
@@ -49,6 +50,11 @@ namespace VICEPDBMonitor
         public static ObservableCollection<ContextDataSource> mContextList;
         List<string> mCommandHistoryList;
 
+        // Last used config file, to write any new config to...
+        String configFile;
+        public Dictionary<string, string> configData = new Dictionary<string, string>();
+        bool configDataChanged = false;
+
 
         private delegate void NoArgDelegate();
         private delegate void OneArgDelegate(String arg);
@@ -57,6 +63,10 @@ namespace VICEPDBMonitor
         public MainWindow()
         {
             InitializeComponent();
+
+            string[] commandLineArgs = Environment.GetCommandLineArgs();
+            ReadConfig(commandLineArgs);
+
             //install the error callback before we do anything in case something connects to VICE
             VICECOMManager vcom = VICECOMManager.getVICEComManager();
             vcom.setErrorCallback(new VICECOMManager.OneArgDelegate(SetSourceView), this.Dispatcher);
@@ -77,7 +87,6 @@ namespace VICEPDBMonitor
  */
             //this must be BEFORE we parse the PDB Data
             mAssertList = new ObservableCollection<AssertDataSource>();
-            string[] commandLineArgs = Environment.GetCommandLineArgs();
             if(commandLineArgs.Length == 1)
             {
                 m_readerAndDispaly = new AcmePDBRandD();
@@ -100,7 +109,18 @@ namespace VICEPDBMonitor
             mBreakPointDisplay.ItemsSource = mBreakPoints;
 
             mCommandHistoryList = new List<string>();
+            int i;
+            for (i = 0; i < 1000; i++)
+            {
+                String key = "commandHistory" + i;
+                if (configData.ContainsKey(key))
+                {
+                    mCommandHistoryList.Add(configData[key]);
+                }
+            }
+
             mCommandBox.ItemsSource = mCommandHistoryList;
+            mCommandBox.Items.Refresh();
 
             VICIIRenderer.initRenderer(); //load charsets
 
@@ -133,6 +153,51 @@ namespace VICEPDBMonitor
 
             AssertDataGrid.ItemsSource = mAssertList;
             ContextDataGrid.ItemsSource = mContextList;
+        }
+
+        private void ReadConfig(string[] commandLineArgs)
+        {
+            // Parse any config file from command line arguments
+            foreach (String arg in commandLineArgs.Skip(1))
+            {
+                try
+                {
+                    String configFilename = arg;
+                    if (System.IO.File.Exists(configFilename))
+                    {
+                        configFilename += "." + string.Concat(Environment.UserName.Split(System.IO.Path.GetInvalidFileNameChars()));
+                        configFilename += ".config";
+
+                        // Save the config file last used
+                        configFile = configFilename;
+
+                        foreach (var row in File.ReadAllLines(configFilename))
+                        {
+                            configData.Add(row.Split('=')[0], string.Join("=", row.Split('=').Skip(1).ToArray()));
+                        }
+                    }
+                }
+                catch (System.Exception)
+                {
+                }
+            }
+        }
+
+        private void WriteConfig()
+        {
+            if (!configDataChanged || configData.Count == 0 || configFile.Length <= 2)
+            {
+                return;
+            }
+
+            System.IO.StreamWriter theFile = new System.IO.StreamWriter(configFile);
+
+            foreach (KeyValuePair<String, String> item in configData)
+            {
+                theFile.WriteLine(item.Key + "=" + item.Value);
+            }
+
+            theFile.Close();
         }
 
         public void canStep(object sender, CanExecuteRoutedEventArgs e)
@@ -761,8 +826,9 @@ namespace VICEPDBMonitor
 
                 if (!mCommandHistoryList.Contains(command))
                 {
+                    String key = "commandHistory" + mCommandHistoryList.Count;
                     mCommandHistoryList.Add(command);
-                    mCommandBox.Items.Refresh();
+                    SetConfig(command, key);
                 }
 
                 // Trap and elevate commands 
@@ -785,6 +851,12 @@ namespace VICEPDBMonitor
 
                 mCommandBox.Text = "";
             }
+        }
+
+        private void SetConfig(string command, String key)
+        {
+            configData[key] = command;
+            configDataChanged = true;
         }
 
         private void HandleCheckBoxes()
@@ -1151,6 +1223,11 @@ namespace VICEPDBMonitor
                 mIsDriveMode = false;
             }
             HandleCodeView();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            WriteConfig();
         }
     }
 

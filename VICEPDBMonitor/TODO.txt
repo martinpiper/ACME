@@ -1,11 +1,5 @@
 ﻿TODO File for VICE PDB Monitor
 
-* Save the command history (and other preferences) in the registry or config file?
-	https://stackoverflow.com/questions/8751650/how-to-save-and-use-apps-window-size
-
-
-
-
 * Profiling data can be shown in the disassembly and source views. Basically show the accumulated count for that particular memory location.
 	This expands the display outside the labels view
 
