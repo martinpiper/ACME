@@ -15,6 +15,14 @@
 
 ACME TODO file.
 
+* Now the PDB debugger can understand multiple contexts for the same address, perhaps output the root real source file information when inside macro(s)?
+	This would be the first real source file line before the macro is called...
+	Or perhaps every level where a macro is entered?
+	When debugging Demo6 for example and MAPU_LoadDoWait is used, it would be nice to be able to switch to the source file that uses the macros...
+	
+
+
+
 
 * When running Vice without "-moncommands TestIRQDisk.lbl" make the disassembly enrich better, to spot labels and potentially immediate values
 	The Vice disassembly with labels in "8:" does not entirely work correctly, so it's better not to run with those labels loaded.

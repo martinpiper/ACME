@@ -96,7 +96,17 @@ static void border_crossed(int current_offset) {
 	if(current_offset >= OUTBUFFERSIZE)
 		Throw_serious_error("Produced too much code.");
 	if(pass_count == 0) {
-		Throw_warning("Segment reached another one, overwriting it.");
+		const char *message = "Segment reached another one, overwriting it.";
+
+		if (warn_zoneoverlap)
+		{
+			Throw_warning(message);
+		}
+		else
+		{
+			Throw_error(message);
+		}
+
 		find_segment_max(current_offset + 1);
 	}
 }
