@@ -203,3 +203,9 @@ Mixed asm and source mode, all on one line?
 
 
 * Save window size and state config
+
+
+
+
+When showing disassembly without source, if the memory map from the PDB is missing then just to a simple disassembly without trying to step back through memory.
+The >>>> display can operate on a flag basis if there is not exact memory/PC match.

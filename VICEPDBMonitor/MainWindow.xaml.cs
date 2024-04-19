@@ -51,7 +51,7 @@ namespace VICEPDBMonitor
         List<string> mCommandHistoryList;
 
         // Last used config file, to write any new config to...
-        String configFile = "_global.config";
+        String configFile = "_global." + string.Concat(Environment.UserName.Split(System.IO.Path.GetInvalidFileNameChars())) + ".config";
         public Dictionary<string, string> configData = new Dictionary<string, string>();
         bool configDataChanged = false;
 
@@ -157,24 +157,47 @@ namespace VICEPDBMonitor
 
         private void ReadConfig(string[] commandLineArgs)
         {
+            bool anyValidFile = false;
             // Parse any config file from command line arguments
             foreach (String arg in commandLineArgs.Skip(1))
             {
                 try
                 {
-                    String configFilename = arg;
-                    if (System.IO.File.Exists(configFilename))
+                    if (System.IO.File.Exists(arg))
                     {
-                        configFilename += "." + string.Concat(Environment.UserName.Split(System.IO.Path.GetInvalidFileNameChars()));
-                        configFilename += ".config";
+                        anyValidFile = true;
+                        // Save the config file last used filename based on the input pdb
+                        configFile = arg + "." + string.Concat(Environment.UserName.Split(System.IO.Path.GetInvalidFileNameChars()));
+                        configFile += ".config";
 
-                        // Save the config file last used
-                        configFile = configFilename;
+                        ReadConfigFile();
+                    }
 
-                        foreach (var row in File.ReadAllLines(configFilename))
-                        {
-                            configData.Add(row.Split('=')[0], string.Join("=", row.Split('=').Skip(1).ToArray()));
-                        }
+                }
+                catch (System.Exception)
+                {
+                }
+            }
+
+            ReadConfigFile();
+
+            if (!anyValidFile)
+            {
+                mDoSource.IsChecked = false;
+                mDoDisassembly.IsChecked = true;
+            }
+        }
+
+        private void ReadConfigFile()
+        {
+            // Attempt to read any config file
+            if ((configFile != null) && configFile.Length > 2)
+            {
+                try
+                {
+                    foreach (var row in File.ReadAllLines(configFile))
+                    {
+                        configData.Add(row.Split('=')[0], string.Join("=", row.Split('=').Skip(1).ToArray()));
                     }
                 }
                 catch (System.Exception)
@@ -681,18 +704,18 @@ namespace VICEPDBMonitor
                 {
                     sms = new ShowSrcDissStruct()
                     {
-                        endNext = m_registerSet.GetPC() + 0x10
+                        endNext = Math.Min(m_registerSet.GetPC() + 0x10 , 8192)
                         ,
-                        startPrev = m_registerSet.GetPC()
+                        startPrev = Math.Max(0 , m_registerSet.GetPC() - 0x10)
                     };
                 }
                 else
                 {
                     sms = new ShowSrcDissStruct()
                     {
-                        endNext = m_registerSet.GetPC() + 0x20
+                        endNext = Math.Min(m_registerSet.GetPC() + 0x20 , 65536)
                         ,
-                        startPrev = m_registerSet.GetPC()
+                        startPrev = Math.Max(0 , m_registerSet.GetPC() - 0x18)
                     };
                 }
             }
