@@ -51,7 +51,7 @@ namespace VICEPDBMonitor
         List<string> mCommandHistoryList;
 
         // Last used config file, to write any new config to...
-        String configFile;
+        String configFile = "_global.config";
         public Dictionary<string, string> configData = new Dictionary<string, string>();
         bool configDataChanged = false;
 
@@ -185,7 +185,7 @@ namespace VICEPDBMonitor
 
         private void WriteConfig()
         {
-            if (!configDataChanged || configData.Count == 0 || configFile.Length <= 2)
+            if (!configDataChanged || configData.Count == 0 || (configFile == null) || configFile.Length <= 2)
             {
                 return;
             }
