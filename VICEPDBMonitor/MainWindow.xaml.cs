@@ -851,6 +851,7 @@ namespace VICEPDBMonitor
                 {
                     String key = "commandHistory" + mCommandHistoryList.Count;
                     mCommandHistoryList.Add(command);
+                    mCommandBox.Items.Refresh();
                     SetConfig(key, command);
                 }
 
