@@ -272,4 +272,6 @@ ACME TODO file.
 
 
 
-
+* Add a !PO to disable and enable: Error (Zone <untitled>): Label already defined. : start
+	C:\work\C64\IRQDisk\SmallestBoot.a
+		Avoid the need for: !set .start = *
