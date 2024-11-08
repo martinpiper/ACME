@@ -338,6 +338,26 @@ static enum eos_t PO_previouscontext(void) {
 	return(ENSURE_EOS);
 }
 
+static enum eos_t PO_labelredefine(void) {
+	if (!pass_count)
+	{
+		gLabel_set_value_changed_allowed += 3;
+	}
+	// ensure there's no garbage at end of line
+	return(ENSURE_EOS);
+}
+
+static enum eos_t PO_labelredefineend(void) {
+	if (!pass_count)
+	{
+		if (gLabel_set_value_changed_allowed >= 4)
+		{
+			gLabel_set_value_changed_allowed -= 1;
+		}
+	}
+	// ensure there's no garbage at end of line
+	return(ENSURE_EOS);
+}
 
 // Select dump file
 static enum eos_t PO_sl(void) {
@@ -407,7 +427,9 @@ static node_t	pseudo_opcodes[]	= {
 	PREDEFNODE("pdb",	PO_pdb),		// MPi: Added
 	PREDEFNODE("disablesegmentcheck",	PO_disablesegmentcheck),	// MPi: Added
 	PREDEFNODE("enablesegmentcheck",	PO_enablesegmentcheck),	// MPi: Added
-	PREDEFLAST("previouscontext",	PO_previouscontext)		// MPi: Added
+	PREDEFNODE("previouscontext",	PO_previouscontext),		// MPi: Added
+	PREDEFNODE("labelredefine",	PO_labelredefine),		// MPi: Added
+	PREDEFLAST("labelredefineend",	PO_labelredefineend)		// MPi: Added
 	//    ^^^^ this marks the last element
 };
 

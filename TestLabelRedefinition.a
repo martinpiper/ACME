@@ -1,0 +1,24 @@
+!ifndef CodeStart {
+CodeStart = $c000
+}
+
+*=$316
+	!word $1234
+
+	jmp CodeStart
+
+!labelredefine
+
+!pseudopc CodeStart {
+RelocStart
+.start
+	inc $d020
+	jmp .start
+RelocEnd
+}
+
+!set CodeStart = $c100 - (RelocEnd - RelocStart)
+
+!labelredefineend
+
+ConstantFoo

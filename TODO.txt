@@ -13,6 +13,10 @@
 
 // --lib ../C64/stdlib/ -v9 --pdb target\TestLabelDefined.pdb --labeldump target\TestLabelDefined.lbl TestLabelDefined.a
 
+// --msvc -v9 TestForForwardReference.a
+
+// --msvc -v9 -f cbm -o c:\temp\t.prg TestLabelRedefinition.a
+
 ACME TODO file.
 
 * Now the PDB debugger can understand multiple contexts for the same address, perhaps output the root real source file information when inside macro(s)?
@@ -268,10 +272,3 @@ ACME TODO file.
 	The corresponding PC is maintained for each bank.
 	Each bank is saved as a distinct file, new addition to the base filename.
 	The PDB would need bank information and the remote debugger would need some way of identifying the bank being executed, perhaps by noting the current cartridge bank select by reading any active cartridge IO space from Vice/BDD6502.
-
-
-
-
-* Add a !PO to disable and enable: Error (Zone <untitled>): Label already defined. : start
-	C:\work\C64\IRQDisk\SmallestBoot.a
-		Avoid the need for: !set .start = *

@@ -230,6 +230,9 @@
     <None Include="TestPythonBin4.a">
       <Filter>Asm</Filter>
     </None>
+    <None Include="TestLabelRedefinition.a">
+      <Filter>Asm</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Done.txt">

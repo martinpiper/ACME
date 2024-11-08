@@ -808,3 +808,9 @@ Now use:	!pseudopc $0400 {
 
 Call:		!previouscontext
 Purpose:	When writing debug information the context will be output from outside the macro. This is useful if you want macros to appear during debugging instead of the contents of the macros.
+
+
+
+Call:		!labelredefine !labelredefineend
+Purpose:	Allows labels to be redefined in the following code, until !labelredefineend is used.
+				See TestLabelRedefinition.a for an example.

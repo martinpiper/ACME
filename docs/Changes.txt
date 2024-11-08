@@ -74,6 +74,8 @@ New CLI switch: "--pdb <filename>"
 
 New CLI switch: "--warnzoneoverlap" changes the zone overlap error to a warning.
 
+!labelredefine and !labelredefineend : Allows labels to be redefined
+
 
 ----------------------------------------------------------------------
 Section:   New in release 1.00mp

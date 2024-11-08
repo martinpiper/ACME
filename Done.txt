@@ -332,3 +332,12 @@ It's possible to break into the execution by sending a character. For example to
 		OPTION_WARNZONEOVERLAP, like OPTION_MSVC
 
 
+
+
+* Add a !PO to disable and enable: Error (Zone <untitled>): Label already defined. : start
+	C:\work\C64\IRQDisk\SmallestBoot.a
+		Avoid the need for: !set .start = *
+	--msvc -v9 -f cbm -o c:\temp\t.prg TestLabelRedefinition.a
+	Could increment gLabel_set_value_changed_allowed
+	!labelredefine
+	!labelredefineend
