@@ -11,8 +11,8 @@ USERBIN		= $(HOME)/bin
 
 all: $(PROGS)
 
-acme: acme.o alu.o basics.o cliargs.o cpu.o dynabuf.o encoding.o flow.o global.o input.o label.o macro.o mnemo.o output.o platform.o section.o tree.o
-	$(CC) $(LIBS) $(CFLAGS) -o acme acme.o alu.o basics.o cliargs.o cpu.o dynabuf.o encoding.o flow.o global.o input.o label.o macro.o mnemo.o output.o platform.o section.o tree.o
+acme: acme.o alu.o basics.o cliargs.o cpu.o dynabuf.o encoding.o flow.o global.o input.o label.o macro.o mnemo.o output.o platform.o section.o tree.o PDB.o
+	$(CC) $(LIBS) $(CFLAGS) -o acme acme.o alu.o basics.o cliargs.o cpu.o dynabuf.o encoding.o flow.o global.o input.o label.o macro.o mnemo.o output.o platform.o section.o tree.o PDB.o
 	strip acme
 
 
@@ -50,7 +50,10 @@ section.o: config.h dynabuf.h global.h section.h tree.h section.h section.c
 tree.o: config.h dynabuf.h global.h label.h tree.h tree.c
 
 clean:
-	-$(RM) -f *.o $(PROGS) *~ core
+	-$(RM) -f *.o $(PROGS) *~ core tags
+
+tags:
+	-ctags *c *cpp *h
 
 
 install: all

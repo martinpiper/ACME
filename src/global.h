@@ -78,7 +78,14 @@ extern bool	warn_zoneoverlap;
 // Prototypes
 
 // Allocate memory and die if not available
+#ifdef __GNUC__
+extern void*	safe_malloc(size_t);
+#define _strdup strdup
+#define _stricmp strcasecmp
+#else
 extern inline void*	safe_malloc(size_t);
+#endif
+//
 // Parse block, beginning with next byte.
 // End reason (either CHAR_EOB or CHAR_EOF) can be found in GotByte afterwards
 // Has to be re-entrant.

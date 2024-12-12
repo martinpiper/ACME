@@ -864,7 +864,7 @@ static bool check_mnemo_tree(node_t* tree, dynabuf_t* dyna_buf) {
 	if(!Tree_easy_scan(tree, &node_body, dyna_buf))
 		return(FALSE);
 	code = ((int) node_body) & CODEMASK;	// get opcode or table index
-	imm_flag = ((int) node_body) & FLAGSMASK;	// get flag
+	imm_flag = ( (int)node_body) & FLAGSMASK;	// get flag
 	switch(((long) node_body) >> GROUPSHIFT) {
 
 	// mnemonics with only implied addressing

@@ -107,7 +107,7 @@ void DumpLabelForPDB(node_ra_t* node, FILE* fd)
 		return;
 	}
 
-	fprintf( fd , "$%x:%d:%s" , label->result.val.intval , gTheZone , node->id_string );
+	fprintf( fd , "$%lx:%d:%s" , label->result.val.intval , gTheZone , node->id_string );
 
 	if ( label->usage )
 	{
@@ -143,7 +143,7 @@ static void dump_one_label_vice(node_ra_t* node, FILE* fd)
 		(label->result.flags & MVALUE_IS_ADDRESS)
 	)
 	{
-		fprintf(fd,"al %s:%0.4x .%s\n",getDeviceNameFromNumber(label->device),label->result.val.intval,node->id_string);
+		fprintf(fd,"al %s:%4lx .%s\n",getDeviceNameFromNumber(label->device),label->result.val.intval,node->id_string);
 	}
 }
 
@@ -160,7 +160,7 @@ static void dump_one_label_vice2(node_ra_t* node, FILE* fd)
 		!(label->result.flags & MVALUE_IS_ADDRESS)
 	)
 	{
-		fprintf(fd,"al %s:%0.4x .%s\n",getDeviceNameFromNumber(label->device),label->result.val.intval,node->id_string);
+		fprintf(fd,"al %s:%4.4lx .%s\n",getDeviceNameFromNumber(label->device),label->result.val.intval,node->id_string);
 	}
 }
 
@@ -177,7 +177,7 @@ static void dump_one_label_vice3(node_ra_t* node, FILE* fd)
 		!(label->result.flags & MVALUE_IS_ADDRESS)
 	)
 	{
-		fprintf(fd,"al C:%0.4x .%s\n",label->result.val.intval,node->id_string);
+		fprintf(fd,"al C:%4.4lx .%s\n",label->result.val.intval,node->id_string);
 	}
 }
 

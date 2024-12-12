@@ -299,7 +299,7 @@ static bool do_actual_work(void) {
 	undefined_prev = undefined_curr + 1;
 	// As long as the number of "NeedValue" errors is decreasing but
 	// non-zero, keep doing passes.
-	while(gLabel_set_value_changed_allowed || undefined_curr && (undefined_curr < undefined_prev)) {
+	while(gLabel_set_value_changed_allowed || (undefined_curr && (undefined_curr < undefined_prev))) {
 		pass_count++;
 		undefined_prev = undefined_curr;
 		if(Process_verbosity > 1)
