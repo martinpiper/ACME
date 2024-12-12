@@ -24,6 +24,10 @@
 #include "tree.h"
 #include "WrapPython.h"
 
+//dummy...
+int RunScript_Python(const char *a, const char *b, const char *c) {
+	return(0);
+}
 
 // type definitions
 enum cond_key_t {

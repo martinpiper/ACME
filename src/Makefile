@@ -1,5 +1,5 @@
 CFLAGS		= -O3 -Wall
-LIBS		= -lm
+LIBS		= -lm -lstdc++
 CC		= gcc
 RM		= rm
 
