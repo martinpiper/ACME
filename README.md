@@ -1,6 +1,15 @@
 ACME
 ====
 
+This is a for of martinpiper/ACME All credit to him, and al blame om me
+I did this fork to get the lates features, changing as little as possible to compile it on linux/gcc/Fedora 41...
+
+
+
+Original readme below:
+
+
+
 A 6502/6510 assembler used for my C64 and other 8 bit projects
 
 
