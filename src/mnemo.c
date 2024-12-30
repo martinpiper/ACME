@@ -13,6 +13,7 @@
 #include "input.h"
 #include "output.h"
 #include "tree.h"
+#include <stdint.h>
 
 
 // Constants
@@ -863,8 +864,8 @@ static bool check_mnemo_tree(node_t* tree, dynabuf_t* dyna_buf) {
 	// search for tree item
 	if(!Tree_easy_scan(tree, &node_body, dyna_buf))
 		return(FALSE);
-	code = ((int) node_body) & CODEMASK;	// get opcode or table index
-	imm_flag = ( (int)node_body) & FLAGSMASK;	// get flag
+	code = ((intptr_t) node_body) & CODEMASK;	// get opcode or table index
+	imm_flag = ( (intptr_t)node_body) & FLAGSMASK;	// get flag
 	switch(((long) node_body) >> GROUPSHIFT) {
 
 	// mnemonics with only implied addressing
