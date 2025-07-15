@@ -94,7 +94,7 @@ extern "C" void PDBSave( FILE *fp )
 	while ( st != sAddrMap.end() )
 	{
 		DebugInfo &debug = st->second;
-		fprintf( fp , "$%x:%d:%d:%d:%d\n" , st->first , debug.mZone , filenameIndex[ debug.mFilename ] , debug.mLineNumber , debug.mDevice );
+		fprintf( fp , "$%04x:%d:%d:%d:%d\n" , st->first , debug.mZone , filenameIndex[ debug.mFilename ] , debug.mLineNumber , debug.mDevice );
 
 		st++;
 	}
