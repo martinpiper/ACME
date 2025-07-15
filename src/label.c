@@ -107,7 +107,7 @@ void DumpLabelForPDB(node_ra_t* node, FILE* fd)
 		return;
 	}
 
-	fprintf( fd , "$%x:%d:%s" , label->result.val.intval , gTheZone , node->id_string );
+	fprintf( fd , "$%04x:%d:%s" , label->result.val.intval , gTheZone , node->id_string );
 
 	if ( label->usage )
 	{

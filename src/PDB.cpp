@@ -138,7 +138,7 @@ extern "C" void PDBSave2( FILE *fp )
 			int addr = st->first;
 			if (addr > 0 && addr > (previousUsed+1))
 			{
-				fprintf( fp , "$%x-$%x:$%x\n" , previousUsed + 1 , addr-1 , (addr-1) - previousUsed );
+				fprintf( fp , "$%04x-$%04x:$%04x\n" , previousUsed + 1 , addr-1 , (addr-1) - previousUsed );
 			}
 
 			previousUsed = addr;
@@ -148,7 +148,7 @@ extern "C" void PDBSave2( FILE *fp )
 	}
 	if (previousUsed + 1 < 0xffff)
 	{
-		fprintf( fp , "$%x-$ffff:$%x\n" , previousUsed + 1 , 65535 - previousUsed);
+		fprintf( fp , "$%04x-$ffff:$%x\n" , previousUsed + 1 , 65535 - previousUsed);
 	}
 }
 
