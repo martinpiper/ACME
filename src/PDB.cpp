@@ -148,7 +148,7 @@ extern "C" void PDBSave2( FILE *fp )
 	}
 	if (previousUsed + 1 < 0xffff)
 	{
-		fprintf( fp , "$%04x-$ffff:$%x\n" , previousUsed + 1 , 65535 - previousUsed);
+		fprintf( fp , "$%04x-$ffff:$%04x\n" , previousUsed + 1 , 65535 - previousUsed);
 	}
 }
 
