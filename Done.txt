@@ -345,3 +345,10 @@ It's possible to break into the execution by sending a character. For example to
 
 
 * Write PDB addresses with full padding
+
+
+
+* PDB to include label reference count
+	>> DumpLabelForPDB
+		>> Label_forest
+	> LABELUSAGE:X section

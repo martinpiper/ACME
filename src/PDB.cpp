@@ -9,6 +9,9 @@ extern "C" {
 #include "acme.h"
 #include "input.h"
 #include "global.h"
+#include "tree.h"
+#include "label.h"
+#include "alu.h"
 }
 
 static int device = 0;
@@ -100,8 +103,57 @@ extern "C" void PDBSave( FILE *fp )
 	}
 }
 
+std::multimap<int,std::string> sLabelCounts;
+extern "C" void GetLabelCounts(node_ra_t* node, FILE* fd)
+{
+	label_t*	label	= (label_t*) (node->body);
+	if ( ! ( (label->result.flags & MVALUE_DEFINED) && !(label->result.flags & MVALUE_IS_FP) ) )
+	{
+		return;
+	}
+	if ( !(label->result.flags & MVALUE_IS_ADDRESS) )
+	{
+		return;
+	}
+	if ( label->usage <= 0 )
+	{
+		return;
+	}
+
+	std::string entry = std::string(node->id_string);
+	if ( (label->result.flags & MVALUE_FORCE08) || (label->result.flags & MVALUE_ISBYTE))
+	{
+		entry += ":is8";
+	}
+	if ( label->result.flags & MVALUE_FORCE16)
+	{
+		entry += ":is16";
+	}
+	if ( label->result.flags & MVALUE_FORCE24)
+	{
+		entry += ":is24";
+	}
+
+	sLabelCounts.insert(std::pair<int,std::string>(label->usage , entry));
+}
+
+
 extern "C" void PDBSave2( FILE *fp )
 {
+	for (zone_t i=0;i<=zone_max;i++)
+	{
+		gTheZone = i;
+		Tree_dump_forest(Label_forest, i, GetLabelCounts, 0);
+	}
+
+	fprintf( fp , "LABELUSAGE:%d\n" , sLabelCounts.size());
+	std::multimap<int,std::string>::iterator st2 = sLabelCounts.begin();
+	while (st2 != sLabelCounts.end())
+	{
+		fprintf( fp , "%d:%s\n" , st2->first , st2->second.c_str() );
+		st2++;
+	}
+
 	int previousUsed = -1;
 	int countBlocks = 0;
 	std::multimap<int , DebugInfo>::iterator st = sAddrMap.begin();

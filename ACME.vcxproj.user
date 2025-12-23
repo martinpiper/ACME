@@ -9,11 +9,11 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>--msvc -v9 -f cbm -o c:\temp\t.prg TestLabelRedefinition.a</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-v9 TestACME.a</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>--msvc -v9 -f cbm -o c:\temp\t.prg TestLabelRedefinition.a</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-v9 TestACME.a</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
