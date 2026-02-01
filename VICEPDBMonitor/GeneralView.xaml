@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="GeneralView" Height="780" Width="810">
     <Grid>
-        <Image x:Name="canvas" Height="281" Margin="16,145,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="384" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" MouseDown="canvas_MouseDown" ToolTipOpening="canvas_ToolTipOpening">
+        <Image x:Name="canvas" Height="267" Margin="16,173,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="384" Stretch="None" SnapsToDevicePixels="true" RenderTransformOrigin="0.0,0.0" MouseDown="canvas_MouseDown" ToolTipOpening="canvas_ToolTipOpening">
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="2" ScaleY="2"/>
@@ -27,17 +27,12 @@
         <Button x:Name="allHiresButton" Content="All Hires" HorizontalAlignment="Left" Margin="457,10,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.456,1.2" Click="allHiresButton_Click" Height="20"/>
         <Button x:Name="allMultiButton" Content="All Multi" HorizontalAlignment="Left" Margin="537,10,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="0.456,1.2" Click="allMultiButton_Click" Height="20"/>
         <Button Content="Refresh" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
-        <RichTextBox x:Name="theScript" HorizontalAlignment="Left" Height="100" Margin="10,35,0,0" VerticalAlignment="Top" Width="782">
-            <FlowDocument>
-                <Paragraph>
-                    <Run Text="RichTextBox"/>
-                </Paragraph>
-            </FlowDocument>
-        </RichTextBox>
+        <TextBox x:Name="theScript" Height="130" TextWrapping="Wrap" Text="function getAddress(x, y){ return (x/8) + (y * 0x100); }&#xD;&#xA;getAddress(xpos, ypos);" VerticalAlignment="Top" MaxLines="100" AcceptsReturn="True" FontFamily="Courier New" FontSize="14" Margin="0,38,243,0" TextChanged="theScript_TextChanged_1"/>
         <TextBox x:Name="theWidth" HorizontalAlignment="Left" Height="23" Margin="136,10,0,0" TextWrapping="Wrap" Text="320" VerticalAlignment="Top" Width="54" TextChanged="theWidth_TextChanged"/>
         <TextBlock HorizontalAlignment="Left" Margin="99,14,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.51,-0.375"><Run Language="en-sg" Text="Width"/></TextBlock>
         <TextBox x:Name="theHeight" HorizontalAlignment="Left" Height="23" Margin="240,10,0,0" TextWrapping="Wrap" Text="200" VerticalAlignment="Top" Width="54" TextChanged="theHeight_TextChanged"/>
         <TextBlock HorizontalAlignment="Left" Margin="195,14,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.51,-0.375" Width="45"><Run Language="en-sg" Text="Height"/></TextBlock>
+        <TextBox x:Name="theDebug" HorizontalAlignment="Left" Height="130" Margin="564,38,0,0" TextWrapping="Wrap" Text="Debug ouput" VerticalAlignment="Top" Width="228"/>
 
     </Grid>
 </Window>

@@ -31,9 +31,17 @@ namespace VICEPDBMonitor
         WriteableBitmap m_wb;
         MainWindow m_mainWindow;
 
+        Type scriptControlType;
+        dynamic scriptControl;
+
         public GeneralView(MainWindow mainWindow)
         {
             InitializeComponent();
+
+            scriptControlType = Type.GetTypeFromProgID("MSScriptControl.ScriptControl");
+            scriptControl = Activator.CreateInstance(scriptControlType);
+            scriptControl.Language = "JScript";
+
             m_backgroundColour = 0;
             m_mainWindow = mainWindow;
             DataContext = new C128ViewModel();
@@ -69,28 +77,54 @@ namespace VICEPDBMonitor
 
         public void renderView()
         {
+            theDebug.Text = "Debug output";
+            string script = theScript.Text;
+
             int width = 320;
             int height = 200;
-            width = int.Parse(theWidth.Text);
-            height = int.Parse(theHeight.Text);
+            try
+            {
+                width = int.Parse(theWidth.Text);
+            }
+            catch (System.Exception)
+            {
+            }
+
+            try
+            {
+                height = int.Parse(theHeight.Text);
+            }
+            catch (System.Exception)
+            {
+            }
 
             m_wb = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.WebPalette);
 
             int sprCol = spriteCol.SelectedIndex;
 
-            for (int y = 0; y < height; ++y)
+            try
             {
-                for (int x = 0; x < width; x += 8)
+                for (int y = 0; y < height; ++y)
                 {
-                    renderPixel(x, y, m_hiresOrMulti, sprCol, m_wb);
-                } //x
-            }// y
+                    for (int x = 0; x < width; x += 8)
+                    {
+                        renderByte(script, x, y, m_hiresOrMulti, sprCol, m_wb);
+                    } //x
+                }// y
+            }
+            catch (System.Exception e)
+            {
+                theDebug.Text = e.Message;
+            }
 
             canvas.Source = m_wb;
         }
 
-        void renderPixel(int posX, int posY, bool multicolour, int sprColour, WriteableBitmap wb)
+        void renderByte(string script, int posX, int posY, bool multicolour, int sprColour, WriteableBitmap wb)
         {
+            script = script.Replace("xpos", posX.ToString());
+            script = script.Replace("ypos", posY.ToString());
+
             C64RAM ramObjc = C64RAM.getInstace();
             byte[] ram = ramObjc.getRAM();
 
@@ -107,12 +141,12 @@ namespace VICEPDBMonitor
             rect.X = posX;
             rect.Y = posY;
 
-            int addr = (posY * 256) + posX;
+            int addr = 0;
+            object result = scriptControl.Eval(script);
+            addr = Convert.ToInt32(result);
+
             addr = addr & 0xffff;
             byte r = ram[addr];
-            //int bitmapIndex = ((spriteTLY + sy) * (24 * 4)) + ((spriteTLX + (sx*8)) * 4);
-
-
 
             if (multicolour)
             {
@@ -211,6 +245,16 @@ namespace VICEPDBMonitor
         }
 
         private void theHeight_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void theScript_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
+        private void theScript_TextChanged_1(object sender, TextChangedEventArgs e)
         {
 
         }
