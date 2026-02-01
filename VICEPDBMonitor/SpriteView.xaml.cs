@@ -39,7 +39,7 @@ namespace VICEPDBMonitor
             InitializeComponent();
 			m_backgroundColour = 0;
             m_mainWindow = mainWindow;
-			//DataContext = new C128ViewModel();
+			DataContext = new C128ViewModel();
 			m_hiresOrMulti = new bool[16, 16];
 			setAllHires();
 		}
