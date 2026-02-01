@@ -139,7 +139,7 @@
         <Button Content="Profile add" Margin="0,0,104,75" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Button_Click_ProfileAdd" Height="20"/>
         <Button Content="Break" Margin="0,0,184,151" VerticalAlignment="Bottom" Click="Button_Click_Break" Height="20" HorizontalAlignment="Right" Width="75"/>
         <CheckBox x:Name="mEnableViewDisk" Content="View Disk" Margin="0,0,10,96" HorizontalAlignment="Right" Width="80" Height="15" VerticalAlignment="Bottom" RenderTransformOrigin="0.69,0.267" Click="mEnableViewDisk_Checked"/>
-        <CheckBox x:Name="mContextDiskCheck" Content="Use Disk" Margin="0,0,15,75" Click="mContextDisk_Click" HorizontalAlignment="Right" Width="75" Height="15" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="mContextDiskCheck" Content="Use Disk" Margin="0,0,15,80" Click="mContextDisk_Click" HorizontalAlignment="Right" Width="75" Height="15" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="mDoSource" Content="Source" HorizontalAlignment="Right" Margin="0,0,203,197" IsChecked="True" Click="mDoSource_Click" Height="15" VerticalAlignment="Bottom" Width="56"/>
         <CheckBox x:Name="mDoDisassembly" Content="Disassembly" Margin="0,0,174,177" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom"/>
         <Button Content="Step in" HorizontalAlignment="Right" Margin="0,0,104,126" VerticalAlignment="Bottom" Width="75" Click="Button_Click_StepIn" Height="20"/>
@@ -149,8 +149,9 @@
         <Button Content="Tweak" HorizontalAlignment="Right" Margin="0,0,104,101" VerticalAlignment="Bottom" Width="75" Click="Button_Click_Tweak" Height="20"/>
         <Button Content="Go" Margin="0,0,104,152" VerticalAlignment="Bottom" Click="Button_Click_Go" Height="20" HorizontalAlignment="Right" Width="75"/>
         <Button Content="MMap clear" HorizontalAlignment="Right" Margin="0,0,184,75" VerticalAlignment="Bottom" Width="75" Click="Button_Click_ProfileClear" Height="20"/>
-        <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,192,55" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
+        <CheckBox x:Name="mCheckExecUse" Content="Exec use" HorizontalAlignment="Right" Margin="0,0,25,60" VerticalAlignment="Bottom" Checked="CheckBox_Checked"/>
         <CheckBox x:Name="mDoDump" Content="+Dump" Margin="0,0,71,177" Click="mDoDisassembly_Click" HorizontalAlignment="Right" Width="85" Height="15" VerticalAlignment="Bottom" Checked="mDoDump_Checked"/>
+        <Button Content="General view" Margin="0,0,184,40" HorizontalAlignment="Right" Width="75" Height="20" VerticalAlignment="Bottom" Click="Button_Click"/>
         <Button x:Name="Memory_view" Content="Memory view" Margin="0,0,104,40" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75" Click="Memory_view_Click"/>
         <Button Content="Delete breaks" Margin="0,0,104,12" VerticalAlignment="Bottom" Click="OnDeleteBreaks" HorizontalAlignment="Right" Width="75"/>
         <Button x:Name="mShowScriptPanel" Content="Script Panel" Margin="0,0,10,167" HorizontalAlignment="Right" Width="75" Height="22" VerticalAlignment="Bottom" Click="mShowScriptPanel_Click" />

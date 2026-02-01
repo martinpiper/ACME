@@ -1312,6 +1312,12 @@ namespace VICEPDBMonitor
             {
             }
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            GeneralView SV = new GeneralView(this);
+            SV.Show();
+        }
     }
 
     public static class CustomCommands

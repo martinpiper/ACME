@@ -85,6 +85,9 @@
       <DependentUpon>ChisViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="ContextDataSource.cs" />
+    <Compile Include="GeneralView.xaml.cs">
+      <DependentUpon>GeneralView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ProfileDataSource.cs" />
     <Compile Include="ProfileView.xaml.cs">
       <DependentUpon>ProfileView.xaml</DependentUpon>
@@ -131,6 +134,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ChisViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GeneralView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
