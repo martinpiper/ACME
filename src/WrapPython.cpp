@@ -111,15 +111,31 @@ static PyObject *acme_bytenum(PyObject *self, PyObject *args)
 	Input_now = &new_input;
 	commonSetupDebug(self , args);
 
-	int theInt;
+	Py_ssize_t num_args = PyTuple_Size(args);
 
-	if (!PyArg_ParseTuple(args, "i", &theInt))
+	for (Py_ssize_t i = 0; i < num_args; i++)
 	{
-		Throw_error(unexpectedPythonType);
-		return NULL;
-	}
+		PyObject *item = PyTuple_GetItem(args, i); 
+        
+		if (item == NULL)
+		{
+			Throw_error(unexpectedPythonType);
+			return NULL;
+		}
+		int theInt;
 
-	Output_8b_source(theInt);
+		if (PyLong_Check(item))
+		{
+			theInt = (int) PyLong_AsLong(item);
+		}
+		else
+		{
+			Throw_error(unexpectedPythonType);
+			return NULL;
+		}
+
+		Output_8b_source(theInt);
+	}
 
 	return PyLong_FromLong(0);
 }

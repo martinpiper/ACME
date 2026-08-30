@@ -35,12 +35,32 @@ TestMemory
 !scriptpythoninline {
 print("Python (inline2) is assembling...")
 acme.bytenum(10)
+acme.bytenum(11,12,13)
 acme.bytestr(str(123))
 acme.bytestr(str([0,0xed,2,3,4,5,6,7,8,9,10]))
 acme.bytestr(str(bytearray([8,9,10,11,12,13,202,203,69,70,71])))
 }
 
 TestMemoryEnd
+
+; Test expected output
+!set .t = peekbyte(TestMemory)
+!if .t != 10 {
+!error "oops1"
+}
+!set .t = peekbyte(TestMemory + 1)
+!if .t != 11 {
+!error "oops2"
+}
+!set .t = peekbyte(TestMemory + 2)
+!if .t != 12 {
+!error "oops3"
+}
+!set .t = peekbyte(TestMemory + 3)
+!if .t != 13 {
+!error "oops4"
+}
+
 
 
 *=$2000
